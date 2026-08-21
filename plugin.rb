@@ -3,8 +3,8 @@
 # name: discourse-user-cosmetics
 # about: Discord tarzı kullanıcı kozmetikleri -- avatar çerçeveleri, isim plakaları ve kullanıcı kartı dekorasyonları.
 # version: 1.0.0
-# authors: Baş Yazılım Ekibi
-# url: https://github.com/your-org/discourse-user-cosmetics
+# authors: dupless54
+# url: https://github.com/dupless54/discourse-user-cosmetics
 # required_version: 3.1.0
 
 enabled_site_setting :discourse_user_cosmetics_enabled
