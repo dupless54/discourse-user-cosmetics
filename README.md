@@ -1,11 +1,5 @@
 # discourse-user-cosmetics
 
-Discord tarzı **avatar çerçeveleri**, **isim plakaları (nameplate)** ve **kullanıcı kartı dekorasyonları** ekleyen bir Discourse eklentisi. Yüklediğiniz `discourse-avatar-frames` eklentisinin fikrini temel alıp üstüne genişletilmiş, sıfırdan yazılmış, tek başına çalışan bir plugin'dir.
-
-> Not: Yüklediğiniz zip dosyası konuşma sırasında bana ulaşmadı (yükleme başarısız olmuş olmalı), bu yüzden orijinal eklentinin kodunu inceleyemedim. Bu paketi, "avatar çerçevesi" kavramını ve Discourse'un güncel (2026) plugin mimarisini temel alarak baştan, daha gelişmiş özelliklerle tasarladım. Elinizdeki orijinal zip'i tekrar yükleyebilirseniz, onu bu pakete göre karşılaştırıp varsa özel bir özelliğini buraya taşıyabilirim.
-
----
-
 ## 1. Neler yapar?
 
 Kullanıcılar, **Tercihler** sayfalarında açılan bir seçim ekranından üç kategoriden istediklerini seçip kullanabilir:
