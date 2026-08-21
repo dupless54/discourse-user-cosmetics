@@ -1,0 +1,531 @@
+// discourse-user-cosmetics
+// Styling for the client-rendered pieces (server-generated avatar-frame CSS
+// lives in DiscourseUserCosmetics::CssBuilder and ships its own tiny bit of
+// inline CSS, so it isn't duplicated here).
+
+// ---------------------------------------------------------------------------
+// Nameplate (user card + profile page)
+// ---------------------------------------------------------------------------
+.duc-nameplate {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0.25em 0;
+  padding: 0.2em 0.75em;
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: var(--font-down-1);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  isolation: isolate;
+
+  .duc-nameplate-glow {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+  }
+
+  &.duc-nameplate--profile {
+    font-size: var(--font-up-1);
+    padding: 0.35em 1em;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Card / profile decoration banner
+// ---------------------------------------------------------------------------
+.duc-card-banner {
+  position: relative;
+  margin: 0.5em 0;
+  padding: 0.6em 1em;
+  border-radius: var(--d-border-radius, 6px);
+  background-size: cover;
+  background-position: center;
+  min-height: 2.5em;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+  }
+
+  .duc-card-banner-label {
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    font-size: var(--font-down-1);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Preferences entry
+// ---------------------------------------------------------------------------
+.duc-preferences-entry {
+  .duc-preferences-description {
+    color: var(--primary-medium);
+    margin-bottom: 0.75em;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Picker overlay (self-contained dialog, no core modal dependency)
+// ---------------------------------------------------------------------------
+.duc-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em;
+  animation: duc-fade-in 0.15s ease-out;
+}
+
+.duc-picker-dialog {
+  background: var(--secondary);
+  color: var(--primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-menu, 0 4px 24px rgba(0, 0, 0, 0.35));
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: duc-pop-in 0.15s ease-out;
+}
+
+.duc-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9em 1em;
+  border-bottom: 1px solid var(--primary-low);
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.duc-picker-tabs {
+  display: flex;
+  gap: 0.4em;
+  padding: 0.75em 1em 0;
+  border-bottom: 1px solid var(--primary-low);
+}
+
+.duc-picker-tab {
+  background: none;
+  border: none;
+  padding: 0.5em 0.9em;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  color: var(--primary-medium);
+  font-weight: 600;
+
+  &:hover {
+    color: var(--primary);
+    background: var(--primary-very-low);
+  }
+
+  &.active {
+    color: var(--tertiary);
+    border-bottom: 2px solid var(--tertiary);
+  }
+}
+
+.duc-picker-body {
+  padding: 1em;
+  overflow-y: auto;
+}
+
+.duc-picker-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2em 0;
+}
+
+.duc-picker-error,
+.duc-picker-empty {
+  color: var(--primary-medium);
+  text-align: center;
+  padding: 1.5em 0;
+}
+
+.duc-picker-current-actions {
+  margin-bottom: 0.75em;
+}
+
+.duc-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.85em;
+}
+
+.duc-picker-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.75em 0.5em;
+  border-radius: 8px;
+  border: 1px solid var(--primary-low);
+  text-align: center;
+
+  &.active {
+    border-color: var(--tertiary);
+    box-shadow: 0 0 0 1px var(--tertiary);
+  }
+
+  &.locked {
+    opacity: 0.7;
+  }
+}
+
+.duc-picker-tile-preview {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--primary-very-low);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.duc-picker-tile-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+  color: #fff;
+}
+
+.duc-picker-tile-check {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: var(--tertiary);
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.duc-picker-tile-name {
+  font-size: var(--font-down-1);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.duc-picker-tile-rarity {
+  font-size: var(--font-down-2);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.duc-picker-tile-locked-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: var(--font-down-2);
+  color: var(--primary-medium);
+}
+
+// ---------------------------------------------------------------------------
+// Admin page
+// ---------------------------------------------------------------------------
+.duc-admin-page {
+  max-width: 900px;
+}
+
+.duc-admin-intro {
+  color: var(--primary-medium);
+}
+
+.duc-admin-tabs {
+  display: flex;
+  gap: 0.5em;
+  border-bottom: 1px solid var(--primary-low);
+  margin-bottom: 1em;
+}
+
+.duc-admin-tab {
+  background: none;
+  border: none;
+  padding: 0.6em 1em;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary-medium);
+  border-bottom: 2px solid transparent;
+
+  &.active {
+    color: var(--tertiary);
+    border-bottom-color: var(--tertiary);
+  }
+}
+
+.duc-admin-toolbar {
+  margin-bottom: 1em;
+}
+
+.duc-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.6em 0.5em;
+    border-bottom: 1px solid var(--primary-low);
+    vertical-align: middle;
+  }
+}
+
+.duc-admin-preview-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-very-low);
+  background-size: cover;
+  background-position: center;
+}
+
+.duc-admin-default-badge {
+  margin-left: 0.5em;
+  font-size: var(--font-down-2);
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  background: var(--tertiary-low);
+  color: var(--tertiary);
+}
+
+.duc-admin-row-actions {
+  white-space: nowrap;
+}
+
+.duc-admin-empty {
+  color: var(--primary-medium);
+  padding: 1.5em 0;
+}
+
+// ---------------------------------------------------------------------------
+// Admin form
+// ---------------------------------------------------------------------------
+.duc-admin-form {
+  border: 1px solid var(--primary-low);
+  border-radius: 8px;
+  padding: 1em;
+  margin-bottom: 1.5em;
+  background: var(--primary-very-low);
+}
+
+.duc-admin-form-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 0.75em;
+  border: 1px solid var(--primary-low);
+}
+
+.duc-admin-field {
+  display: block;
+  margin-bottom: 0.85em;
+
+  > span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3em;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+.duc-admin-field-row {
+  display: flex;
+  gap: 1.5em;
+  flex-wrap: wrap;
+
+  > label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+  }
+}
+
+.duc-admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+
+  input[type="checkbox"] {
+    margin: 0;
+  }
+
+  > span {
+    margin: 0;
+    font-weight: normal;
+  }
+}
+
+.duc-admin-image-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.4em;
+}
+
+.duc-upload-btn {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.duc-hidden-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.duc-admin-url-input {
+  font-size: var(--font-down-1);
+  color: var(--primary-medium);
+}
+
+.duc-admin-help {
+  font-size: var(--font-down-1);
+  color: var(--primary-medium);
+  margin: 0 0 0.5em;
+}
+
+.duc-admin-group-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em 1.25em;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 0.5em;
+  border: 1px solid var(--primary-low);
+  border-radius: 6px;
+  background: var(--secondary);
+}
+
+.duc-admin-owners-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-bottom: 0.5em;
+}
+
+.duc-admin-owner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  border-radius: 999px;
+  padding: 0.15em 0.4em 0.15em 0.7em;
+  font-size: var(--font-down-1);
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-medium);
+    font-size: 1.1em;
+    line-height: 1;
+    padding: 0 0.3em;
+
+    &:hover {
+      color: var(--danger);
+    }
+  }
+}
+
+.duc-admin-owners-none {
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+}
+
+.duc-admin-owners-add {
+  display: flex;
+  gap: 0.5em;
+
+  input {
+    flex: 1;
+    max-width: 260px;
+  }
+}
+
+.duc-admin-form-error {
+  color: var(--danger);
+  margin: 0.5em 0;
+}
+
+.duc-admin-form-actions {
+  display: flex;
+  gap: 0.5em;
+  margin-top: 1em;
+}
+
+// ---------------------------------------------------------------------------
+// Shared
+// ---------------------------------------------------------------------------
+.duc-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes duc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes duc-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

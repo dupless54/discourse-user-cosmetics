@@ -1,0 +1,82 @@
+tr:
+  js:
+    discourse_user_cosmetics:
+      title: "Kullanıcı Kozmetikleri"
+
+      kinds:
+        avatar_frame: "Avatar Çerçeveleri"
+        nameplate: "İsim Plakaları"
+        card_decoration: "Kart Dekorasyonları"
+
+      preferences:
+        title: "Kozmetikler"
+        description: "Bir avatar çerçevesi, bir isim plakası ve bir kart dekorasyonu seçin."
+        open: "Kozmetik seçiciyi aç"
+
+      picker:
+        title: "Kozmetiklerim"
+        equip: "Kullan"
+        equipped: "Kullanılıyor"
+        remove: "Kaldır"
+        locked: "Kilitli"
+        locked_tooltip: "Bu öğeye henüz sahip değilsiniz."
+        locked_group_tooltip: "Şu gruplar için açık: %{groups}"
+        none_for_kind: "Bu kategori için henüz öğe eklenmedi."
+        save_error: "Seçiminiz kaydedilemedi, lütfen tekrar deneyin."
+        close: "Kapat"
+        preview: "Önizleme"
+
+      admin:
+        title: "Kullanıcı Kozmetikleri"
+        intro: "Üyelerin kullanabileceği avatar çerçevelerini, isim plakalarını ve kullanıcı kartı dekorasyonlarını yönetin."
+        new_item: "Yeni öğe"
+        edit_item: "Öğeyi düzenle"
+        no_items: "Henüz öğe yok. İlk öğenizi eklemek için \"Yeni öğe\"ye tıklayın."
+        table:
+          preview: "Önizleme"
+          name: "Ad"
+          group: "Kimler kullanabilir"
+          owners: "Sahip sayısı"
+          enabled: "Etkin"
+          actions: "İşlemler"
+        everyone: "Herkes"
+        default_badge: "Varsayılan"
+        fields:
+          name: "Ad"
+          name_placeholder: "örn. Altın Halka"
+          description: "Açıklama"
+          description_placeholder: "Seçicide ipucu olarak gösterilir (opsiyonel)"
+          image: "Görsel"
+          upload: "Görsel yükle"
+          uploading: "Yükleniyor..."
+          replace_image: "Görseli değiştir"
+          remove_image: "Görseli kaldır"
+          or_paste_url: "...veya bir görsel URL'si yapıştırın"
+          gradient: "Renk geçişi"
+          gradient_from: "Başlangıç"
+          gradient_to: "Bitiş"
+          glow_color: "Parlama rengi (opsiyonel)"
+          rarity_label: "Nadirlik etiketi"
+          rarity_label_placeholder: "örn. Efsanevi (opsiyonel)"
+          rarity_color: "Nadirlik rengi"
+          sort_order: "Sıra"
+          enabled: "Etkin"
+          is_default: "Herkese otomatik ver"
+          groups: "Kilidini açan gruplar"
+          groups_help: "Boş bırakırsanız herkes kullanabilir. Güven seviyeleri, rozet grupları ve ekip de dahil olmak üzere hepsi birer gruptur, buradan seçebilirsiniz."
+        save: "Kaydet"
+        cancel: "Vazgeç"
+        delete: "Sil"
+        delete_confirm: "\"%{name}\" silinsin mi? Bu işlem geri alınamaz."
+        saved: "Kaydedildi."
+        save_error: "Bu öğe kaydedilemedi. Lütfen alanları kontrol edin."
+        upload_error: "Bu görsel yüklenemedi."
+        image_too_big: "Bu görsel, site ayarlarındaki %{max} KB sınırından büyük."
+        owners:
+          title: "Ayrıca elle verildiği kişiler"
+          add_placeholder: "kullanıcı adı"
+          add: "Ver"
+          remove: "Geri al"
+          none: "Henüz kimseye elle verilmedi."
+        tabs:
+          items: "Öğeler"

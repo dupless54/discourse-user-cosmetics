@@ -1,0 +1,82 @@
+en:
+  js:
+    discourse_user_cosmetics:
+      title: "User Cosmetics"
+
+      kinds:
+        avatar_frame: "Avatar Frames"
+        nameplate: "Nameplates"
+        card_decoration: "Card Decorations"
+
+      preferences:
+        title: "Cosmetics"
+        description: "Choose an avatar frame, a nameplate, and a card decoration."
+        open: "Open cosmetics picker"
+
+      picker:
+        title: "My Cosmetics"
+        equip: "Equip"
+        equipped: "Equipped"
+        remove: "Remove"
+        locked: "Locked"
+        locked_tooltip: "You don't own this item yet."
+        locked_group_tooltip: "Unlocked for: %{groups}"
+        none_for_kind: "No items have been added for this category yet."
+        save_error: "Couldn't save your selection, please try again."
+        close: "Close"
+        preview: "Preview"
+
+      admin:
+        title: "User Cosmetics"
+        intro: "Manage the avatar frames, nameplates, and user card decorations members can equip."
+        new_item: "New item"
+        edit_item: "Edit item"
+        no_items: "No items yet. Click \"New item\" to add your first one."
+        table:
+          preview: "Preview"
+          name: "Name"
+          group: "Restricted to"
+          owners: "Owners"
+          enabled: "Enabled"
+          actions: "Actions"
+        everyone: "Everyone"
+        default_badge: "Default"
+        fields:
+          name: "Name"
+          name_placeholder: "e.g. Gold Ring"
+          description: "Description"
+          description_placeholder: "Shown as a tooltip in the picker (optional)"
+          image: "Image"
+          upload: "Upload image"
+          uploading: "Uploading..."
+          replace_image: "Replace image"
+          remove_image: "Remove image"
+          or_paste_url: "...or paste an image URL"
+          gradient: "Gradient colors"
+          gradient_from: "From"
+          gradient_to: "To"
+          glow_color: "Glow accent (optional)"
+          rarity_label: "Rarity label"
+          rarity_label_placeholder: "e.g. Legendary (optional)"
+          rarity_color: "Rarity color"
+          sort_order: "Sort order"
+          enabled: "Enabled"
+          is_default: "Give to everyone automatically"
+          groups: "Unlocked by groups"
+          groups_help: "Leave empty to let every member use this item. Trust levels, badges-as-groups, and staff all work here too, since they're groups under the hood."
+        save: "Save"
+        cancel: "Cancel"
+        delete: "Delete"
+        delete_confirm: "Delete \"%{name}\"? This can't be undone."
+        saved: "Saved."
+        save_error: "Couldn't save this item. Please check the fields above."
+        upload_error: "Couldn't upload that image."
+        image_too_big: "That image is larger than the %{max} KB limit set in site settings."
+        owners:
+          title: "Individually granted to"
+          add_placeholder: "username"
+          add: "Grant"
+          remove: "Revoke"
+          none: "No individual grants yet."
+        tabs:
+          items: "Items"

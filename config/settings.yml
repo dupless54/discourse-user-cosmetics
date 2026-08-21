@@ -1,0 +1,27 @@
+plugins:
+  discourse_user_cosmetics_enabled:
+    default: true
+    client: true
+
+  discourse_user_cosmetics_avatar_frames_enabled:
+    default: true
+    client: true
+
+  discourse_user_cosmetics_nameplates_enabled:
+    default: true
+    client: true
+
+  discourse_user_cosmetics_card_decorations_enabled:
+    default: true
+    client: true
+
+  discourse_user_cosmetics_frame_overhang_percent:
+    default: 14
+    min: 0
+    max: 60
+    client: true
+
+  discourse_user_cosmetics_max_image_kb:
+    default: 2048
+    min: 32
+    max: 10240

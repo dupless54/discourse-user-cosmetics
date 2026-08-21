@@ -1,0 +1,27 @@
+en:
+  site_settings:
+    discourse_user_cosmetics_enabled: "Enable the User Cosmetics plugin (avatar frames, nameplates, and user card decorations)."
+    discourse_user_cosmetics_avatar_frames_enabled: "Allow members to equip avatar frames."
+    discourse_user_cosmetics_nameplates_enabled: "Allow members to equip nameplates."
+    discourse_user_cosmetics_card_decorations_enabled: "Allow members to equip user card decorations."
+    discourse_user_cosmetics_frame_overhang_percent: "How far an avatar frame extends past the edge of the avatar, as a percentage of the avatar's size."
+    discourse_user_cosmetics_max_image_kb: "Maximum size, in kilobytes, for an uploaded cosmetic image."
+
+  discourse_user_cosmetics:
+    title: "User Cosmetics"
+
+  activerecord:
+    errors:
+      models:
+        discourse_user_cosmetics/item:
+          attributes:
+            gradient_from:
+              invalid: "must be a hex color, e.g. #FF9900"
+            gradient_to:
+              invalid: "must be a hex color, e.g. #FF9900"
+            glow_color:
+              invalid: "must be a hex color, e.g. #FF9900"
+            rarity_color:
+              invalid: "must be a hex color, e.g. #FF9900"
+            slug:
+              taken: "is already used by another item of the same kind"

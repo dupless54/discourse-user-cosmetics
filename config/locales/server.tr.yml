@@ -1,0 +1,27 @@
+tr:
+  site_settings:
+    discourse_user_cosmetics_enabled: "Kullanıcı Kozmetikleri eklentisini etkinleştir (avatar çerçeveleri, isim plakaları ve kullanıcı kartı dekorasyonları)."
+    discourse_user_cosmetics_avatar_frames_enabled: "Üyelerin avatar çerçevesi kullanmasına izin ver."
+    discourse_user_cosmetics_nameplates_enabled: "Üyelerin isim plakası kullanmasına izin ver."
+    discourse_user_cosmetics_card_decorations_enabled: "Üyelerin kullanıcı kartı dekorasyonu kullanmasına izin ver."
+    discourse_user_cosmetics_frame_overhang_percent: "Avatar çerçevesinin, avatarın kenarından ne kadar taştığı (avatar boyutunun yüzdesi olarak)."
+    discourse_user_cosmetics_max_image_kb: "Yüklenebilecek kozmetik görselinin en fazla boyutu (KB)."
+
+  discourse_user_cosmetics:
+    title: "Kullanıcı Kozmetikleri"
+
+  activerecord:
+    errors:
+      models:
+        discourse_user_cosmetics/item:
+          attributes:
+            gradient_from:
+              invalid: "geçerli bir hex renk olmalı, örn. #FF9900"
+            gradient_to:
+              invalid: "geçerli bir hex renk olmalı, örn. #FF9900"
+            glow_color:
+              invalid: "geçerli bir hex renk olmalı, örn. #FF9900"
+            rarity_color:
+              invalid: "geçerli bir hex renk olmalı, örn. #FF9900"
+            slug:
+              taken: "bu isimde başka bir öğe zaten var"
