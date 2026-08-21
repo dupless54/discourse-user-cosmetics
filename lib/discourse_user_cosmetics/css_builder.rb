@@ -19,7 +19,7 @@ module ::DiscourseUserCosmetics
       inset_value = "-#{overhang}%"
 
       css = +"/* discourse-user-cosmetics: generated avatar frame overlays */\n"
-      css << ".duc-avatar-frame-target { position: relative; display: inline-block; }\n"
+      css << ".duc-avatar-frame-target { position: relative !important; display: inline-block !important; }\n"
       css << ".duc-avatar-frame-target::after {\n"
       css << "  content: \"\";\n"
       css << "  position: absolute;\n"
@@ -47,7 +47,8 @@ module ::DiscourseUserCosmetics
         uname = escape_css_string(user.username_lower)
         image_css = escape_css_url(image)
 
-        css << %([data-user-card="#{uname}"] { position: relative; display: inline-block; }\n)
+        # Avatar kutusunu güvene alıyoruz (display ve position kurallarını zorluyoruz)
+        css << %([data-user-card="#{uname}"] { position: relative !important; display: inline-block !important; }\n)
         css << %([data-user-card="#{uname}"]::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"
@@ -59,7 +60,9 @@ module ::DiscourseUserCosmetics
         css << "  pointer-events: none;\n"
         css << "  z-index: 2;\n"
         css << "}\n"
-        css << %(a.mention[href="/u/#{uname}"] { position: relative; display: inline-block; }\n)
+        
+        # Etiketlenen (mention) isimler için de aynısını yapıyoruz
+        css << %(a.mention[href="/u/#{uname}"] { position: relative !important; display: inline-block !important; }\n)
         css << %(a.mention[href="/u/#{uname}"]::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"

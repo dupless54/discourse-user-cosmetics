@@ -92,31 +92,21 @@ public/default-cosmetics/                    → hazır örnek görseller
 
 Bu bir Discourse **plugin**'idir (tema bileşeni değil), bu yüzden sunucu erişiminiz olmalı.
 
-1. Bu klasörü kendi Git deponuza (GitHub/GitLab, özel olabilir) yükleyin:
-   ```bash
-   cd discourse-user-cosmetics
-   git init
-   git add .
-   git commit -m "discourse-user-cosmetics ilk sürüm"
-   git branch -M main
-   git remote add origin https://github.com/kullanici-adiniz/discourse-user-cosmetics.git
-   git push -u origin main
-   ```
-2. Sunucunuzda `containers/app.yml` dosyasını açın ve `after_code` altına ekleyin:
+1. Sunucunuzda `containers/app.yml` dosyasını açın ve `after_code` altına ekleyin:
    ```yaml
    hooks:
      after_code:
        - exec:
            cd: $home/plugins
            cmd:
-             - git clone https://github.com/kullanici-adiniz/discourse-user-cosmetics.git
+             - git clone https://github.com/dupless54/discourse-user-cosmetics.git
    ```
-3. Yeniden derleyin:
+2. Yeniden derleyin:
    ```bash
    cd /var/discourse
    ./launcher rebuild app
    ```
-4. **Admin → Ayarlar → Eklentiler**'de `discourse_user_cosmetics_enabled` açık olduğunu doğrulayın (varsayılan olarak açık gelir).
+3. **Admin → Ayarlar → Eklentiler**'de `discourse_user_cosmetics_enabled` açık olduğunu doğrulayın (varsayılan olarak açık gelir).
 
 Yerel/geliştirme kurulumunuz varsa (kaynak koddan çalışan Discourse), klasörü doğrudan Discourse'un `plugins/` klasörüne kopyalayıp sunucuyu yeniden başlatmanız yeterlidir.
 

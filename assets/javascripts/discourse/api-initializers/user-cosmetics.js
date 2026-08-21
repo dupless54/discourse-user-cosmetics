@@ -30,12 +30,14 @@ export default apiInitializer("1.8.0", (api) => {
 
     const safeUrl = frame.image_url.replace(/"/g, '\\"');
     styleTag.textContent = `
-      #current-user .avatar,
-      .header-dropdown-toggle.current-user .avatar {
+      /* Avatarı saran dış buton/kutuya position veriyoruz, img etiketine değil! */
+      #current-user,
+      .header-dropdown-toggle.current-user {
         position: relative;
       }
-      #current-user .avatar::after,
-      .header-dropdown-toggle.current-user .avatar::after {
+      /* Çerçeveyi doğrudan dış kutunun üzerine (::after) ekliyoruz */
+      #current-user::after,
+      .header-dropdown-toggle.current-user::after {
         content: "";
         position: absolute;
         inset: -14%;
