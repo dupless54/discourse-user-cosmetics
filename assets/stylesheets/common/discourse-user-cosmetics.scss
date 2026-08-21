@@ -36,7 +36,31 @@
 }
 
 // ---------------------------------------------------------------------------
-// Card / profile decoration banner
+// User Card Base (Required for Overlay)
+// ---------------------------------------------------------------------------
+#user-card {
+  position: relative;
+}
+
+// ---------------------------------------------------------------------------
+// Profile Effect Overlay (Discord-style animation)
+// ---------------------------------------------------------------------------
+.duc-profile-effect-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover; 
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: inherit; 
+  z-index: 100; 
+  pointer-events: none; 
+}
+
+// ---------------------------------------------------------------------------
+// Card / profile decoration banner (Legacy gradient/banner)
 // ---------------------------------------------------------------------------
 .duc-card-banner {
   position: relative;
