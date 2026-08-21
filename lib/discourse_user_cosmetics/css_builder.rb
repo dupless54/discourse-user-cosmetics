@@ -85,7 +85,7 @@ module ::DiscourseUserCosmetics
           css << "  padding: 2px 6px;\n"
           css << "  border-radius: 6px;\n"
           css << "  color: #ffffff !important;\n"
-          css << "  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.5);\n"
+          css << "  text-shadow: 0px 1px 2px #000000, 0px 0px 4px #000000, 0px 0px 8px #000000 !important;\n"
           css << "}\n"
 
           # ::before sözde elementi ile isim plakasını (GIF/APNG) tam arkaya yerleştiriyoruz
