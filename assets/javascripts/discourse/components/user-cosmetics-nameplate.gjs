@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { htmlSafe } from "@ember/template"; // Ember'ın güvenlik kilidini açıyoruz
+import { htmlSafe } from "@ember/template";
 
 export default class UserCosmeticsNameplate extends Component {
   get user() {
@@ -29,42 +29,46 @@ export default class UserCosmeticsNameplate extends Component {
       return htmlSafe("");
     }
 
-    // Doğrudan Discourse'un kendi İsim/Nick kutularını hedefleyip arkaplanı yerleştiriyoruz
     return htmlSafe(`
       /* 1. Kullanıcı Kartındaki İsim Alanı */
       #user-card .name-username-wrapper {
         ${bgCss}
         background-size: cover;
         background-position: center;
-        padding: 6px 12px !important;
+        padding: 4px 10px !important;
         border-radius: 8px;
-        width: fit-content; /* Arkaplanın tüm satırı kaplamaması, sadece yazı kadar olması için */
+        width: fit-content;
+        max-width: 100%;
       }
 
-      /* 2. Profil Sayfasındaki İsim Alanı */
-      .user-profile-names {
+      /* 2. Profil Sayfası (Sadece Ana Nick Alanı: İkiye bölünmeyi önler) */
+      .user-profile-names .user-profile-names__primary {
         ${bgCss}
         background-size: cover;
         background-position: center;
-        padding: 10px 16px !important;
-        border-radius: 12px;
+        padding: 4px 14px !important;
+        border-radius: 10px;
+        display: inline-block !important; /* Sadece yazı kadar yer kaplamasını sağlar */
         width: fit-content;
+        max-width: 100%;
       }
 
-      /* Yazıların animasyon veya renkli arkaplanda her zaman net okunabilmesi için gölge ayarı */
-      #user-card .name-username-wrapper .name,
-      #user-card .name-username-wrapper .username,
-      .user-profile-names .name,
-      .user-profile-names .username {
+      /* YAZI OKUNABİLİRLİĞİ: Her renk arkaplanda kusursuz okunması için 3 katmanlı kalın siyah gölge */
+      #user-card .name-username-wrapper,
+      #user-card .name-username-wrapper *,
+      .user-profile-names .user-profile-names__primary,
+      .user-profile-names .user-profile-names__primary * {
         color: #ffffff !important;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.5);
+        text-shadow: 
+          0px 1px 2px #000000, 
+          0px 0px 4px #000000, 
+          0px 0px 8px #000000 !important;
       }
     `);
   }
 
   <template>
     {{#if this.nameplate}}
-      {{!-- Nameplate'i ayrı bir kutu olarak değil, CSS injection ile ana kutulara uyguluyoruz --}}
       <style>{{this.nameplateStyle}}</style>
     {{/if}}
   </template>
