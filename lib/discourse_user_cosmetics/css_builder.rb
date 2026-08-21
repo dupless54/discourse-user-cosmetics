@@ -39,23 +39,9 @@ module ::DiscourseUserCosmetics
         uname = escape_css_string(user.username_lower)
         image_css = escape_css_url(image)
 
-        # 1. Konular, Mesajlar ve Alıntılar (Büyük/küçük harf duyarsız 'i' takısı ile)
-        css << %([data-user-card="#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
-        css << %([data-user-card="#{uname}" i]::after {\n)
-        css << "  content: \"\";\n"
-        css << "  position: absolute;\n"
-        css << "  inset: #{inset_value};\n"
-        css << "  background-image: url(\"#{image_css}\");\n"
-        css << "  background-repeat: no-repeat;\n"
-        css << "  background-position: center;\n"
-        css << "  background-size: contain;\n"
-        css << "  pointer-events: none;\n"
-        css << "  z-index: 2;\n"
-        css << "}\n"
-        
-        # 2. Bahsetmeler (Mentions)
-        css << %(a.mention[href^="/u/#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
-        css << %(a.mention[href^="/u/#{uname}" i]::after {\n)
+        # 1. Konular ve Mesajlar (SADECE İÇİNDE AVATAR RESMİ OLANLARI SEÇER, METİNLERİ ELLER)
+        css << %([data-user-card="#{uname}" i]:has(img.avatar) { position: relative !important; display: inline-block !important; }\n)
+        css << %([data-user-card="#{uname}" i]:has(img.avatar)::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"
         css << "  inset: #{inset_value};\n"
@@ -67,7 +53,7 @@ module ::DiscourseUserCosmetics
         css << "  z-index: 2;\n"
         css << "}\n"
 
-        # 3. Kullanıcı Kartındaki (Açılır Pencere) Avatar
+        # 2. Kullanıcı Kartındaki (Açılır Pencere) Avatar
         css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
         css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i]::after {\n)
         css << "  content: \"\";\n"
@@ -81,9 +67,10 @@ module ::DiscourseUserCosmetics
         css << "  z-index: 2;\n"
         css << "}\n"
 
-        # 4. Kullanıcı Profil Sayfasındaki Avatar
-        css << %(.user-#{uname} .user-profile-avatar { position: relative !important; display: inline-block !important; }\n)
-        css << %(.user-#{uname} .user-profile-avatar::after {\n)
+        # 3. Kullanıcı Profil Sayfasındaki Ana Avatar
+        # Resmin url yolundan (src) VEYA başlığından (title) eşleştirme yaparak kesin yakalarız
+        css << %(.user-profile-avatar:has(img.avatar[src*="/#{uname}/" i]), .user-profile-avatar:has(img.avatar[title="#{uname}" i]) { position: relative !important; display: inline-block !important; }\n)
+        css << %(.user-profile-avatar:has(img.avatar[src*="/#{uname}/" i])::after, .user-profile-avatar:has(img.avatar[title="#{uname}" i])::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"
         css << "  inset: #{inset_value};\n"
