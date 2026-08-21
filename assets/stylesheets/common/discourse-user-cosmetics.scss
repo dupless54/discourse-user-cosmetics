@@ -51,13 +51,18 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: 100% 100%; // Animasyonun ortasının kesilmesini önler, 624x173 alana tam sığdırır.
-  background-position: center;
+  
+  /* Sıkışmayı/ezilmeyi engellemek için tekrar cover yapıyoruz */
+  background-size: cover; 
+  
+  /* Dikey animasyonun neresinin görüneceğini ayarlar. 
+     center 30% -> Yukarıya biraz daha yakın olan odak noktasını gösterir. */
+  background-position: center 30%; 
   background-repeat: no-repeat;
   border-radius: inherit; 
   z-index: 100; 
   pointer-events: none; 
-  animation: duc-fade-in 0.3s ease-out; // 10 saniyelik döngüde sahneye yumuşak bir giriş yapar.
+  animation: duc-fade-in 0.3s ease-out; 
 }
 
 // ---------------------------------------------------------------------------
