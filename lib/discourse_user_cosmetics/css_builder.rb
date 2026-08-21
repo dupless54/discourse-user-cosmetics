@@ -1,15 +1,6 @@
 # frozen_string_literal: true
 
 module ::DiscourseUserCosmetics
-  # Builds a plain CSS stylesheet that draws every user's chosen avatar frame
-  # as an overlay, keyed off the `data-user-card="username"` attribute that
-  # Discourse core already renders on every clickable avatar/username link
-  # (post stream, topic list, quotes, notifications, the header, etc).
-  #
-  # Doing this in pure CSS -- instead of hooking into each individual
-  # Ember/widget component that happens to render an avatar -- means frames
-  # keep working everywhere Discourse shows an avatar, even if core changes
-  # how a particular avatar is rendered internally.
   class CssBuilder
     def self.build_frames_css
       return "/* discourse-user-cosmetics: avatar frames disabled */\n" unless
@@ -19,6 +10,7 @@ module ::DiscourseUserCosmetics
       inset_value = "-#{overhang}%"
 
       css = +"/* discourse-user-cosmetics: generated avatar frame overlays */\n"
+      
       css << ".duc-avatar-frame-target { position: relative !important; display: inline-block !important; }\n"
       css << ".duc-avatar-frame-target::after {\n"
       css << "  content: \"\";\n"
@@ -47,9 +39,9 @@ module ::DiscourseUserCosmetics
         uname = escape_css_string(user.username_lower)
         image_css = escape_css_url(image)
 
-        # Avatar kutusunu güvene alıyoruz (display ve position kurallarını zorluyoruz)
-        css << %([data-user-card="#{uname}"] { position: relative !important; display: inline-block !important; }\n)
-        css << %([data-user-card="#{uname}"]::after {\n)
+        # 1. Konular, Mesajlar ve Alıntılar (Büyük/küçük harf duyarsız 'i' takısı ile)
+        css << %([data-user-card="#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
+        css << %([data-user-card="#{uname}" i]::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"
         css << "  inset: #{inset_value};\n"
@@ -61,9 +53,37 @@ module ::DiscourseUserCosmetics
         css << "  z-index: 2;\n"
         css << "}\n"
         
-        # Etiketlenen (mention) isimler için de aynısını yapıyoruz
-        css << %(a.mention[href="/u/#{uname}"] { position: relative !important; display: inline-block !important; }\n)
-        css << %(a.mention[href="/u/#{uname}"]::after {\n)
+        # 2. Bahsetmeler (Mentions)
+        css << %(a.mention[href^="/u/#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
+        css << %(a.mention[href^="/u/#{uname}" i]::after {\n)
+        css << "  content: \"\";\n"
+        css << "  position: absolute;\n"
+        css << "  inset: #{inset_value};\n"
+        css << "  background-image: url(\"#{image_css}\");\n"
+        css << "  background-repeat: no-repeat;\n"
+        css << "  background-position: center;\n"
+        css << "  background-size: contain;\n"
+        css << "  pointer-events: none;\n"
+        css << "  z-index: 2;\n"
+        css << "}\n"
+
+        # 3. Kullanıcı Kartındaki (Açılır Pencere) Avatar
+        css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
+        css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i]::after {\n)
+        css << "  content: \"\";\n"
+        css << "  position: absolute;\n"
+        css << "  inset: #{inset_value};\n"
+        css << "  background-image: url(\"#{image_css}\");\n"
+        css << "  background-repeat: no-repeat;\n"
+        css << "  background-position: center;\n"
+        css << "  background-size: contain;\n"
+        css << "  pointer-events: none;\n"
+        css << "  z-index: 2;\n"
+        css << "}\n"
+
+        # 4. Kullanıcı Profil Sayfasındaki Avatar
+        css << %(.user-#{uname} .user-profile-avatar { position: relative !important; display: inline-block !important; }\n)
+        css << %(.user-#{uname} .user-profile-avatar::after {\n)
         css << "  content: \"\";\n"
         css << "  position: absolute;\n"
         css << "  inset: #{inset_value};\n"
