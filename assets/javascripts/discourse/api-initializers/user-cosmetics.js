@@ -7,19 +7,7 @@ const FRAMES_CSS_LINK_ID = "discourse-user-cosmetics-frames-css";
 const CURRENT_USER_STYLE_ID = "discourse-user-cosmetics-current-user-style";
 
 export default apiInitializer("1.8.0", (api) => {
-  // Make the `cosmetics` field we add server-side (see plugin.rb) a proper
-  // tracked field on the user model, so it's reactive in the UI. Guarded
-  // with a typeof check since addModelField is a newer API -- if it isn't
-  // present, the field is usually still readable, just not reactive.
-  if (typeof api.addModelField === "function") {
-    api.addModelField("user", "cosmetics", { defaultValue: null });
-  }
-
-  // The bulk of avatar-frame rendering is done by a single, cacheable CSS
-  // file generated server-side (see DiscourseUserCosmetics::CssBuilder).
-  // Loading it once here means frames keep showing up correctly everywhere
-  // Discourse renders an avatar, without us having to hook every individual
-  // place avatars are drawn.
+  // 1. CSS Dosyasını Ekleme
   if (!document.getElementById(FRAMES_CSS_LINK_ID)) {
     const link = document.createElement("link");
     link.id = FRAMES_CSS_LINK_ID;
@@ -28,10 +16,7 @@ export default apiInitializer("1.8.0", (api) => {
     document.head.appendChild(link);
   }
 
-  // Small bonus: the header's own "current user" avatar toggle isn't a
-  // user-card trigger (it opens the user menu, not a card), so it isn't
-  // covered by the rule above. We already know who the current user is on
-  // the client, so give that one spot its own tiny inline style too.
+  // 2. Geçerli Kullanıcı (Current User) için Inline CSS Ayarları
   const currentUser = api.getCurrentUser();
   const frame = currentUser?.cosmetics?.avatar_frame;
 
@@ -64,10 +49,7 @@ export default apiInitializer("1.8.0", (api) => {
     `;
   }
 
-  // Nameplates + card decorations render into a handful of core outlets.
-  // Wrapped defensively so that if a particular outlet name ever changes in
-  // a future Discourse release, the rest of the plugin (most importantly
-  // the CSS above) keeps working regardless.
+  // 3. Outlet Bileşenlerini (Bileşenleri) Yükleme
   if (typeof api.renderInOutlet === "function") {
     api.renderInOutlet("user-card-post-names", UserCosmeticsNameplate);
     api.renderInOutlet("user-profile-primary", UserCosmeticsNameplate);
