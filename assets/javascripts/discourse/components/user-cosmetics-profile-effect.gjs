@@ -45,15 +45,16 @@ const attachProfileEffect = modifier((element, [effect]) => {
       img.style.position = "absolute";
       img.style.display = "block";
       
-      // YENİ "TAM ÇERÇEVE" MANTIĞI BURADA!
       if (layer.anchor === "full") {
         img.style.top = "0";
         img.style.left = "0";
         img.style.width = "100%";
         img.style.height = "100%";
       } else if (layer.anchor === "left" || layer.anchor === "right") {
-        img.style.top = "0";
-        img.style.height = "100%";
+        // YENİ MATEMATİK BURADA: 
+        // Yan çubukları üst/alt taşmalardan kırpıp, tam olarak kartın kendi boyuna eşitliyoruz
+        img.style.top = "var(--duc-overflow-top, 0px)";
+        img.style.height = "calc(100% - var(--duc-overflow-top, 0px) - var(--duc-overflow-bottom, 0px))";
         img.style.width = "auto";
         img.style[layer.anchor] = "0";
       } else {
@@ -98,16 +99,21 @@ const attachProfileEffect = modifier((element, [effect]) => {
       card.style.zIndex = cardZ;
     }
 
-    backPortal.style.left = pLeft;
-    backPortal.style.top = pTop;
-    backPortal.style.width = pWidth;
-    backPortal.style.height = pHeight;
+    // Portal stillerini ve CSS Değişkenlerini uygulayan ortak bir fonksiyon
+    const applyPortalStyles = (p) => {
+      p.style.left = pLeft;
+      p.style.top = pTop;
+      p.style.width = pWidth;
+      p.style.height = pHeight;
+      // Yan çubukların matematiksel kırpılması için değerleri portala öğretiyoruz
+      p.style.setProperty("--duc-overflow-top", `${overflowTop}px`);
+      p.style.setProperty("--duc-overflow-bottom", `${overflowBottom}px`);
+    };
+
+    applyPortalStyles(backPortal);
     backPortal.style.zIndex = cardZ - 1;
 
-    frontPortal.style.left = pLeft;
-    frontPortal.style.top = pTop;
-    frontPortal.style.width = pWidth;
-    frontPortal.style.height = pHeight;
+    applyPortalStyles(frontPortal);
     frontPortal.style.zIndex = cardZ + 1;
   }
 
