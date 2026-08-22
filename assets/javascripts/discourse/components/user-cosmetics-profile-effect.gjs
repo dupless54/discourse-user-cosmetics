@@ -3,9 +3,6 @@ import { modifier } from "ember-modifier";
 import { htmlSafe } from "@ember/template";
 
 const PORTAL_CLASS = "duc-profile-effect-portal";
-
-// HATA 1'İN ÇÖZÜMÜ: .user-profile ve .user-main'i sildik! 
-// Artık devasa canavar yok, sadece küçük kullanıcı kartına (user-card) odaklanıyoruz.
 const CARD_SELECTOR = "#user-card, .user-card"; 
 
 const attachProfileEffect = modifier((element, [effect]) => {
@@ -15,20 +12,14 @@ const attachProfileEffect = modifier((element, [effect]) => {
     return;
   }
 
-  // HATA 2'NİN ÇÖZÜMÜ: Kartı izole ediyoruz (3D Derinlik için)
-  card.style.isolation = "isolate";
-  card.style.overflow = "visible";
-  if (getComputedStyle(card).position === "static") {
-    card.style.position = "relative";
-  }
-
+  // 1. DİSCORD MANTIĞI: Efekti kartın içine değil, SAYFANIN EN DIŞINA (body) ekliyoruz. 
+  // Bu sayede kartı bir "sandviç" gibi arasına alabileceğiz.
   const portal = document.createElement("div");
   portal.className = PORTAL_CLASS;
   portal.style.position = "absolute";
   portal.style.pointerEvents = "none";
-  
-  // Efekti sayfanın dibine (body) DEĞİL, doğrudan kartın içine ekliyoruz!
-  card.appendChild(portal);
+  // DİKKAT: Portalın kendisine z-index VERMİYORUZ ki içindeki resimler serbest kalsın.
+  document.body.appendChild(portal);
 
   const images = effect.layers
     .filter((layer) => layer && layer.image_url)
@@ -47,16 +38,18 @@ const attachProfileEffect = modifier((element, [effect]) => {
       
       img.style[layer.anchor === "top" ? "top" : "bottom"] = "0";
       
-      // DERİNLİK HİSSİYATI: Ön katmanlar 10, Arka katmanlar -1
-      // İzolasyon sayesinde -1 olanlar kartın arka planının içine gömülecek
-      img.style.zIndex = layer.stack_order === "front" ? "10" : "-1";
-      
+      // Resimler, kendi yerleşimlerine göre CSS z-index değişkenini alacak
+      img.style.zIndex =
+        layer.stack_order === "front"
+          ? "var(--duc-effect-front-z)"
+          : "var(--duc-effect-back-z)";
+          
       portal.appendChild(img);
       return img;
     });
 
   function layout() {
-    if (!card.contains(portal)) {
+    if (!document.body.contains(card)) {
       return;
     }
 
@@ -68,12 +61,28 @@ const attachProfileEffect = modifier((element, [effect]) => {
     const overflowTop = (effect.effect_overflow_top || effect.overflow_top || 0) * scale;
     const overflowBottom = (effect.effect_overflow_bottom || effect.overflow_bottom || 0) * scale;
 
-    // Portal kartın içinde olduğu için, ekran koordinatları (scrollX) hesaplamaya 
-    // gerek kalmadı. Sadece negatif paylar (margin) vererek dışarı taşırıyoruz.
-    portal.style.left = `-${overflowH}px`;
-    portal.style.top = `-${overflowTop}px`;
-    portal.style.width = `calc(100% + ${overflowH * 2}px)`;
-    portal.style.height = `calc(100% + ${overflowTop + overflowBottom}px)`;
+    // Portalı karta milimetrik olarak hizalıyoruz
+    portal.style.left = `${rect.left + window.scrollX - overflowH}px`;
+    portal.style.top = `${rect.top + window.scrollY - overflowTop}px`;
+    portal.style.width = `${rect.width + overflowH * 2}px`;
+    portal.style.height = `${rect.height + overflowTop + overflowBottom}px`;
+
+    // 2. KUSURSUZ DERİNLİK HESAPLAMASI (Sandviçleme)
+    // Kartın sistemdeki katman numarasını (z-index) öğreniyoruz
+    let cardZ = parseInt(getComputedStyle(card).zIndex, 10);
+    
+    if (!Number.isFinite(cardZ)) {
+      cardZ = 1000;
+      card.style.zIndex = cardZ;
+      if (getComputedStyle(card).position === "static") {
+        card.style.position = "relative";
+      }
+    }
+
+    // ARKA (Back) katmanları kartın 1 seviye arkasına (cardZ - 1)
+    // ÖN (Front) katmanları kartın 1 seviye önüne (cardZ + 1) atıyoruz!
+    portal.style.setProperty("--duc-effect-back-z", cardZ - 1);
+    portal.style.setProperty("--duc-effect-front-z", cardZ + 1);
   }
 
   layout();
@@ -86,7 +95,7 @@ const attachProfileEffect = modifier((element, [effect]) => {
 
   return () => {
     resizeObserver?.disconnect();
-    if (card.contains(portal)) {
+    if (document.body.contains(portal)) {
       portal.remove();
     }
     images.length = 0;
@@ -111,7 +120,6 @@ export default class UserCosmeticsProfileEffect extends Component {
     return htmlSafe(`
       #user-card, .user-card {
         overflow: visible !important;
-        isolation: isolate !important;
       }
     `);
   }
