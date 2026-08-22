@@ -111,14 +111,21 @@ module ::DiscourseUserCosmetics
     end
 
     # Profil efekti katmanları: en fazla 4 slot (üst/alt x ön/arka), Discord'un
-    # layers[] şemasındaki anchor + order alanlarının karşılığı. Basitlik ve
-    # öngörülebilirlik için her kayıtta dörtünü de silip gönderilenleri
-    # yeniden oluşturuyoruz (grup listesiyle aynı desen).
+    # layers[] şemasındaki anchor + order alanlarının karşılığı.
     def save_effect_layers(item)
-      layers = Array(params.dig(:item, :layers))
+      layers_param = params.dig(:item, :layers)
+      return if layers_param.blank?
+
+      # Rails Strong Parameters korumasını aşıp güvenli bir şekilde verilere erişiyoruz
+      layers = layers_param.is_a?(Hash) ? layers_param.values : Array(layers_param)
+      
       item.effect_layers.destroy_all
 
-      layers.each do |layer|
+      layers.each do |lp|
+        # Parametreyi normal bir Ruby Hash nesnesine dönüştürüyoruz
+        layer = lp.respond_to?(:permit) ? lp.permit(:anchor, :stack_order, :image_upload_id, :image_url).to_h : lp
+        layer = layer.with_indifferent_access
+
         anchor = layer[:anchor].to_s
         stack_order = layer[:stack_order].to_s
         next unless DiscourseUserCosmetics::EffectLayer::ANCHORS.include?(anchor)
