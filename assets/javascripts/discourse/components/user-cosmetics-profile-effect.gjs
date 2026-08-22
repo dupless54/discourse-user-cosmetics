@@ -51,10 +51,9 @@ const attachProfileEffect = modifier((element, [effect]) => {
         img.style.width = "100%";
         img.style.height = "100%";
       } else if (layer.anchor === "left" || layer.anchor === "right") {
-        // YENİ MATEMATİK BURADA: 
-        // Yan çubukları üst/alt taşmalardan kırpıp, tam olarak kartın kendi boyuna eşitliyoruz
-        img.style.top = "var(--duc-overflow-top, 0px)";
-        img.style.height = "calc(100% - var(--duc-overflow-top, 0px) - var(--duc-overflow-bottom, 0px))";
+        // YENİ MATEMATİK: CSS değişkenleri admin panelinden gelen değerleri okuyacak
+        img.style.top = "var(--duc-side-offset-top, 0px)";
+        img.style.height = "calc(100% - var(--duc-side-offset-top, 0px) - var(--duc-side-offset-bottom, 0px))";
         img.style.width = "auto";
         img.style[layer.anchor] = "0";
       } else {
@@ -88,6 +87,10 @@ const attachProfileEffect = modifier((element, [effect]) => {
     const overflowTop = (effect.effect_overflow_top || effect.overflow_top || 0) * scale;
     const overflowBottom = (effect.effect_overflow_bottom || effect.overflow_bottom || 0) * scale;
 
+    // YENİ: Admin panelinden gelen özel yan çubuk kesinti değerlerini oranlıyoruz
+    const sideOffsetTop = (effect.effect_side_offset_top || 0) * scale;
+    const sideOffsetBottom = (effect.effect_side_offset_bottom || 0) * scale;
+
     const pLeft = `${left - overflowH}px`;
     const pTop = `${top - overflowTop}px`;
     const pWidth = `${width + overflowH * 2}px`;
@@ -99,15 +102,14 @@ const attachProfileEffect = modifier((element, [effect]) => {
       card.style.zIndex = cardZ;
     }
 
-    // Portal stillerini ve CSS Değişkenlerini uygulayan ortak bir fonksiyon
     const applyPortalStyles = (p) => {
       p.style.left = pLeft;
       p.style.top = pTop;
       p.style.width = pWidth;
       p.style.height = pHeight;
-      // Yan çubukların matematiksel kırpılması için değerleri portala öğretiyoruz
-      p.style.setProperty("--duc-overflow-top", `${overflowTop}px`);
-      p.style.setProperty("--duc-overflow-bottom", `${overflowBottom}px`);
+      // Yan çubukların matematiksel kırpılması için değişkenleri aktarıyoruz
+      p.style.setProperty("--duc-side-offset-top", `${sideOffsetTop}px`);
+      p.style.setProperty("--duc-side-offset-bottom", `${sideOffsetBottom}px`);
     };
 
     applyPortalStyles(backPortal);

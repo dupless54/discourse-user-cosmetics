@@ -86,6 +86,9 @@ export default class UserCosmeticsAdminPage extends Component {
       effect_overflow_top: 300,
       effect_overflow_bottom: 140,
       effect_overflow_horizontal: 60,
+      // YENİ EKLENEN YAN KESİNTİ VARSAYILAN DEĞERLERİ
+      effect_side_offset_top: 0,
+      effect_side_offset_bottom: 0,
       layers: [],
     };
   }

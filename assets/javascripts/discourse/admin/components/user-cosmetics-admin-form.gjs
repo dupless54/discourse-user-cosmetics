@@ -9,10 +9,8 @@ import DButton from "discourse/components/d-button";
 import { t } from "../../lib/duc-i18n";
 import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
 
-// Yeni "Sol" ve "Sağ" (left/right) katmanlarımızı sisteme dahil ettik.
-// Sistem bu listeyi okuyup otomatik olarak 8 kutu çizecek.
-// ... (import kısımları) ...
-
+// Yeni "Sol", "Sağ" (left/right) ve "Tam" (full) katmanlarımızı sisteme dahil ettik.
+// Sistem bu listeyi okuyup otomatik olarak 10 kutu çizecek.
 const LAYER_SLOTS = [
   { anchor: "full", stackOrder: "front", labelKey: "layer_full_front" },
   { anchor: "full", stackOrder: "back", labelKey: "layer_full_back" },
@@ -25,8 +23,6 @@ const LAYER_SLOTS = [
   { anchor: "right", stackOrder: "front", labelKey: "layer_right_front" },
   { anchor: "right", stackOrder: "back", labelKey: "layer_right_back" },
 ];
-
-// ... (dosyanın geri kalanı aynı) ...
 
 export default class UserCosmeticsAdminForm extends Component {
   @tracked name = this.args.item.name ?? "";
@@ -46,6 +42,10 @@ export default class UserCosmeticsAdminForm extends Component {
   @tracked effectOverflowTop = this.args.item.effect_overflow_top ?? 300;
   @tracked effectOverflowBottom = this.args.item.effect_overflow_bottom ?? 140;
   @tracked effectOverflowHorizontal = this.args.item.effect_overflow_horizontal ?? 60;
+
+  // YENİ EKLENEN YAN ÇUBUK KESİNTİ DEĞERLERİ
+  @tracked effectSideOffsetTop = this.args.item.effect_side_offset_top ?? 0;
+  @tracked effectSideOffsetBottom = this.args.item.effect_side_offset_bottom ?? 0;
 
   currentLayers = new Map(
     (this.args.item.layers ?? []).map((l) => [`${l.anchor}:${l.stack_order}`, { ...l }])
@@ -129,6 +129,17 @@ export default class UserCosmeticsAdminForm extends Component {
   @action
   updateEffectOverflowHorizontal(e) {
     this.effectOverflowHorizontal = Number(e.target.value) || 0;
+  }
+
+  // YENİ EKLENEN AKSİYONLAR
+  @action
+  updateEffectSideOffsetTop(e) {
+    this.effectSideOffsetTop = Number(e.target.value) || 0;
+  }
+
+  @action
+  updateEffectSideOffsetBottom(e) {
+    this.effectSideOffsetBottom = Number(e.target.value) || 0;
   }
 
   @action
@@ -303,6 +314,9 @@ export default class UserCosmeticsAdminForm extends Component {
         payload.item.effect_overflow_top = this.effectOverflowTop;
         payload.item.effect_overflow_bottom = this.effectOverflowBottom;
         payload.item.effect_overflow_horizontal = this.effectOverflowHorizontal;
+        // YENİ KESİNTİ DEĞERLERİNİ SUNUCUYA GÖNDERİYORUZ
+        payload.item.effect_side_offset_top = this.effectSideOffsetTop;
+        payload.item.effect_side_offset_bottom = this.effectSideOffsetBottom;
         payload.item.layers = Array.from(this.currentLayers.values());
       }
 
@@ -455,6 +469,29 @@ export default class UserCosmeticsAdminForm extends Component {
           </label>
         </div>
         <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.overflow_help"}}</p>
+
+        <!-- YENİ EKLENEN: YAN KESİNTİ HTML KUTUCUKLARI -->
+        <div class="duc-admin-field duc-admin-field-row">
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.side_offset_top"}}</span>
+            <input
+              type="number"
+              min="0"
+              value={{this.effectSideOffsetTop}}
+              {{on "input" this.updateEffectSideOffsetTop}}
+            />
+          </label>
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.side_offset_bottom"}}</span>
+            <input
+              type="number"
+              min="0"
+              value={{this.effectSideOffsetBottom}}
+              {{on "input" this.updateEffectSideOffsetBottom}}
+            />
+          </label>
+        </div>
+        <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.side_offset_help"}}</p>
       {{/if}}
 
       <div class="duc-admin-field duc-admin-field-row">
