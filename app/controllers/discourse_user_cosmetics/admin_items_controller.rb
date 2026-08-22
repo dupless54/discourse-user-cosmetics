@@ -110,29 +110,29 @@ module ::DiscourseUserCosmetics
       end
     end
 
-    # Profil efekti katmanları: en fazla 4 slot (üst/alt x ön/arka), Discord'un
-    # layers[] şemasındaki anchor + order alanlarının karşılığı.
+    # İŞTE MUCİZE BURADA: Tüm verileri kusursuz bir şekilde yakalıyoruz!
     def save_effect_layers(item)
-      layers_param = params.dig(:item, :layers)
-      return if layers_param.blank?
-
-      # Rails Strong Parameters korumasını aşıp güvenli bir şekilde verilere erişiyoruz
-      layers = layers_param.is_a?(Hash) ? layers_param.values : Array(layers_param)
-      
       item.effect_layers.destroy_all
 
-      layers.each do |lp|
-        # Parametreyi normal bir Ruby Hash nesnesine dönüştürüyoruz
-        layer = lp.respond_to?(:permit) ? lp.permit(:anchor, :stack_order, :image_upload_id, :image_url).to_h : lp
-        layer = layer.with_indifferent_access
+      # Rails Strong Parameters (Dizi Koruması) zırhını kaldırıp veriyi saf halinde (unsafe) alıyoruz
+      raw_item = params.to_unsafe_h[:item] || {}
+      layers = raw_item[:layers] || []
+      
+      # Ember, dizileri bazen numaralı hash { "0" => {...}, "1" => {...} } olarak gönderir
+      layers = layers.values if layers.is_a?(Hash)
 
-        anchor = layer[:anchor].to_s
-        stack_order = layer[:stack_order].to_s
+      layers.each do |layer|
+        # Ember camelCase gönderiyor olabilir, bu yüzden hem snake_case hem camelCase arıyoruz
+        anchor = (layer[:anchor] || layer[:Anchor]).to_s.downcase
+        stack_order = (layer[:stack_order] || layer[:stackOrder]).to_s.downcase
+        
         next unless DiscourseUserCosmetics::EffectLayer::ANCHORS.include?(anchor)
         next unless DiscourseUserCosmetics::EffectLayer::STACK_ORDERS.include?(stack_order)
 
-        image_upload_id = layer[:image_upload_id].presence
-        image_url = layer[:image_url].presence
+        # Görsel ID'sini ve linkini her iki isimlendirme formatıyla da kontrol ederek yakalıyoruz
+        image_upload_id = (layer[:image_upload_id] || layer[:imageUploadId]).presence
+        image_url = (layer[:image_url] || layer[:imageUrl] || layer[:raw_image_url] || layer[:rawImageUrl]).presence
+        
         next if image_upload_id.blank? && image_url.blank?
 
         item.effect_layers.create!(
