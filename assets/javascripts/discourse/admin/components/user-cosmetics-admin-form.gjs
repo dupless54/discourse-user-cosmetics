@@ -9,15 +9,17 @@ import DButton from "discourse/components/d-button";
 import { t } from "../../lib/duc-i18n";
 import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
 
-// The 4 slots Discord's own profile-effect schema allows: every combination
-// of anchor (top/bottom) x order (front/back). "front" layers draw above the
-// card's own content (e.g. characters peeking over the edge); "back" layers
-// draw behind it (e.g. a glow/halo visible only where it pokes out).
+// Yeni "Sol" ve "Sağ" (left/right) katmanlarımızı sisteme dahil ettik.
+// Sistem bu listeyi okuyup otomatik olarak 8 kutu çizecek.
 const LAYER_SLOTS = [
   { anchor: "top", stackOrder: "front", labelKey: "layer_top_front" },
   { anchor: "top", stackOrder: "back", labelKey: "layer_top_back" },
   { anchor: "bottom", stackOrder: "front", labelKey: "layer_bottom_front" },
   { anchor: "bottom", stackOrder: "back", labelKey: "layer_bottom_back" },
+  { anchor: "left", stackOrder: "front", labelKey: "layer_left_front" },
+  { anchor: "left", stackOrder: "back", labelKey: "layer_left_back" },
+  { anchor: "right", stackOrder: "front", labelKey: "layer_right_front" },
+  { anchor: "right", stackOrder: "back", labelKey: "layer_right_back" },
 ];
 
 export default class UserCosmeticsAdminForm extends Component {
@@ -39,9 +41,6 @@ export default class UserCosmeticsAdminForm extends Component {
   @tracked effectOverflowBottom = this.args.item.effect_overflow_bottom ?? 140;
   @tracked effectOverflowHorizontal = this.args.item.effect_overflow_horizontal ?? 60;
 
-  // Not @tracked on purpose: these mirror the 4 layer-slot components'
-  // current values, updated via onLayerChange, and are only ever *read*
-  // once, at save() time -- they don't need to drive any template output.
   currentLayers = new Map(
     (this.args.item.layers ?? []).map((l) => [`${l.anchor}:${l.stack_order}`, { ...l }])
   );
@@ -68,8 +67,6 @@ export default class UserCosmeticsAdminForm extends Component {
       );
       this.owners = res.owners ?? [];
     } catch (e) {
-      // Individual grants are a secondary feature -- a failure to load them
-      // shouldn't block editing the rest of the item.
     }
   }
 

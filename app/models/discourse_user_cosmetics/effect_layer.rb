@@ -6,7 +6,8 @@ module ::DiscourseUserCosmetics
   class EffectLayer < ActiveRecord::Base
     self.table_name = "discourse_user_cosmetics_effect_layers"
 
-    ANCHORS = %w[top bottom].freeze
+    # Sağ ve Sol (left, right) yönlerini sisteme güvenli olarak tanıtıyoruz
+    ANCHORS = %w[top bottom left right].freeze
     STACK_ORDERS = %w[front back].freeze
 
     belongs_to :item, class_name: "DiscourseUserCosmetics::Item"

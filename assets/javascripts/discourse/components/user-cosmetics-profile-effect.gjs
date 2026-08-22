@@ -11,32 +11,25 @@ const attachProfileEffect = modifier((element, [effect]) => {
     return;
   }
 
-  // Kartın kapsayıcısını buluyoruz (Sandviçi burada yapacağız)
   const parent = card.parentElement;
   if (!parent) return;
 
-  // 1. GERÇEK DİSCORD SANDVİÇLEMESİ:
-  // Kapsayıcıyı referans noktası yapıp, dışarı taşmaları serbest bırakıyoruz
   if (getComputedStyle(parent).position === "static") {
     parent.style.position = "relative";
   }
   parent.style.overflow = "visible";
-  // Z-index savaşlarının site geneline yayılmasını engelliyoruz
   parent.style.isolation = "isolate";
 
-  // Arka Katman (Kartın ve avatarın arkasında kalacak bölüm)
   const backPortal = document.createElement("div");
   backPortal.className = "duc-profile-effect-portal-back";
   backPortal.style.position = "absolute";
   backPortal.style.pointerEvents = "none";
 
-  // Ön Katman (Kartın ve avatarın önünde duracak bölüm)
   const frontPortal = document.createElement("div");
   frontPortal.className = "duc-profile-effect-portal-front";
   frontPortal.style.position = "absolute";
   frontPortal.style.pointerEvents = "none";
 
-  // MUCİZE BURADA: Arka portalı karttan ÖNCE, Ön portalı karttan SONRA ekliyoruz
   parent.insertBefore(backPortal, card);
   parent.insertBefore(frontPortal, card.nextSibling);
 
@@ -47,15 +40,25 @@ const attachProfileEffect = modifier((element, [effect]) => {
       img.src = layer.image_url;
       img.alt = "";
       img.className = "duc-profile-effect-layer";
+      img.dataset.anchor = layer.anchor;
+      img.dataset.stackOrder = layer.stack_order;
       img.style.position = "absolute";
-      img.style.left = "0";
-      img.style.width = "100%";
-      img.style.height = "auto";
       img.style.display = "block";
       
-      img.style[layer.anchor === "top" ? "top" : "bottom"] = "0";
+      // YÖN HESAPLAMASI (Sol/Sağ eklendi)
+      if (layer.anchor === "left" || layer.anchor === "right") {
+        img.style.top = "0";
+        img.style.height = "100%";
+        img.style.width = "auto";
+        img.style[layer.anchor] = "0"; // left: 0 veya right: 0
+      } else {
+        // Normal Üst/Alt mantığı
+        img.style.left = "0";
+        img.style.width = "100%";
+        img.style.height = "auto";
+        img.style[layer.anchor === "top" ? "top" : "bottom"] = "0";
+      }
       
-      // Yönüne göre resmi ait olduğu portala atıyoruz
       if (layer.stack_order === "front") {
         frontPortal.appendChild(img);
       } else {
@@ -68,7 +71,6 @@ const attachProfileEffect = modifier((element, [effect]) => {
   function layout() {
     if (!parent.contains(card)) return;
 
-    // Kartın ebeveyne göre tam konumunu alıyoruz (Böylece scroll hatalarını sıfırlıyoruz)
     const width = card.offsetWidth;
     const height = card.offsetHeight;
     const left = card.offsetLeft;
@@ -92,14 +94,12 @@ const attachProfileEffect = modifier((element, [effect]) => {
       card.style.zIndex = cardZ;
     }
 
-    // ARKA portal kartın arkasında durur
     backPortal.style.left = pLeft;
     backPortal.style.top = pTop;
     backPortal.style.width = pWidth;
     backPortal.style.height = pHeight;
     backPortal.style.zIndex = cardZ - 1;
 
-    // ÖN portal kartın önünde durur
     frontPortal.style.left = pLeft;
     frontPortal.style.top = pTop;
     frontPortal.style.width = pWidth;
