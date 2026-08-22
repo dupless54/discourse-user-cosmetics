@@ -3,6 +3,8 @@ import { modifier } from "ember-modifier";
 import { htmlSafe } from "@ember/template";
 
 const PORTAL_CLASS = "duc-profile-effect-portal";
+
+// HATA 1 ÇÖZÜLDÜ: .user-profile ve .user-main silindi! Sadece kullanıcı kartını hedefliyoruz.
 const CARD_SELECTOR = "#user-card, .user-card"; 
 
 const attachProfileEffect = modifier((element, [effect]) => {
@@ -12,13 +14,23 @@ const attachProfileEffect = modifier((element, [effect]) => {
     return;
   }
 
-  // 1. DİSCORD MANTIĞI: Efekti kartın içine değil, SAYFANIN EN DIŞINA (body) ekliyoruz. 
-  // Bu sayede kartı bir "sandviç" gibi arasına alabileceğiz.
+  // HATA 2 ÇÖZÜLDÜ: Gerçek Sandviçleme (3D Derinlik)
+  // Kartı izole bir katman olmaya zorluyoruz ki arkasına ve önüne güvenle eleman atabilelim.
+  let cardZ = parseInt(getComputedStyle(card).zIndex, 10);
+  if (!Number.isFinite(cardZ)) {
+    cardZ = 1000; // Sabit güçlü bir katman değeri
+  }
+  
+  card.style.zIndex = cardZ;
+  if (getComputedStyle(card).position === "static") {
+    card.style.position = "relative";
+  }
+
   const portal = document.createElement("div");
   portal.className = PORTAL_CLASS;
   portal.style.position = "absolute";
   portal.style.pointerEvents = "none";
-  // DİKKAT: Portalın kendisine z-index VERMİYORUZ ki içindeki resimler serbest kalsın.
+  // Portal sayfanın en dışına eklenir ki taşmalar (overflow) kesilmesin.
   document.body.appendChild(portal);
 
   const images = effect.layers
@@ -38,12 +50,11 @@ const attachProfileEffect = modifier((element, [effect]) => {
       
       img.style[layer.anchor === "top" ? "top" : "bottom"] = "0";
       
-      // Resimler, kendi yerleşimlerine göre CSS z-index değişkenini alacak
-      img.style.zIndex =
-        layer.stack_order === "front"
-          ? "var(--duc-effect-front-z)"
-          : "var(--duc-effect-back-z)";
-          
+      // DİSCORD MANTIĞI UYGULANDI:
+      // Ön (front) katmanlar kartın önüne (cardZ + 1)
+      // Arka (back) katmanlar kartın GERÇEKTEN arkasına (cardZ - 1)
+      img.style.zIndex = layer.stack_order === "front" ? (cardZ + 1) : (cardZ - 1);
+      
       portal.appendChild(img);
       return img;
     });
@@ -61,28 +72,17 @@ const attachProfileEffect = modifier((element, [effect]) => {
     const overflowTop = (effect.effect_overflow_top || effect.overflow_top || 0) * scale;
     const overflowBottom = (effect.effect_overflow_bottom || effect.overflow_bottom || 0) * scale;
 
-    // Portalı karta milimetrik olarak hizalıyoruz
     portal.style.left = `${rect.left + window.scrollX - overflowH}px`;
     portal.style.top = `${rect.top + window.scrollY - overflowTop}px`;
     portal.style.width = `${rect.width + overflowH * 2}px`;
     portal.style.height = `${rect.height + overflowTop + overflowBottom}px`;
-
-    // 2. KUSURSUZ DERİNLİK HESAPLAMASI (Sandviçleme)
-    // Kartın sistemdeki katman numarasını (z-index) öğreniyoruz
-    let cardZ = parseInt(getComputedStyle(card).zIndex, 10);
     
-    if (!Number.isFinite(cardZ)) {
-      cardZ = 1000;
-      card.style.zIndex = cardZ;
-      if (getComputedStyle(card).position === "static") {
-        card.style.position = "relative";
-      }
+    // HATA 3 ÇÖZÜLDÜ: Sizin yakaladığınız .user-card-avatar detayını kullanarak avatarı sağlama alıyoruz!
+    const avatar = card.querySelector('.user-card-avatar');
+    if(avatar) {
+      avatar.style.position = "relative";
+      avatar.style.zIndex = "5"; // Kartın kendi içinde daima önde kalmasını sağlıyoruz
     }
-
-    // ARKA (Back) katmanları kartın 1 seviye arkasına (cardZ - 1)
-    // ÖN (Front) katmanları kartın 1 seviye önüne (cardZ + 1) atıyoruz!
-    portal.style.setProperty("--duc-effect-back-z", cardZ - 1);
-    portal.style.setProperty("--duc-effect-front-z", cardZ + 1);
   }
 
   layout();
