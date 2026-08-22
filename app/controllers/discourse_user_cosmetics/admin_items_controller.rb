@@ -13,7 +13,7 @@ module ::DiscourseUserCosmetics
 
     # GET /admin/plugins/user-cosmetics/items.json?kind=avatar_frame
     def index
-      items = DiscourseUserCosmetics::Item.ordered.includes(:groups, :image_upload)
+      items = DiscourseUserCosmetics::Item.ordered.includes(:groups, :image_upload, effect_layers: :image_upload)
       items = items.for_kind(params[:kind]) if params[:kind].present?
 
       render json: {
@@ -101,10 +101,39 @@ module ::DiscourseUserCosmetics
         item.item_groups.destroy_all
         group_ids.uniq.each { |gid| item.item_groups.create!(group_id: gid) }
 
+        save_effect_layers(item) if item.kind == "profile_effect"
+
         DiscourseUserCosmetics::Presenter.bump_version!
         render json: admin_serialize(item.reload)
       else
         render_json_error(item)
+      end
+    end
+
+    # Profil efekti katmanları: en fazla 4 slot (üst/alt x ön/arka), Discord'un
+    # layers[] şemasındaki anchor + order alanlarının karşılığı. Basitlik ve
+    # öngörülebilirlik için her kayıtta dörtünü de silip gönderilenleri
+    # yeniden oluşturuyoruz (grup listesiyle aynı desen).
+    def save_effect_layers(item)
+      layers = Array(params.dig(:item, :layers))
+      item.effect_layers.destroy_all
+
+      layers.each do |layer|
+        anchor = layer[:anchor].to_s
+        stack_order = layer[:stack_order].to_s
+        next unless DiscourseUserCosmetics::EffectLayer::ANCHORS.include?(anchor)
+        next unless DiscourseUserCosmetics::EffectLayer::STACK_ORDERS.include?(stack_order)
+
+        image_upload_id = layer[:image_upload_id].presence
+        image_url = layer[:image_url].presence
+        next if image_upload_id.blank? && image_url.blank?
+
+        item.effect_layers.create!(
+          anchor: anchor,
+          stack_order: stack_order,
+          image_upload_id: image_upload_id,
+          image_url: image_upload_id.present? ? nil : image_url,
+        )
       end
     end
 
@@ -130,6 +159,21 @@ module ::DiscourseUserCosmetics
         group_names: item.groups.pluck(:name),
         owner_count: item.user_items.count,
         created_at: item.created_at,
+        effect_inner_width: item.resolved_effect_inner_width,
+        effect_overflow_top: item.effect_overflow_top || 0,
+        effect_overflow_bottom: item.effect_overflow_bottom || 0,
+        effect_overflow_horizontal: item.effect_overflow_horizontal || 0,
+        layers: item.effect_layers.map { |l| admin_serialize_layer(l) },
+      }
+    end
+
+    def admin_serialize_layer(layer)
+      {
+        anchor: layer.anchor,
+        stack_order: layer.stack_order,
+        image_upload_id: layer.image_upload_id,
+        raw_image_url: layer.image_url,
+        image_url: layer.resolved_image_url,
       }
     end
 
@@ -147,6 +191,10 @@ module ::DiscourseUserCosmetics
         :sort_order,
         :enabled,
         :is_default,
+        :effect_inner_width,
+        :effect_overflow_top,
+        :effect_overflow_bottom,
+        :effect_overflow_horizontal,
       )
     end
   end

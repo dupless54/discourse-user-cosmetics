@@ -21,6 +21,7 @@ after_initialize do
   require_relative "app/models/discourse_user_cosmetics/item_group"
   require_relative "app/models/discourse_user_cosmetics/user_item"
   require_relative "app/models/discourse_user_cosmetics/user_selection"
+  require_relative "app/models/discourse_user_cosmetics/effect_layer"
   require_relative "lib/discourse_user_cosmetics/presenter"
   require_relative "lib/discourse_user_cosmetics/css_builder"
   require_relative "lib/discourse_user_cosmetics/seeder"

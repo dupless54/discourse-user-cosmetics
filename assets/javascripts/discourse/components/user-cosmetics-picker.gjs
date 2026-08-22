@@ -8,7 +8,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/components/d-button";
 import { t } from "../lib/duc-i18n";
 
-const KINDS = ["avatar_frame", "nameplate", "card_decoration"];
+const KINDS = ["avatar_frame", "nameplate", "card_decoration", "profile_effect"];
 
 const LockIcon = <template>
   <svg

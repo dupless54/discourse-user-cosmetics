@@ -4,14 +4,17 @@ module ::DiscourseUserCosmetics
   class Item < ActiveRecord::Base
     self.table_name = "discourse_user_cosmetics_items"
 
-    KINDS = %w[avatar_frame nameplate card_decoration].freeze
+    KINDS = %w[avatar_frame nameplate card_decoration profile_effect].freeze
     HEX_COLOR_REGEX = /\A#[0-9a-fA-F]{3}([0-9a-fA-F]{3}([0-9a-fA-F]{2})?)?\z/
+    DEFAULT_EFFECT_INNER_WIDTH = 1200
 
     has_many :item_groups, class_name: "DiscourseUserCosmetics::ItemGroup", foreign_key: :item_id,
                             dependent: :destroy
     has_many :groups, through: :item_groups
     has_many :user_items, class_name: "DiscourseUserCosmetics::UserItem", foreign_key: :item_id,
                            dependent: :destroy
+    has_many :effect_layers, -> { order(:anchor, :stack_order) },
+             class_name: "DiscourseUserCosmetics::EffectLayer", foreign_key: :item_id, dependent: :destroy
 
     belongs_to :image_upload, class_name: "::Upload", optional: true
     belongs_to :created_by, class_name: "::User", optional: true
@@ -26,6 +29,11 @@ module ::DiscourseUserCosmetics
               }, allow_blank: true
     validates :rarity_label, length: { maximum: 40 }, allow_blank: true
     validates :image_url, length: { maximum: 1000 }, allow_blank: true
+    validates :effect_inner_width, numericality: { only_integer: true, in: 200..4000 }, allow_nil: true
+    validates :effect_overflow_top, :effect_overflow_bottom, :effect_overflow_horizontal,
+              numericality: {
+                only_integer: true, in: 0..2000,
+              }, allow_nil: true
     validate :slug_unique_within_kind
 
     before_validation :ensure_slug
@@ -42,6 +50,10 @@ module ::DiscourseUserCosmetics
     def resolved_image_url
       return image_upload.url if image_upload
       image_url.presence
+    end
+
+    def resolved_effect_inner_width
+      effect_inner_width || DEFAULT_EFFECT_INNER_WIDTH
     end
 
     # Central permission check: is this user allowed to select/wear this item?

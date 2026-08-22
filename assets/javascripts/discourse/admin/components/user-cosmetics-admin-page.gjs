@@ -9,7 +9,7 @@ import DButton from "discourse/components/d-button";
 import { t } from "../../lib/duc-i18n";
 import UserCosmeticsAdminForm from "./user-cosmetics-admin-form";
 
-const KINDS = ["avatar_frame", "nameplate", "card_decoration"];
+const KINDS = ["avatar_frame", "nameplate", "card_decoration", "profile_effect"];
 
 export default class UserCosmeticsAdminPage extends Component {
   kinds = KINDS;
@@ -37,6 +37,10 @@ export default class UserCosmeticsAdminPage extends Component {
     }
     if (item.gradient_from && item.gradient_to) {
       return `background-image: linear-gradient(135deg, ${item.gradient_from}, ${item.gradient_to});`;
+    }
+    const layerImage = (item.layers ?? []).find((l) => l.image_url)?.image_url;
+    if (layerImage) {
+      return `background-image: url("${layerImage}");`;
     }
     return "";
   }
@@ -78,13 +82,22 @@ export default class UserCosmeticsAdminPage extends Component {
       enabled: true,
       is_default: false,
       group_ids: [],
+      effect_inner_width: 1200,
+      effect_overflow_top: 300,
+      effect_overflow_bottom: 140,
+      effect_overflow_horizontal: 60,
+      layers: [],
     };
   }
 
   @action
   startEdit(item) {
     this.isNew = false;
-    this.editingItem = { ...item, group_ids: [...(item.group_ids ?? [])] };
+    this.editingItem = {
+      ...item,
+      group_ids: [...(item.group_ids ?? [])],
+      layers: (item.layers ?? []).map((l) => ({ ...l })),
+    };
   }
 
   @action

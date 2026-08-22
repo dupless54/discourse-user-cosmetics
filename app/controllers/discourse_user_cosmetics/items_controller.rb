@@ -9,7 +9,7 @@ module ::DiscourseUserCosmetics
     # Returns every enabled item grouped by kind, flagged with whether the
     # current user owns/can-use it, plus the user's currently active picks.
     def mine
-      items = DiscourseUserCosmetics::Item.enabled.ordered.includes(:groups)
+      items = DiscourseUserCosmetics::Item.enabled.ordered.includes(:groups, effect_layers: :image_upload)
 
       grouped =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
@@ -51,7 +51,7 @@ module ::DiscourseUserCosmetics
     private
 
     def serialize_for_user(item)
-      {
+      base = {
         id: item.id,
         kind: item.kind,
         name: item.name,
@@ -65,6 +65,12 @@ module ::DiscourseUserCosmetics
         owned: item.usable_by?(current_user),
         group_names: item.groups.map(&:name),
       }
+
+      # Profil efektlerinde tekil bir image_url yoktur (katmanlardan oluşur);
+      # seçim ekranındaki önizleme için temsili görseli buradan alıyoruz.
+      base[:image_url] = DiscourseUserCosmetics::Presenter.effect_fields(item)[:image_url] if item.kind == "profile_effect"
+
+      base
     end
   end
 end

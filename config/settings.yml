@@ -15,6 +15,10 @@ plugins:
     default: true
     client: true
 
+  discourse_user_cosmetics_profile_effects_enabled:
+    default: true
+    client: true
+
   discourse_user_cosmetics_frame_overhang_percent:
     default: 14
     min: 0

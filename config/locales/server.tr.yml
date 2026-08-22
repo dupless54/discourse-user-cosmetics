@@ -4,6 +4,7 @@ tr:
     discourse_user_cosmetics_avatar_frames_enabled: "Üyelerin avatar çerçevesi kullanmasına izin ver."
     discourse_user_cosmetics_nameplates_enabled: "Üyelerin isim plakası kullanmasına izin ver."
     discourse_user_cosmetics_card_decorations_enabled: "Üyelerin kullanıcı kartı dekorasyonu kullanmasına izin ver."
+    discourse_user_cosmetics_profile_effects_enabled: "Üyelerin profil efekti (kullanıcı kartının çevresine Discord tarzı katmanlı çerçeve) kullanmasına izin ver."
     discourse_user_cosmetics_frame_overhang_percent: "Avatar çerçevesinin, avatarın kenarından ne kadar taştığı (avatar boyutunun yüzdesi olarak)."
     discourse_user_cosmetics_max_image_kb: "Yüklenebilecek kozmetik görselinin en fazla boyutu (KB)."
 

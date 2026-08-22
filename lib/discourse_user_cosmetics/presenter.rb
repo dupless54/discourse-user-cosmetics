@@ -31,6 +31,7 @@ module ::DiscourseUserCosmetics
 
       DiscourseUserCosmetics::Item::KINDS.each do |kind|
         result[kind] = nil
+        next if kind == "profile_effect" && !SiteSetting.discourse_user_cosmetics_profile_effects_enabled
         next unless selection
         item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
         next unless item_id
@@ -46,7 +47,7 @@ module ::DiscourseUserCosmetics
     end
 
     def self.serialize_item(item)
-      {
+      base = {
         id: item.id,
         slug: item.slug,
         name: item.name,
@@ -54,6 +55,32 @@ module ::DiscourseUserCosmetics
         gradient_from: item.gradient_from,
         gradient_to: item.gradient_to,
         glow_color: item.glow_color,
+      }
+
+      base.merge!(effect_fields(item)) if item.kind == "profile_effect"
+      base
+    end
+
+    # Profil efekti: Discord'un layers[] + inner_width + overflow_* şemasının
+    # sunucu tarafındaki karşılığı. Önizleme (picker kartı) için image_url'i,
+    # ön-üst katmandan (yoksa ilk bulunan katmandan) türetiyoruz.
+    def self.effect_fields(item)
+      layers =
+        item
+          .effect_layers
+          .map { |l| { anchor: l.anchor, stack_order: l.stack_order, image_url: l.resolved_image_url } }
+          .select { |l| l[:image_url].present? }
+
+      representative =
+        layers.find { |l| l[:anchor] == "top" && l[:stack_order] == "front" } || layers.first
+
+      {
+        image_url: representative && representative[:image_url],
+        inner_width: item.resolved_effect_inner_width,
+        overflow_top: item.effect_overflow_top || 0,
+        overflow_bottom: item.effect_overflow_bottom || 0,
+        overflow_horizontal: item.effect_overflow_horizontal || 0,
+        layers: layers,
       }
     end
   end

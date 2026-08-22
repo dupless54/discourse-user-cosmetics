@@ -7,6 +7,18 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/components/d-button";
 import { t } from "../../lib/duc-i18n";
+import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
+
+// The 4 slots Discord's own profile-effect schema allows: every combination
+// of anchor (top/bottom) x order (front/back). "front" layers draw above the
+// card's own content (e.g. characters peeking over the edge); "back" layers
+// draw behind it (e.g. a glow/halo visible only where it pokes out).
+const LAYER_SLOTS = [
+  { anchor: "top", stackOrder: "front", labelKey: "layer_top_front" },
+  { anchor: "top", stackOrder: "back", labelKey: "layer_top_back" },
+  { anchor: "bottom", stackOrder: "front", labelKey: "layer_bottom_front" },
+  { anchor: "bottom", stackOrder: "back", labelKey: "layer_bottom_back" },
+];
 
 export default class UserCosmeticsAdminForm extends Component {
   @tracked name = this.args.item.name ?? "";
@@ -22,6 +34,17 @@ export default class UserCosmeticsAdminForm extends Component {
   @tracked enabled = this.args.item.enabled ?? true;
   @tracked isDefault = this.args.item.is_default ?? false;
   @tracked groupIds = [...(this.args.item.group_ids ?? [])];
+
+  @tracked effectOverflowTop = this.args.item.effect_overflow_top ?? 300;
+  @tracked effectOverflowBottom = this.args.item.effect_overflow_bottom ?? 140;
+  @tracked effectOverflowHorizontal = this.args.item.effect_overflow_horizontal ?? 60;
+
+  // Not @tracked on purpose: these mirror the 4 layer-slot components'
+  // current values, updated via onLayerChange, and are only ever *read*
+  // once, at save() time -- they don't need to drive any template output.
+  currentLayers = new Map(
+    (this.args.item.layers ?? []).map((l) => [`${l.anchor}:${l.stack_order}`, { ...l }])
+  );
 
   @tracked uploading = false;
   @tracked saving = false;
@@ -66,6 +89,43 @@ export default class UserCosmeticsAdminForm extends Component {
       name: g.name,
       checked: this.groupIds.includes(g.id),
     }));
+  }
+
+  get isProfileEffect() {
+    return this.args.item.kind === "profile_effect";
+  }
+
+  get layerSlots() {
+    return LAYER_SLOTS.map((slot) => ({
+      ...slot,
+      label: t(`discourse_user_cosmetics.admin.fields.${slot.labelKey}`),
+      initialLayer: this.currentLayers.get(`${slot.anchor}:${slot.stackOrder}`) ?? null,
+    }));
+  }
+
+  @action
+  onLayerChange(layerValue) {
+    const key = `${layerValue.anchor}:${layerValue.stack_order}`;
+    if (layerValue.image_upload_id || layerValue.image_url) {
+      this.currentLayers.set(key, layerValue);
+    } else {
+      this.currentLayers.delete(key);
+    }
+  }
+
+  @action
+  updateEffectOverflowTop(e) {
+    this.effectOverflowTop = Number(e.target.value) || 0;
+  }
+
+  @action
+  updateEffectOverflowBottom(e) {
+    this.effectOverflowBottom = Number(e.target.value) || 0;
+  }
+
+  @action
+  updateEffectOverflowHorizontal(e) {
+    this.effectOverflowHorizontal = Number(e.target.value) || 0;
   }
 
   @action
@@ -235,6 +295,14 @@ export default class UserCosmeticsAdminForm extends Component {
         },
       };
 
+      if (this.isProfileEffect) {
+        payload.item.effect_inner_width = 1200;
+        payload.item.effect_overflow_top = this.effectOverflowTop;
+        payload.item.effect_overflow_bottom = this.effectOverflowBottom;
+        payload.item.effect_overflow_horizontal = this.effectOverflowHorizontal;
+        payload.item.layers = Array.from(this.currentLayers.values());
+      }
+
       let response;
       if (this.args.isNew) {
         response = await ajax("/admin/plugins/user-cosmetics/items.json", {
@@ -285,55 +353,106 @@ export default class UserCosmeticsAdminForm extends Component {
         />
       </label>
 
-      <div class="duc-admin-field">
-        <span>{{t "discourse_user_cosmetics.admin.fields.image"}}</span>
-        <div class="duc-admin-image-controls">
-          <label class="btn duc-upload-btn">
-            {{#if this.uploading}}
-              {{t "discourse_user_cosmetics.admin.fields.uploading"}}
-            {{else}}
-              {{t "discourse_user_cosmetics.admin.fields.upload"}}
+      {{#unless this.isProfileEffect}}
+        <div class="duc-admin-field">
+          <span>{{t "discourse_user_cosmetics.admin.fields.image"}}</span>
+          <div class="duc-admin-image-controls">
+            <label class="btn duc-upload-btn">
+              {{#if this.uploading}}
+                {{t "discourse_user_cosmetics.admin.fields.uploading"}}
+              {{else}}
+                {{t "discourse_user_cosmetics.admin.fields.upload"}}
+              {{/if}}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                disabled={{this.uploading}}
+                {{on "change" this.uploadImage}}
+                class="duc-hidden-file-input"
+              />
+            </label>
+            {{#if this.rawImageUrl}}
+              <DButton
+                @icon="xmark"
+                @translatedLabel={{t "discourse_user_cosmetics.admin.fields.remove_image"}}
+                @action={{this.clearImage}}
+                class="btn-small"
+              />
             {{/if}}
+          </div>
+          <input
+            type="text"
+            value={{this.rawImageUrl}}
+            {{on "input" this.updateRawImageUrl}}
+            placeholder={{t "discourse_user_cosmetics.admin.fields.or_paste_url"}}
+            class="duc-admin-url-input"
+          />
+        </div>
+
+        <div class="duc-admin-field duc-admin-field-row">
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.gradient_from"}}</span>
+            <input type="color" value={{this.gradientFrom}} {{on "input" this.updateGradientFrom}} />
+          </label>
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.gradient_to"}}</span>
+            <input type="color" value={{this.gradientTo}} {{on "input" this.updateGradientTo}} />
+          </label>
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.glow_color"}}</span>
+            <input type="color" value={{this.glowColor}} {{on "input" this.updateGlowColor}} />
+          </label>
+        </div>
+      {{/unless}}
+
+      {{#if this.isProfileEffect}}
+        <div class="duc-admin-field duc-effect-layers">
+          <span>{{t "discourse_user_cosmetics.admin.fields.layers"}}</span>
+          <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.layers_help"}}</p>
+          <div class="duc-layer-grid">
+            {{#each this.layerSlots as |slot|}}
+              <UserCosmeticsLayerUpload
+                @anchor={{slot.anchor}}
+                @stackOrder={{slot.stackOrder}}
+                @label={{slot.label}}
+                @layer={{slot.initialLayer}}
+                @onChange={{this.onLayerChange}}
+              />
+            {{/each}}
+          </div>
+        </div>
+
+        <div class="duc-admin-field duc-admin-field-row">
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_top"}}</span>
             <input
-              type="file"
-              accept="image/png,image/jpeg,image/gif,image/webp"
-              disabled={{this.uploading}}
-              {{on "change" this.uploadImage}}
-              class="duc-hidden-file-input"
+              type="number"
+              min="0"
+              value={{this.effectOverflowTop}}
+              {{on "input" this.updateEffectOverflowTop}}
             />
           </label>
-          {{#if this.rawImageUrl}}
-            <DButton
-              @icon="xmark"
-              @translatedLabel={{t "discourse_user_cosmetics.admin.fields.remove_image"}}
-              @action={{this.clearImage}}
-              class="btn-small"
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_bottom"}}</span>
+            <input
+              type="number"
+              min="0"
+              value={{this.effectOverflowBottom}}
+              {{on "input" this.updateEffectOverflowBottom}}
             />
-          {{/if}}
+          </label>
+          <label>
+            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_horizontal"}}</span>
+            <input
+              type="number"
+              min="0"
+              value={{this.effectOverflowHorizontal}}
+              {{on "input" this.updateEffectOverflowHorizontal}}
+            />
+          </label>
         </div>
-        <input
-          type="text"
-          value={{this.rawImageUrl}}
-          {{on "input" this.updateRawImageUrl}}
-          placeholder={{t "discourse_user_cosmetics.admin.fields.or_paste_url"}}
-          class="duc-admin-url-input"
-        />
-      </div>
-
-      <div class="duc-admin-field duc-admin-field-row">
-        <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.gradient_from"}}</span>
-          <input type="color" value={{this.gradientFrom}} {{on "input" this.updateGradientFrom}} />
-        </label>
-        <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.gradient_to"}}</span>
-          <input type="color" value={{this.gradientTo}} {{on "input" this.updateGradientTo}} />
-        </label>
-        <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.glow_color"}}</span>
-          <input type="color" value={{this.glowColor}} {{on "input" this.updateGlowColor}} />
-        </label>
-      </div>
+        <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.overflow_help"}}</p>
+      {{/if}}
 
       <div class="duc-admin-field duc-admin-field-row">
         <label>

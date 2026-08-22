@@ -2,6 +2,7 @@ import { apiInitializer } from "discourse/lib/api";
 import UserCosmeticsNameplate from "../components/user-cosmetics-nameplate";
 import UserCosmeticsCardDecoration from "../components/user-cosmetics-card-decoration";
 import UserCosmeticsPreferencesEntry from "../components/user-cosmetics-preferences-entry";
+import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
 
 const FRAMES_CSS_LINK_ID = "discourse-user-cosmetics-frames-css";
 const CURRENT_USER_STYLE_ID = "discourse-user-cosmetics-current-user-style";
@@ -57,5 +58,7 @@ export default apiInitializer("1.8.0", (api) => {
     api.renderInOutlet("user-profile-primary", UserCosmeticsNameplate);
     api.renderInOutlet("user-card-metadata", UserCosmeticsCardDecoration);
     api.renderInOutlet("user-custom-preferences", UserCosmeticsPreferencesEntry);
+    api.renderInOutlet("user-card-metadata", UserCosmeticsProfileEffect);
+    api.renderInOutlet("user-profile-primary", UserCosmeticsProfileEffect);
   }
 });
