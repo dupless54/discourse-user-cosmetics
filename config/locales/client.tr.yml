@@ -71,6 +71,8 @@ tr:
           layer_left_back: "Sol - Arka"
           layer_right_front: "Sağ - Ön"
           layer_right_back: "Sağ - Arka"
+          layer_full_front: "Tam Çerçeve - Ön"
+          layer_full_back: "Tam Çerçeve - Arka"
           overflow_top: "Üstten taşma (px)"
           overflow_bottom: "Alttan taşma (px)"
           overflow_horizontal: "Yanlardan taşma (px)"

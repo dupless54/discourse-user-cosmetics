@@ -11,7 +11,11 @@ import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
 
 // Yeni "Sol" ve "Sağ" (left/right) katmanlarımızı sisteme dahil ettik.
 // Sistem bu listeyi okuyup otomatik olarak 8 kutu çizecek.
+// ... (import kısımları) ...
+
 const LAYER_SLOTS = [
+  { anchor: "full", stackOrder: "front", labelKey: "layer_full_front" },
+  { anchor: "full", stackOrder: "back", labelKey: "layer_full_back" },
   { anchor: "top", stackOrder: "front", labelKey: "layer_top_front" },
   { anchor: "top", stackOrder: "back", labelKey: "layer_top_back" },
   { anchor: "bottom", stackOrder: "front", labelKey: "layer_bottom_front" },
@@ -21,6 +25,8 @@ const LAYER_SLOTS = [
   { anchor: "right", stackOrder: "front", labelKey: "layer_right_front" },
   { anchor: "right", stackOrder: "back", labelKey: "layer_right_back" },
 ];
+
+// ... (dosyanın geri kalanı aynı) ...
 
 export default class UserCosmeticsAdminForm extends Component {
   @tracked name = this.args.item.name ?? "";

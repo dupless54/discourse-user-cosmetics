@@ -45,14 +45,18 @@ const attachProfileEffect = modifier((element, [effect]) => {
       img.style.position = "absolute";
       img.style.display = "block";
       
-      // YÖN HESAPLAMASI (Sol/Sağ eklendi)
-      if (layer.anchor === "left" || layer.anchor === "right") {
+      // YENİ "TAM ÇERÇEVE" MANTIĞI BURADA!
+      if (layer.anchor === "full") {
+        img.style.top = "0";
+        img.style.left = "0";
+        img.style.width = "100%";
+        img.style.height = "100%";
+      } else if (layer.anchor === "left" || layer.anchor === "right") {
         img.style.top = "0";
         img.style.height = "100%";
         img.style.width = "auto";
-        img.style[layer.anchor] = "0"; // left: 0 veya right: 0
+        img.style[layer.anchor] = "0";
       } else {
-        // Normal Üst/Alt mantığı
         img.style.left = "0";
         img.style.width = "100%";
         img.style.height = "auto";
