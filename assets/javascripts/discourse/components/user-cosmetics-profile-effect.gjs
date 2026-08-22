@@ -1,27 +1,15 @@
 import Component from "@glimmer/component";
+import { modifier } from "ember-modifier"; // Hatanın çözümü: Modifier kütüphanesini dahil ettik
 
 const PORTAL_CLASS = "duc-profile-effect-portal";
 const CARD_SELECTOR = "#user-card, .user-card, .user-profile, .user-main";
 
-// Positions up to 4 <img> layers (top/bottom x front/back) around whichever
-// card/profile element this component is nested inside, bleeding outside its
-// bounds by the item's overflow_* amounts (scaled from the 1200px reference
-// width the admin designed against, matching Discord's inner_width concept).
-//
-// Layers are appended to document.body (not left in their natural nested
-// position) and positioned in *document* coordinates. This sidesteps any
-// `overflow: hidden` or unrelated `position:` rules on ancestors we don't
-// control, which would otherwise clip or mis-position a bleeding effect.
-//
-// Written as a plain function used directly in modifier position -- a
-// long-standing, stable Ember capability -- so it needs no extra addon
-// import. Returning a cleanup function is how Ember tears it down when the
-// element is removed or `effect` changes.
-function attachProfileEffect(element, [effect]) {
+// Normal fonksiyonu, Ember'ın anlayacağı "modifier" yapısı ile sarmalıyoruz
+const attachProfileEffect = modifier((element, [effect]) => {
   const card = element.closest(CARD_SELECTOR);
 
   if (!card || !effect || !Array.isArray(effect.layers) || effect.layers.length === 0) {
-    return undefined;
+    return;
   }
 
   const portal = document.createElement("div");
@@ -89,7 +77,7 @@ function attachProfileEffect(element, [effect]) {
     portal.remove();
     images.length = 0;
   };
-}
+});
 
 export default class UserCosmeticsProfileEffect extends Component {
   get user() {
