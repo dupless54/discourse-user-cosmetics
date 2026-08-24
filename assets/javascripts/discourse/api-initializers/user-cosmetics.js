@@ -1,6 +1,7 @@
 import { apiInitializer } from "discourse/lib/api";
 import UserCosmeticsNameplate from "../components/user-cosmetics-nameplate";
 import UserCosmeticsCardDecoration from "../components/user-cosmetics-card-decoration";
+import UserCosmeticsCardMessage from "../components/user-cosmetics-card-message";
 import UserCosmeticsPreferencesEntry from "../components/user-cosmetics-preferences-entry";
 import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
 
@@ -57,6 +58,10 @@ export default apiInitializer("1.8.0", (api) => {
     api.renderInOutlet("user-card-post-names", UserCosmeticsNameplate);
     api.renderInOutlet("user-profile-primary", UserCosmeticsNameplate);
     api.renderInOutlet("user-card-metadata", UserCosmeticsCardDecoration);
+    api.renderInOutlet(
+      "user-card-below-message-button",
+      UserCosmeticsCardMessage
+    );
     api.renderInOutlet("user-custom-preferences", UserCosmeticsPreferencesEntry);
     api.renderInOutlet("user-card-metadata", UserCosmeticsProfileEffect);
     api.renderInOutlet("user-profile-primary", UserCosmeticsProfileEffect);

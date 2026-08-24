@@ -130,9 +130,52 @@ export default class UserCosmeticsPicker extends Component {
     return this.currentActiveId != null;
   }
 
+  get currentKindLabel() {
+    return t(`discourse_user_cosmetics.kinds.${this.activeKind}`);
+  }
+
+  get currentItemCountLabel() {
+    return t("discourse_user_cosmetics.picker.item_count", {
+      count: this.currentItems.length,
+    });
+  }
+
   @action
-  setKind(kind) {
+  setKind(kind, event) {
+    const tabElement = event?.currentTarget;
     this.activeKind = kind;
+    requestAnimationFrame(() => {
+      tabElement?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    });
+  }
+
+  scrollTabList(event, direction) {
+    const tabs = event.currentTarget
+      .closest(".duc-picker-tabbar")
+      ?.querySelector(".duc-picker-tabs");
+
+    if (!tabs) {
+      return;
+    }
+
+    tabs.scrollBy({
+      left: direction * Math.max(180, tabs.clientWidth * 0.72),
+      behavior: "smooth",
+    });
+  }
+
+  @action
+  scrollTabsBack(event) {
+    this.scrollTabList(event, -1);
+  }
+
+  @action
+  scrollTabsForward(event) {
+    this.scrollTabList(event, 1);
   }
 
   @action
@@ -191,26 +234,63 @@ export default class UserCosmeticsPicker extends Component {
 
   <template>
     <div class="duc-picker-overlay" {{on "click" this.close}}>
-      <div class="duc-picker-dialog" {{on "click" this.stopPropagation}}>
+      <div
+        class="duc-picker-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="duc-picker-title"
+        {{on "click" this.stopPropagation}}
+      >
         <div class="duc-picker-header">
-          <h3>{{t "discourse_user_cosmetics.picker.title"}}</h3>
+          <div class="duc-picker-heading-copy">
+            <span class="duc-picker-eyebrow">
+              {{t "discourse_user_cosmetics.picker.eyebrow"}}
+            </span>
+            <h3 id="duc-picker-title">
+              {{t "discourse_user_cosmetics.picker.title"}}
+            </h3>
+            <p>{{t "discourse_user_cosmetics.picker.subtitle"}}</p>
+          </div>
           <DButton
             @icon="xmark"
             @action={{this.close}}
+            @translatedTitle={{t "discourse_user_cosmetics.picker.close"}}
             class="btn-flat duc-picker-close"
           />
         </div>
 
-        <div class="duc-picker-tabs">
-          {{#each this.tabs as |tab|}}
-            <button
-              type="button"
-              class="duc-picker-tab {{if tab.active 'active'}}"
-              {{on "click" (fn this.setKind tab.kind)}}
-            >
-              {{tab.label}}
-            </button>
-          {{/each}}
+        <div class="duc-picker-tabbar">
+          <button
+            type="button"
+            class="duc-picker-tab-scroll duc-picker-tab-scroll--back"
+            aria-label={{t "discourse_user_cosmetics.picker.scroll_back"}}
+            {{on "click" this.scrollTabsBack}}
+          >
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+
+          <div class="duc-picker-tabs" role="tablist">
+            {{#each this.tabs as |tab|}}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={{if tab.active "true" "false"}}
+                class="duc-picker-tab {{if tab.active 'active'}}"
+                {{on "click" (fn this.setKind tab.kind)}}
+              >
+                {{tab.label}}
+              </button>
+            {{/each}}
+          </div>
+
+          <button
+            type="button"
+            class="duc-picker-tab-scroll duc-picker-tab-scroll--forward"
+            aria-label={{t "discourse_user_cosmetics.picker.scroll_forward"}}
+            {{on "click" this.scrollTabsForward}}
+          >
+            <span aria-hidden="true">&#8250;</span>
+          </button>
         </div>
 
         <div class="duc-picker-body">
@@ -219,16 +299,21 @@ export default class UserCosmeticsPicker extends Component {
           {{else if this.errorMessage}}
             <p class="duc-picker-error">{{this.errorMessage}}</p>
           {{else}}
-            {{#if this.hasActiveSelection}}
-              <div class="duc-picker-current-actions">
+            <div class="duc-picker-section-heading">
+              <div>
+                <h4>{{this.currentKindLabel}}</h4>
+                <p>{{this.currentItemCountLabel}}</p>
+              </div>
+
+              {{#if this.hasActiveSelection}}
                 <DButton
                   @icon="xmark"
                   @translatedLabel={{t "discourse_user_cosmetics.picker.remove"}}
                   @action={{this.unequip}}
                   class="btn-default btn-small duc-unequip-btn"
                 />
-              </div>
-            {{/if}}
+              {{/if}}
+            </div>
 
             {{#if this.currentItems.length}}
               <div class="duc-picker-grid">
@@ -238,7 +323,11 @@ export default class UserCosmeticsPicker extends Component {
                       {{if item.owned 'owned' 'locked'}}
                       {{if item.isActive 'active'}}"
                   >
-                    <div class="duc-picker-tile-preview" style={{item.previewStyle}}>
+                    <div
+                      class="duc-picker-tile-preview
+                        duc-picker-tile-preview--{{this.activeKind}}"
+                      style={{item.previewStyle}}
+                    >
                       {{#unless item.owned}}
                         <span class="duc-picker-tile-lock"><LockIcon /></span>
                       {{/unless}}
@@ -248,6 +337,10 @@ export default class UserCosmeticsPicker extends Component {
                     </div>
 
                     <div class="duc-picker-tile-name">{{item.name}}</div>
+
+                    {{#if item.description}}
+                      <p class="duc-picker-tile-description">{{item.description}}</p>
+                    {{/if}}
 
                     {{#if item.rarity_label}}
                       <div class="duc-picker-tile-rarity" style={{item.rarityStyle}}>

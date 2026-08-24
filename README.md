@@ -138,5 +138,8 @@ Eklentinin arka planında performansı ve güvenliği sağlamak için modern sta
 
 ## Bu Sürümde Neler Değişti?
 
+* **Yeni kozmetik seçici tasarımı:** Profil ayarlarındaki seçici, Crimson temasına uyumlu koyu/gradyan yüzeyler, daha okunaklı öğe kartları ve modern durum düğmeleriyle yenilendi.
+* **Kaydırılabilir dört sekme:** Avatar Çerçeveleri, İsim Plakaları, Kart Dekorasyonları ve Profil Efektleri sekmeleri hem dokunarak/yatay kaydırmayla hem de sağ-sol ok düğmeleriyle gezilebilir.
+* **User-card mesaj alanı:** Mesaj gönderilebilen kullanıcıların kartında `@kullanıcıadı kullanıcısına mesaj gönder` alanı görünür ve Discourse'un yerleşik özel mesaj oluşturucusunu açar.
 * **Yeni:** Profil Efektleri (Discord JSON şemasına dayalı, 4 katmanlı, kart sınırlarını taşabilen efektler).
 * Mevcut avatar çerçevesi / isim plakası / kart dekorasyonu / admin altyapısı dokunulmadan korundu; yeni özellik tamamen ek (additive) olarak eklendi.

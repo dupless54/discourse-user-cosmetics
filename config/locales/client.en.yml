@@ -15,7 +15,12 @@ en:
         open: "Open cosmetics picker"
 
       picker:
+        eyebrow: "Profile customization"
         title: "My Cosmetics"
+        subtitle: "Browse the cosmetics you own and change your profile appearance in one place."
+        item_count: "%{count} cosmetics"
+        scroll_back: "Show previous cosmetic tabs"
+        scroll_forward: "Show next cosmetic tabs"
         equip: "Equip"
         equipped: "Equipped"
         remove: "Remove"
@@ -26,6 +31,9 @@ en:
         save_error: "Couldn't save your selection, please try again."
         close: "Close"
         preview: "Preview"
+
+      user_card:
+        message: "Message @%{username}"
 
       admin:
         title: "User Cosmetics"
