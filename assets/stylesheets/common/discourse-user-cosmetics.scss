@@ -39,13 +39,49 @@
 // User Card Base (Required for Overlay)
 // ---------------------------------------------------------------------------
 #user-card {
+  // Card-decoration assets use a 450x880 canvas. Keep that exact ratio while
+  // scaling both dimensions together when the viewport is smaller, so an
+  // animated GIF/WEBP is never cropped or stretched by the popover.
+  --duc-user-card-width: min(
+    450px,
+    calc(100vw - 16px),
+    calc(51.1364vh - 8.1818px)
+  );
+  --duc-user-card-height: min(
+    880px,
+    calc(195.5556vw - 31.2889px),
+    calc(100vh - 16px)
+  );
+  --duc-user-card-width: min(
+    450px,
+    calc(100vw - 16px),
+    calc(51.1364dvh - 8.1818px)
+  );
+  --duc-user-card-height: min(
+    880px,
+    calc(195.5556vw - 31.2889px),
+    calc(100dvh - 16px)
+  );
+
   position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: var(--duc-user-card-width) !important;
+  min-width: 0 !important;
+  max-width: var(--duc-user-card-width) !important;
+  height: var(--duc-user-card-height) !important;
+  min-height: 0 !important;
+  max-height: var(--duc-user-card-height) !important;
+  aspect-ratio: 450 / 880;
 }
 
 // Discord-style direct-message field. The native PM button is only hidden
 // when this replacement is actually rendered, so restricted/self cards keep
 // Discourse's normal controls unchanged.
 #user-card .usercard-controls:has(.duc-user-card-message) {
+  position: relative;
+  z-index: 20 !important;
+
   > .compose-pm {
     display: none;
   }
@@ -59,7 +95,9 @@
 
 .duc-user-card-message {
   position: relative;
-  z-index: 110;
+  // Card decorations are intentionally rendered above every card control.
+  // The overlay ignores pointer events, so this control remains clickable.
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -114,22 +152,21 @@
 // ---------------------------------------------------------------------------
 .duc-profile-effect-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  z-index: 200 !important;
+  display: block;
   width: 100%;
   height: 100%;
-  
-  /* Sıkışmayı/ezilmeyi engellemek için tekrar cover yapıyoruz */
-  background-size: cover; 
-  
-  /* Dikey animasyonun neresinin görüneceğini ayarlar. 
-     center 30% -> Yukarıya biraz daha yakın olan odak noktasını gösterir. */
-  background-position: center 30%; 
-  background-repeat: no-repeat;
-  border-radius: inherit; 
-  z-index: 100; 
-  pointer-events: none; 
-  animation: duc-fade-in 0.3s ease-out; 
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: inherit;
+  object-fit: contain;
+  object-position: center;
+  image-rendering: auto;
+  pointer-events: none;
+  animation: duc-fade-in 0.3s ease-out;
 }
 
 // ---------------------------------------------------------------------------
@@ -436,6 +473,10 @@
   }
 }
 
+.duc-picker-mobile-actions {
+  display: none;
+}
+
 .duc-picker-loading {
   display: flex;
   justify-content: center;
@@ -678,7 +719,39 @@
   }
 
   .duc-picker-body {
-    padding: 0.9em 0.8em calc(1.1em + env(safe-area-inset-bottom));
+    padding: 0.9em 0.8em 1em;
+  }
+
+  .duc-picker-mobile-actions {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    flex: 0 0 auto;
+    padding: 0.72em 0.8em calc(0.72em + env(safe-area-inset-bottom));
+    border-top: 1px solid color-mix(in srgb, var(--primary) 11%, transparent);
+    background: color-mix(in srgb, var(--secondary) 96%, #07101b);
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .duc-picker-mobile-close.btn {
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--duc-picker-accent) 82%, #ff426c),
+      var(--duc-picker-accent)
+    );
+    color: #fff;
+    font-weight: 700;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--duc-picker-accent) 82%, #ff6685);
+      color: #fff;
+    }
   }
 
   .duc-picker-grid {

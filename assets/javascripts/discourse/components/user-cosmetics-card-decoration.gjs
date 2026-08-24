@@ -53,14 +53,6 @@ export default class UserCosmeticsCardDecoration extends Component {
     return this.user?.cosmetics?.card_decoration;
   }
 
-  get effectStyle() {
-    const d = this.decoration;
-    if (!d || !d.image_url) {
-      return htmlSafe("");
-    }
-    return htmlSafe(`background-image: url("${d.image_url}");`);
-  }
-
   get bannerStyle() {
     const d = this.decoration;
     if (!d || !d.gradient_from || !d.gradient_to) {
@@ -77,7 +69,12 @@ export default class UserCosmeticsCardDecoration extends Component {
       {{#if this.decoration.image_url}}
         {{!-- Efekt sadece isPlaying true olduğunda HTML'e eklenir, false olunca silinir --}}
         {{#if this.isPlaying}}
-          <div class="duc-profile-effect-overlay" style={{this.effectStyle}}></div>
+          <img
+            class="duc-profile-effect-overlay"
+            src={{this.decoration.image_url}}
+            alt=""
+            draggable="false"
+          />
         {{/if}}
       {{else if this.decoration.gradient_from}}
         <div class="duc-card-banner" style={{this.bannerStyle}}>

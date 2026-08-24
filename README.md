@@ -138,6 +138,9 @@ Eklentinin arka planında performansı ve güvenliği sağlamak için modern sta
 
 ## Bu Sürümde Neler Değişti?
 
+* **450x880 kart dekorasyonları:** User-card, dekorasyonun özgün 450×880 oranını koruyarak ekrana sığacak biçimde ölçeklenir; animasyon artık kırpılmadan gerçek bir görsel katmanı olarak oynatılır.
+* **Doğru katman sırası:** Kart dekorasyonu mesaj gönderme alanının üzerinde görünür; `pointer-events: none` sayesinde alttaki mesaj eylemi kullanılmaya devam eder.
+* **Mobilde kalıcı kapatma eylemi:** My Cosmetics penceresinin altına, içerik ne kadar kaydırılırsa kaydırılsın erişilebilir kalan tam genişlikte bir **Kapat** düğmesi eklendi.
 * **Yeni kozmetik seçici tasarımı:** Profil ayarlarındaki seçici, Crimson temasına uyumlu koyu/gradyan yüzeyler, daha okunaklı öğe kartları ve modern durum düğmeleriyle yenilendi.
 * **Kaydırılabilir dört sekme:** Avatar Çerçeveleri, İsim Plakaları, Kart Dekorasyonları ve Profil Efektleri sekmeleri hem dokunarak/yatay kaydırmayla hem de sağ-sol ok düğmeleriyle gezilebilir.
 * **User-card mesaj alanı:** Mesaj gönderilebilen kullanıcıların kartında `@kullanıcıadı kullanıcısına mesaj gönder` alanı görünür ve Discourse'un yerleşik özel mesaj oluşturucusunu açar.

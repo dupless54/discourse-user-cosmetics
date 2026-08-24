@@ -369,6 +369,15 @@ export default class UserCosmeticsPicker extends Component {
             {{/if}}
           {{/if}}
         </div>
+
+        <div class="duc-picker-mobile-actions">
+          <DButton
+            @icon="xmark"
+            @translatedLabel={{t "discourse_user_cosmetics.picker.close"}}
+            @action={{this.close}}
+            class="btn-primary duc-picker-mobile-close"
+          />
+        </div>
       </div>
     </div>
   </template>
