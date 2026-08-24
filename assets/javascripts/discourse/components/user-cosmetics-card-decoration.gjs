@@ -2,6 +2,36 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { htmlSafe } from "@ember/template";
 import { later, cancel } from "@ember/runloop"; // Ember zamanlayıcıları
+import { modifier } from "ember-modifier";
+
+const CARD_SELECTOR = "#user-card, .user-card";
+
+// The outlet lives inside Discourse's metadata area. Rendering the image
+// there makes absolute sizing depend on whichever nested element happens to
+// be positioned by the active theme. Mount a dedicated image directly under
+// the real user-card instead, so Crimson Channels is always the size source.
+const attachCardDecoration = modifier((element, [imageUrl]) => {
+  const card = element.closest(CARD_SELECTOR);
+
+  if (!card || !imageUrl) {
+    return;
+  }
+
+  card
+    .querySelector(":scope > .duc-card-decoration-overlay")
+    ?.remove();
+
+  const image = document.createElement("img");
+  image.src = imageUrl;
+  image.alt = "";
+  image.draggable = false;
+  image.setAttribute("aria-hidden", "true");
+  image.className =
+    "duc-profile-effect-overlay duc-card-decoration-overlay";
+  card.appendChild(image);
+
+  return () => image.remove();
+});
 
 export default class UserCosmeticsCardDecoration extends Component {
   @tracked isPlaying = true;
@@ -69,12 +99,10 @@ export default class UserCosmeticsCardDecoration extends Component {
       {{#if this.decoration.image_url}}
         {{!-- Efekt sadece isPlaying true olduğunda HTML'e eklenir, false olunca silinir --}}
         {{#if this.isPlaying}}
-          <img
-            class="duc-profile-effect-overlay"
-            src={{this.decoration.image_url}}
-            alt=""
-            draggable="false"
-          />
+          <span
+            class="duc-card-decoration-anchor"
+            {{attachCardDecoration this.decoration.image_url}}
+          ></span>
         {{/if}}
       {{else if this.decoration.gradient_from}}
         <div class="duc-card-banner" style={{this.bannerStyle}}>
