@@ -1,4 +1,4 @@
-tr:
+tr_TR:
   site_settings:
     discourse_user_cosmetics_enabled: "Kullanıcı Kozmetikleri eklentisini etkinleştir (avatar çerçeveleri, isim plakaları ve kullanıcı kartı dekorasyonları)."
     discourse_user_cosmetics_avatar_frames_enabled: "Üyelerin avatar çerçevesi kullanmasına izin ver."
