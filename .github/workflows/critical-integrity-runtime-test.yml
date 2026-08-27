@@ -6,6 +6,7 @@ on:
       - fix/critical-integrity-hardening
       - fix/profile-effect-layer-validation
       - fix/cosmetics-stylesheet-cache-invalidation
+      - fix/user-catalog-active-entitlement
 
 permissions:
   contents: read
