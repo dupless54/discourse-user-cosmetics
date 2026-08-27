@@ -72,4 +72,50 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     expect(response.headers.fetch("ETag")).not_to eq(first_etag)
     expect(response.body).not_to include(user.username_lower)
   end
+
+  it "does not expose generated user CSS anonymously when login is required" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Private site frame",
+        image_url: "https://example.com/private-frame.webp",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+    SiteSetting.login_required = true
+
+    get "/user-cosmetics/frames.css"
+
+    expect(response).to have_http_status(:found)
+    expect(response.headers.fetch("Location")).to include("/login")
+    expect(response.body).not_to include(user.username_lower)
+  end
+
+  it "serves private-site CSS to authenticated users without cache storage" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "nameplate",
+        name: "Private site plate",
+        gradient_from: "#112233",
+        gradient_to: "#445566",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "nameplate",
+      item_id: item.id,
+    )
+    SiteSetting.login_required = true
+    sign_in(user)
+
+    get "/user-cosmetics/frames.css"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.media_type).to eq("text/css")
+    expect(response.headers["Cache-Control"]).to include("no-store")
+    expect(response.headers["Cache-Control"]).not_to include("public")
+    expect(response.body).to include(user.username_lower)
+  end
 end
