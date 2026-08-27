@@ -73,6 +73,59 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     expect(response.body).not_to include(user.username_lower)
   end
 
+  it "rebuilds username-backed CSS after the selected user's username changes" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Rename frame",
+        image_url: "https://example.com/rename-frame.webp",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+
+    get "/user-cosmetics/frames.css"
+
+    expect(response).to have_http_status(:ok)
+    old_username = user.username_lower
+    first_etag = response.headers.fetch("ETag")
+    expect(response.body).to include(old_username)
+
+    new_username = "renamed#{user.id}"
+    user.update_columns(username: new_username, username_lower: new_username.downcase)
+    DiscourseEvent.trigger(:user_updated, user.reload, %w[username])
+
+    get "/user-cosmetics/frames.css", headers: { "HTTP_IF_NONE_MATCH" => first_etag }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers.fetch("ETag")).not_to eq(first_etag)
+    expect(response.body).to include(new_username.downcase)
+    expect(response.body).not_to include(old_username)
+  end
+
+  it "does not invalidate username-backed CSS for unrelated user updates" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "nameplate",
+        name: "Stable plate",
+        gradient_from: "#112233",
+        gradient_to: "#445566",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "nameplate",
+      item_id: item.id,
+    )
+
+    before_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    DiscourseEvent.trigger(:user_updated, user, %w[name])
+
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).to eq(before_version)
+  end
+
   it "does not expose generated user CSS anonymously when login is required" do
     item =
       DiscourseUserCosmetics::Item.create!(
