@@ -6,7 +6,7 @@ module ::DiscourseUserCosmetics
   # cosmetics on every request. Catalog changes use one global version while
   # user entitlement changes can invalidate only the affected user's cache.
   class Presenter
-    CACHE_SCHEMA_VERSION = 2
+    CACHE_SCHEMA_VERSION = 3
     CACHE_NAMESPACE = "discourse_user_cosmetics/v#{CACHE_SCHEMA_VERSION}"
     STYLESHEET_KINDS = %w[avatar_frame nameplate].freeze
 

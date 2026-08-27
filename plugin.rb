@@ -25,6 +25,7 @@ after_initialize do
   require_relative "app/models/discourse_user_cosmetics/effect_layer"
   require_relative "lib/discourse_user_cosmetics/presenter"
   require_relative "lib/discourse_user_cosmetics/selection_service"
+  require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
   require_relative "lib/discourse_user_cosmetics/css_builder"
   require_relative "lib/discourse_user_cosmetics/seeder"
   require_relative "app/controllers/discourse_user_cosmetics/items_controller"
@@ -74,6 +75,10 @@ after_initialize do
   DiscourseEvent.on(:group_destroyed) do |group, _cached_user_ids|
     removed = DiscourseUserCosmetics::ItemGroup.where(group_id: group&.id).delete_all
     DiscourseUserCosmetics::Presenter.bump_version! if removed.positive?
+  end
+
+  DiscourseEvent.on(:user_destroyed) do |user|
+    DiscourseUserCosmetics::UserReferenceCleanup.cleanup!(user_id: user&.id)
   end
 
   # --- expose "what am I wearing" on the serializers the front-end reads ---
