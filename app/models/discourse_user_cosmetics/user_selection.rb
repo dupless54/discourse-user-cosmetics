@@ -17,8 +17,26 @@ module ::DiscourseUserCosmetics
       "profile_effect" => :profile_effect_item_id,
     }.freeze
 
+    validate :changed_selections_are_usable
+
     def self.field_for(kind)
       FIELD_FOR_KIND.fetch(kind.to_s)
+    end
+
+    private
+
+    def changed_selections_are_usable
+      FIELD_FOR_KIND.each do |kind, field|
+        next unless will_save_change_to_attribute?(field)
+
+        item_id = public_send(field)
+        next if item_id.blank?
+
+        item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
+        next if item && item.usable_by?(user)
+
+        errors.add(field, :invalid)
+      end
     end
   end
 end
