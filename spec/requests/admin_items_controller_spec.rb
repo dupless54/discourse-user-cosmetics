@@ -91,6 +91,30 @@ RSpec.describe DiscourseUserCosmetics::AdminItemsController, type: :request do
     )
   end
 
+  it "preserves groups and profile-effect layers when a partial update omits them" do
+    sign_in(admin)
+
+    restricted_group = Fabricate(:group)
+    item = DiscourseUserCosmetics::Item.create!(kind: "profile_effect", name: "Original effect")
+    item.item_groups.create!(group: restricted_group)
+    item.effect_layers.create!(
+      anchor: "left",
+      stack_order: "front",
+      image_url: "https://example.com/original.webp",
+    )
+
+    put "/admin/plugins/user-cosmetics/items/#{item.id}.json",
+        params: { item: { name: "Renamed effect" } }
+
+    expect(response).to be_successful
+    item.reload
+    expect(item.name).to eq("Renamed effect")
+    expect(item.groups.pluck(:id)).to eq([restricted_group.id])
+    expect(item.effect_layers.pluck(:anchor, :stack_order, :image_url)).to eq(
+      [["left", "front", "https://example.com/original.webp"]],
+    )
+  end
+
   it "clears a selection after the final admin group set removes access" do
     sign_in(admin)
 
