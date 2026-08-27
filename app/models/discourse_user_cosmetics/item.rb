@@ -79,11 +79,14 @@ module ::DiscourseUserCosmetics
     end
 
     # Central permission check: is this user allowed to select/wear this item?
+    # Group membership is intentionally read from GroupUser rather than the
+    # user association so a long-lived User instance cannot retain a revoked
+    # entitlement through cached group_ids.
     def usable_by?(user)
       return false unless user
       return true if is_default?
       return true if public_access?
-      return true if item_groups.where(group_id: user.group_ids).exists?
+      return true if item_groups.where(group_id: ::GroupUser.where(user_id: user.id).select(:group_id)).exists?
       user_items.where(user_id: user.id).exists?
     end
 
