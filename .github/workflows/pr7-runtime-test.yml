@@ -43,12 +43,17 @@ jobs:
           chown -R postgres /var/run/postgresql
           sudo -E -u postgres script/start_test_db.rb
           sudo -u postgres psql -c "CREATE ROLE $PGUSER LOGIN SUPERUSER PASSWORD '$PGPASSWORD';" || true
+          sudo -u postgres createdb -O "$PGUSER" discourse_test
           ln -s /var/www/discourse/vendor/bundle vendor/bundle
-          bundle config --local path vendor/bundle
-          bundle config --local deployment true
-          bundle config --local without development
+          bundle config set --local path vendor/bundle
+          bundle config set --local deployment true
+          bundle config set --local without development
           bundle install --jobs $(($(nproc) - 1))
           pnpm install --frozen-lockfile
+
+      - name: Migrate test database with plugin
+        working-directory: discourse
+        run: LOAD_PLUGINS=1 bin/rake db:migrate
 
       - name: Load plugin Ruby
         working-directory: discourse
