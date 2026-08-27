@@ -113,7 +113,7 @@ module ::DiscourseUserCosmetics
       DiscourseUserCosmetics::Presenter.bump_version!
       render json: serialized
     rescue ActiveRecord::RecordInvalid => e
-      render_json_error(e.record)
+      render_json_error(e.record, status: 422)
     end
 
     def replace_groups!(item)
