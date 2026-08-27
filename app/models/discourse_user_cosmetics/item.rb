@@ -37,6 +37,7 @@ module ::DiscourseUserCosmetics
                 only_integer: true, in: 0..2000,
               }, allow_nil: true
     validate :slug_unique_within_kind
+    validate :validate_image_asset
 
     before_validation :ensure_slug
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
@@ -77,6 +78,15 @@ module ::DiscourseUserCosmetics
 
     def sync_image_upload_reference
       ::UploadReference.ensure_exist!(upload_ids: [image_upload_id], target: self)
+    end
+
+    def validate_image_asset
+      DiscourseUserCosmetics::AssetPolicy.validate(
+        self,
+        upload_id: image_upload_id,
+        upload: image_upload,
+        url: image_url,
+      )
     end
 
     def slug_unique_within_kind
