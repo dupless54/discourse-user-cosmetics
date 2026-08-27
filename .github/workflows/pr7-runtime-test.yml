@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 25
     env:
       RAILS_ENV: test
+      LOAD_PLUGINS: 1
       PGUSER: discourse
       PGPASSWORD: discourse
     defaults:
@@ -53,7 +54,7 @@ jobs:
 
       - name: Migrate test database with plugin
         working-directory: discourse
-        run: LOAD_PLUGINS=1 bin/rake db:migrate
+        run: bin/rake db:migrate
 
       - name: Load plugin Ruby
         working-directory: discourse
