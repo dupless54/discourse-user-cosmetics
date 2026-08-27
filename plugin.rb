@@ -17,6 +17,7 @@ end
 
 after_initialize do
   # --- load our Ruby code -------------------------------------------------
+  require_relative "lib/discourse_user_cosmetics/asset_policy"
   require_relative "app/models/discourse_user_cosmetics/item"
   require_relative "app/models/discourse_user_cosmetics/item_group"
   require_relative "app/models/discourse_user_cosmetics/user_item"
