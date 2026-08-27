@@ -51,6 +51,13 @@ module ::DiscourseUserCosmetics
       )
     end
 
+    def self.invalidate_user_selection!(user_id:, kind:)
+      return if user_id.blank?
+
+      bump_user_version!(user_id)
+      bump_stylesheet_version! if STYLESHEET_KINDS.include?(kind.to_s)
+    end
+
     def self.invalidate_group_membership!(user_id:, group_id:)
       return if user_id.blank?
 
