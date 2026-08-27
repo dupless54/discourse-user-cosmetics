@@ -66,4 +66,40 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
     expect(serialized).not_to have_key("group_names")
     expect(response.body).not_to include("private-cosmetic")
   end
+
+  it "hides a stored active selection while its group entitlement is unavailable" do
+    restricted_group = Fabricate(:group)
+    restricted_group.add(user)
+    frame = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Temporary group frame")
+    frame.item_groups.create!(group: restricted_group)
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: frame.id,
+    )
+
+    restricted_group.remove(user)
+
+    get "/user-cosmetics/mine.json"
+
+    expect(response).to be_successful
+    expect(response.parsed_body.dig("active", "avatar_frame")).to be_nil
+    serialized =
+      response.parsed_body.dig("items", "avatar_frame").find { |item| item["id"] == frame.id }
+    expect(serialized).to include("owned" => false)
+    expect(
+      DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id).avatar_frame_item_id,
+    ).to eq(frame.id)
+
+    restricted_group.add(user)
+
+    get "/user-cosmetics/mine.json"
+
+    expect(response).to be_successful
+    expect(response.parsed_body.dig("active", "avatar_frame")).to eq(frame.id)
+    restored =
+      response.parsed_body.dig("items", "avatar_frame").find { |item| item["id"] == frame.id }
+    expect(restored).to include("owned" => true)
+  end
 end
