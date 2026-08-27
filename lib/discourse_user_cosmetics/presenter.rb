@@ -3,9 +3,8 @@
 module ::DiscourseUserCosmetics
   # Computes "what is this user currently wearing" and caches it, so that
   # rendering a post/user-card/profile never has to hit the database for
-  # cosmetics on every request. The cache is invalidated instantly (for
-  # every user at once) by bumping a single version counter, which is far
-  # cheaper and safer than trying to enumerate affected users on every edit.
+  # cosmetics on every request. Catalog changes use one global version while
+  # user entitlement changes can invalidate only the affected user's cache.
   class Presenter
     CACHE_NAMESPACE = "discourse_user_cosmetics"
 
@@ -18,11 +17,31 @@ module ::DiscourseUserCosmetics
       Discourse.cache.write("#{CACHE_NAMESPACE}/version", current + 1, expires_in: 30.days)
     end
 
+    def self.user_cache_version(user_id)
+      Discourse.cache.fetch("#{CACHE_NAMESPACE}/user-version/#{user_id}", expires_in: 30.days) { 1 }
+    end
+
+    def self.bump_user_version!(user_id)
+      return if user_id.blank?
+
+      key = "#{CACHE_NAMESPACE}/user-version/#{user_id}"
+      current = Discourse.cache.read(key) || 1
+      Discourse.cache.write(key, current + 1, expires_in: 30.days)
+    end
+
+    def self.feature_gate_signature
+      DiscourseUserCosmetics::Item::KINDS.map do |kind|
+        DiscourseUserCosmetics::Item.kind_enabled?(kind) ? "1" : "0"
+      end.join
+    end
+
     def self.summary_for(user)
       return nil unless user
-      Discourse.cache.fetch("#{CACHE_NAMESPACE}/summary/#{cache_version}/#{user.id}", expires_in: 1.hour) do
-        build_summary(user)
-      end
+
+      Discourse.cache.fetch(
+        "#{CACHE_NAMESPACE}/summary/#{cache_version}/#{user_cache_version(user.id)}/#{feature_gate_signature}/#{user.id}",
+        expires_in: 1.hour,
+      ) { build_summary(user) }
     end
 
     def self.build_summary(user)
