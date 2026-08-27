@@ -66,4 +66,5 @@ jobs:
         run: |
           bin/rspec \
             plugins/discourse-user-cosmetics/spec/models/upload_reference_persistence_spec.rb \
+            plugins/discourse-user-cosmetics/spec/models/relation_id_width_spec.rb \
             plugins/discourse-user-cosmetics/spec/migrations/backfill_cosmetic_upload_references_spec.rb
