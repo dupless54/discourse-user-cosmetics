@@ -61,18 +61,17 @@ module ::DiscourseUserCosmetics
       base
     end
 
-    # Profil efekti: Discord'un layers[] + inner_width + overflow_* şemasının
-    # sunucu tarafındaki karşılığı. Önizleme (picker kartı) için image_url'i,
-    # ön-üst katmandan (yoksa ilk bulunan katmandan) türetiyoruz.
+    # Profile effects are serialized as positioned layers plus the reference
+    # geometry used by the client to scale overflow and side clipping values.
     def self.effect_fields(item)
       layers =
         item
           .effect_layers
-          .map { |l| { anchor: l.anchor, stack_order: l.stack_order, image_url: l.resolved_image_url } }
-          .select { |l| l[:image_url].present? }
+          .map { |layer| { anchor: layer.anchor, stack_order: layer.stack_order, image_url: layer.resolved_image_url } }
+          .select { |layer| layer[:image_url].present? }
 
       representative =
-        layers.find { |l| l[:anchor] == "top" && l[:stack_order] == "front" } || layers.first
+        layers.find { |layer| layer[:anchor] == "top" && layer[:stack_order] == "front" } || layers.first
 
       {
         image_url: representative && representative[:image_url],
@@ -80,6 +79,8 @@ module ::DiscourseUserCosmetics
         overflow_top: item.effect_overflow_top || 0,
         overflow_bottom: item.effect_overflow_bottom || 0,
         overflow_horizontal: item.effect_overflow_horizontal || 0,
+        effect_side_offset_top: item.effect_side_offset_top || 0,
+        effect_side_offset_bottom: item.effect_side_offset_bottom || 0,
         layers: layers,
       }
     end
