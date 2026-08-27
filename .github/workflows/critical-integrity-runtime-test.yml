@@ -7,6 +7,7 @@ on:
       - fix/profile-effect-layer-validation
       - fix/cosmetics-stylesheet-cache-invalidation
       - fix/user-catalog-active-entitlement
+      - fix/deleted-group-item-group-cleanup
 
 permissions:
   contents: read
