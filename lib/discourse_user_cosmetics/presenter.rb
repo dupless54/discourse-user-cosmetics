@@ -31,8 +31,9 @@ module ::DiscourseUserCosmetics
 
       DiscourseUserCosmetics::Item::KINDS.each do |kind|
         result[kind] = nil
-        next if kind == "profile_effect" && !SiteSetting.discourse_user_cosmetics_profile_effects_enabled
+        next unless DiscourseUserCosmetics::Item.kind_enabled?(kind)
         next unless selection
+
         item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
         next unless item_id
 
