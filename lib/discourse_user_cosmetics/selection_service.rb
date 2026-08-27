@@ -15,11 +15,16 @@ module ::DiscourseUserCosmetics
         raise Discourse::InvalidAccess unless item.usable_by?(user)
       end
 
+      field = DiscourseUserCosmetics::UserSelection.field_for(kind)
       selection = DiscourseUserCosmetics::UserSelection.find_or_initialize_by(user_id: user.id)
-      selection.public_send("#{DiscourseUserCosmetics::UserSelection.field_for(kind)}=", item&.id)
+      selection.public_send("#{field}=", item&.id)
+      changed = selection.will_save_change_to_attribute?(field)
       selection.save!
 
-      DiscourseUserCosmetics::Presenter.bump_version!
+      DiscourseUserCosmetics::Presenter.invalidate_user_selection!(
+        user_id: user.id,
+        kind: kind,
+      ) if changed
       selection
     end
 
@@ -45,7 +50,12 @@ module ::DiscourseUserCosmetics
           updated_at: Time.zone.now,
         )
 
-      DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
+      if bump && changed.positive?
+        DiscourseUserCosmetics::Presenter.invalidate_user_selection!(
+          user_id: user.id,
+          kind: item.kind,
+        )
+      end
       changed
     end
 
