@@ -95,11 +95,15 @@ module ::DiscourseUserCosmetics
 
     def save_item(item)
       serialized = nil
+      creating = item.new_record?
+      payload = params.require(:item)
+      replace_groups = creating || payload.key?(:group_ids)
+      replace_layers = creating || payload.key?(:layers)
 
       ActiveRecord::Base.transaction do
         item.save!
-        replace_groups!(item)
-        save_effect_layers(item) if item.kind == "profile_effect"
+        replace_groups!(item) if replace_groups
+        save_effect_layers(item) if item.kind == "profile_effect" && replace_layers
         DiscourseUserCosmetics::SelectionService.clear_invalid_for_item!(item, bump: false)
         serialized = admin_serialize(item.reload)
       end
