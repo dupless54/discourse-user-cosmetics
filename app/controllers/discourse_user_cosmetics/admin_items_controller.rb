@@ -45,13 +45,22 @@ module ::DiscourseUserCosmetics
     def grant
       item = DiscourseUserCosmetics::Item.find(params[:id])
       user = find_user!(params[:username])
+      was_usable = item.usable_by?(user)
 
-      DiscourseUserCosmetics::UserItem.find_or_create_by!(item_id: item.id, user_id: user.id) do |ui|
-        ui.granted_by_id = current_user.id
+      user_item =
+        DiscourseUserCosmetics::UserItem.find_or_create_by!(item_id: item.id, user_id: user.id) do |ui|
+          ui.granted_by_id = current_user.id
+        end
+
+      if user_item.previously_new_record? && !was_usable
+        # A new direct grant can reactivate a stale selected item. Only that
+        # user's presentation state (and CSS when applicable) needs invalidation.
+        DiscourseUserCosmetics::Presenter.invalidate_direct_entitlement_change!(
+          user_id: user.id,
+          item: item,
+        )
       end
 
-      # A grant can make a previously stale selection usable again.
-      DiscourseUserCosmetics::Presenter.bump_version!
       render json: success_json.merge(owners: owner_usernames(item))
     end
 
