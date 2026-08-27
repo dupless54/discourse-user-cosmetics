@@ -1,5 +1,6 @@
 name: PR7 Runtime Test
 
+# Temporary validation workflow for PR #7.
 on:
   push:
     branches:
