@@ -71,6 +71,11 @@ after_initialize do
     )
   end
 
+  DiscourseEvent.on(:group_destroyed) do |group, _cached_user_ids|
+    removed = DiscourseUserCosmetics::ItemGroup.where(group_id: group&.id).delete_all
+    DiscourseUserCosmetics::Presenter.bump_version! if removed.positive?
+  end
+
   # --- expose "what am I wearing" on the serializers the front-end reads ---
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }
