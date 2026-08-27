@@ -13,8 +13,11 @@ module ::DiscourseUserCosmetics
     end
 
     def self.bump_version!
-      current = Discourse.cache.read("#{CACHE_NAMESPACE}/version") || 1
-      Discourse.cache.write("#{CACHE_NAMESPACE}/version", current + 1, expires_in: 30.days)
+      Discourse.cache.write(
+        "#{CACHE_NAMESPACE}/version",
+        SecureRandom.hex(12),
+        expires_in: 30.days,
+      )
     end
 
     def self.user_cache_version(user_id)
@@ -24,9 +27,11 @@ module ::DiscourseUserCosmetics
     def self.bump_user_version!(user_id)
       return if user_id.blank?
 
-      key = "#{CACHE_NAMESPACE}/user-version/#{user_id}"
-      current = Discourse.cache.read(key) || 1
-      Discourse.cache.write(key, current + 1, expires_in: 30.days)
+      Discourse.cache.write(
+        "#{CACHE_NAMESPACE}/user-version/#{user_id}",
+        SecureRandom.hex(12),
+        expires_in: 30.days,
+      )
     end
 
     def self.feature_gate_signature
