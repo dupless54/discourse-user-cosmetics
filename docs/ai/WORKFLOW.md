@@ -1,0 +1,2 @@
+# Multi-model quality workflow
+Default roles: Claude Builder -> ChatGPT/Codex independent Reviewer -> Gemini mandatory Final Verifier. Reviewer uses locked task + rules + latest diff + test/CI evidence, not Builder reasoning as authority. Final Verifier independently checks the exact reviewed diff. Merge only after Builder ready, Reviewer approve, Final Verifier approve, exact-path validation, and latest exact PR-head CI green; disagreement requires human arbitration.
