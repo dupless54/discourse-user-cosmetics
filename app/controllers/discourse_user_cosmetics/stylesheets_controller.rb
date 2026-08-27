@@ -8,20 +8,28 @@ module ::DiscourseUserCosmetics
                         :preload_json, raise: false
 
     # GET /user-cosmetics/frames.css
-    # Publicly cacheable, versioned CSS file with one rule-pair per user who
-    # has an active avatar frame. See DiscourseUserCosmetics::CssBuilder.
+    # Publicly cacheable, conditionally revalidated CSS file with one rule-pair
+    # per user who has an active avatar frame/nameplate. The cache identity
+    # includes catalog/selection changes, group-entitlement changes, and feature
+    # gates so stale authorization state is never served after revalidation.
     def frames
-      version = DiscourseUserCosmetics::Presenter.cache_version
+      presenter = DiscourseUserCosmetics::Presenter
+      state = [presenter.cache_version, presenter.stylesheet_version, presenter.feature_gate_signature].join("/")
+
+      response.headers["Content-Type"] = "text/css; charset=utf-8"
+      return unless stale?(
+        etag: "discourse-user-cosmetics-frames/#{state}",
+        public: true,
+        cache_control: { no_cache: true, must_revalidate: true },
+      )
 
       css =
         Discourse
           .cache
-          .fetch("discourse_user_cosmetics/frames_css/#{version}", expires_in: 1.hour) do
+          .fetch("discourse_user_cosmetics/frames_css/#{state}", expires_in: 1.hour) do
             DiscourseUserCosmetics::CssBuilder.build_frames_css
           end
 
-      response.headers["Content-Type"] = "text/css; charset=utf-8"
-      response.headers["Cache-Control"] = "public, max-age=300"
       render plain: css, content_type: "text/css"
     end
   end
