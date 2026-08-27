@@ -1,0 +1,298 @@
+// Native Discourse preferences integration for User Cosmetics.
+// Keep this intentionally restrained: layout and color follow core Discourse
+// variables so custom themes, dark mode, and mobile inherit naturally.
+
+.duc-cosmetics-page {
+  width: 100%;
+}
+
+.duc-cosmetics-page__header {
+  margin-bottom: 1.25em;
+
+  h2 {
+    margin: 0;
+    color: var(--primary);
+    font-size: var(--font-up-2);
+  }
+
+  p {
+    max-width: 62ch;
+    margin: 0.4em 0 0;
+    color: var(--primary-medium);
+    line-height: 1.5;
+  }
+}
+
+.duc-cosmetics-tabs {
+  display: flex;
+  gap: 0.25em;
+  margin: 0 0 1.25em;
+  padding: 0 0 0.45em;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--primary-low);
+  scrollbar-width: thin;
+}
+
+.duc-cosmetics-tab {
+  flex: 0 0 auto;
+  padding: 0.55em 0.75em;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--primary-medium);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--primary-very-low);
+    color: var(--primary);
+    outline: none;
+  }
+
+  &.active {
+    border-bottom-color: var(--tertiary);
+    color: var(--tertiary);
+  }
+}
+
+.duc-cosmetics-page__body {
+  min-height: 220px;
+}
+
+.duc-cosmetics-state {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+}
+
+.duc-cosmetics-state--error {
+  flex-direction: column;
+  gap: 0.75em;
+
+  p {
+    margin: 0;
+    color: var(--primary-medium);
+  }
+}
+
+.duc-cosmetics-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin-bottom: 1em;
+
+  h3 {
+    margin: 0;
+    color: var(--primary);
+    font-size: var(--font-up-1);
+  }
+
+  p {
+    margin: 0.25em 0 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+}
+
+.duc-cosmetics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75em;
+}
+
+.duc-cosmetics-item {
+  display: flex;
+  min-width: 0;
+  min-height: 230px;
+  flex-direction: column;
+  padding: 0.75em;
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--secondary);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &.owned:hover {
+    border-color: var(--primary-low-mid);
+    background: var(--primary-very-low);
+  }
+
+  &.active {
+    border-color: var(--tertiary);
+  }
+
+  &.locked {
+    background: var(--primary-very-low);
+  }
+}
+
+.duc-cosmetics-item__preview {
+  position: relative;
+  display: flex;
+  width: 96px;
+  height: 96px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  border: 1px solid var(--primary-low);
+  border-radius: 50%;
+  background-color: var(--primary-very-low);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  &--nameplate {
+    width: 100%;
+    height: 58px;
+    border-radius: var(--d-border-radius, 6px);
+    background-size: cover;
+  }
+
+  &--card_decoration,
+  &--profile_effect {
+    width: 100%;
+    height: 92px;
+    border-radius: var(--d-border-radius, 6px);
+    background-size: cover;
+  }
+}
+
+.duc-cosmetics-item__lock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+}
+
+.duc-cosmetics-item__check {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 2px solid var(--secondary);
+  border-radius: 50%;
+  background: var(--tertiary);
+  color: var(--secondary);
+}
+
+.duc-cosmetics-item__content {
+  min-width: 0;
+  margin-top: 0.75em;
+  text-align: center;
+}
+
+.duc-cosmetics-item__name {
+  overflow: hidden;
+  color: var(--primary);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.duc-cosmetics-item__description {
+  display: -webkit-box;
+  margin: 0.35em 0 0;
+  overflow: hidden;
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.duc-cosmetics-item__rarity {
+  margin-top: 0.4em;
+  font-size: var(--font-down-2);
+  font-weight: 600;
+}
+
+.duc-cosmetics-item__actions {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 0.75em;
+
+  .btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.duc-cosmetics-item__locked-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+}
+
+.duc-cosmetics-empty {
+  margin: 0;
+  padding: 2em 1em;
+  border: 1px dashed var(--primary-low);
+  color: var(--primary-medium);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .duc-cosmetics-page__header {
+    margin-bottom: 1em;
+  }
+
+  .duc-cosmetics-tabs {
+    margin-right: -0.5em;
+    margin-bottom: 1em;
+    margin-left: -0.5em;
+    padding-right: 0.5em;
+    padding-left: 0.5em;
+  }
+
+  .duc-cosmetics-section-heading {
+    align-items: flex-start;
+  }
+
+  .duc-cosmetics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5em;
+  }
+
+  .duc-cosmetics-item {
+    min-height: 210px;
+    padding: 0.6em;
+  }
+
+  .duc-cosmetics-item__preview {
+    width: 78px;
+    height: 78px;
+
+    &--nameplate,
+    &--card_decoration,
+    &--profile_effect {
+      width: 100%;
+    }
+
+    &--nameplate {
+      height: 50px;
+    }
+
+    &--card_decoration,
+    &--profile_effect {
+      height: 72px;
+    }
+  }
+}

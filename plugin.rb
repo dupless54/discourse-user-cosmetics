@@ -2,7 +2,7 @@
 
 # name: discourse-user-cosmetics
 # about: Discord tarzı kullanıcı kozmetikleri -- avatar çerçeveleri, isim plakaları ve kullanıcı kartı dekorasyonları.
-# version: 1.1.3
+# version: 1.2.0
 # authors: dupless54
 # url: https://github.com/dupless54/discourse-user-cosmetics
 # required_version: 3.1.0
@@ -10,6 +10,7 @@
 enabled_site_setting :discourse_user_cosmetics_enabled
 
 register_asset "stylesheets/common/discourse-user-cosmetics.scss"
+register_asset "stylesheets/common/discourse-user-cosmetics-preferences.scss"
 
 module ::DiscourseUserCosmetics
   PLUGIN_NAME = "discourse-user-cosmetics"
