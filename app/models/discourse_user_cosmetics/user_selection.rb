@@ -33,7 +33,7 @@ module ::DiscourseUserCosmetics
         next if item_id.blank?
 
         item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
-        next if item && item.usable_by?(user)
+        next if DiscourseUserCosmetics::Item.kind_enabled?(kind) && item && item.usable_by?(user)
 
         errors.add(field, :invalid)
       end
