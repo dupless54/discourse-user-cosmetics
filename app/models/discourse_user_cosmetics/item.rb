@@ -32,6 +32,7 @@ module ::DiscourseUserCosmetics
     validates :image_url, length: { maximum: 1000 }, allow_blank: true
     validates :effect_inner_width, numericality: { only_integer: true, in: 200..4000 }, allow_nil: true
     validates :effect_overflow_top, :effect_overflow_bottom, :effect_overflow_horizontal,
+              :effect_side_offset_top, :effect_side_offset_bottom,
               numericality: {
                 only_integer: true, in: 0..2000,
               }, allow_nil: true
