@@ -21,7 +21,7 @@ module ::DiscourseUserCosmetics
       selection
     end
 
-    def self.clear_item!(item)
+    def self.clear_item!(item, bump: true)
       field = DiscourseUserCosmetics::UserSelection.field_for(item.kind)
       changed =
         DiscourseUserCosmetics::UserSelection.where(field => item.id).update_all(
@@ -29,11 +29,11 @@ module ::DiscourseUserCosmetics
           updated_at: Time.zone.now,
         )
 
-      DiscourseUserCosmetics::Presenter.bump_version! if changed.positive?
+      DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
       changed
     end
 
-    def self.clear_item_for_user_if_unusable!(item:, user:)
+    def self.clear_item_for_user_if_unusable!(item:, user:, bump: true)
       return 0 if item.enabled? && item.usable_by?(user)
 
       field = DiscourseUserCosmetics::UserSelection.field_for(item.kind)
@@ -43,11 +43,11 @@ module ::DiscourseUserCosmetics
           updated_at: Time.zone.now,
         )
 
-      DiscourseUserCosmetics::Presenter.bump_version! if changed.positive?
+      DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
       changed
     end
 
-    def self.clear_invalid_for_item!(item)
+    def self.clear_invalid_for_item!(item, bump: true)
       field = DiscourseUserCosmetics::UserSelection.field_for(item.kind)
       changed = 0
 
@@ -55,12 +55,11 @@ module ::DiscourseUserCosmetics
         user = selection.user
         next if user && item.enabled? && item.usable_by?(user)
 
-        selection.update_column(field, nil)
-        selection.touch
+        selection.update_columns(field => nil, updated_at: Time.zone.now)
         changed += 1
       end
 
-      DiscourseUserCosmetics::Presenter.bump_version! if changed.positive?
+      DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
       changed
     end
   end
