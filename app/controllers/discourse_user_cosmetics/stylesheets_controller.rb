@@ -20,7 +20,7 @@ module ::DiscourseUserCosmetics
       return unless stale?(
         etag: "discourse-user-cosmetics-frames/#{state}",
         public: true,
-        cache_control: { no_cache: true, must_revalidate: true },
+        cache_control: { no_cache: true },
       )
 
       css =
