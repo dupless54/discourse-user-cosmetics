@@ -51,6 +51,7 @@ jobs:
           bundle config set --local deployment true
           bundle config set --local without development
           bundle install --jobs $(($(nproc) - 1))
+          pnpm install --frozen-lockfile
 
       - name: Migrate test database with plugin
         working-directory: discourse
