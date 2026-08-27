@@ -8,6 +8,7 @@ on:
       - fix/cosmetics-stylesheet-cache-invalidation
       - fix/user-catalog-active-entitlement
       - fix/deleted-group-item-group-cleanup
+      - fix/deleted-user-cosmetic-reference-cleanup
 
 permissions:
   contents: read
