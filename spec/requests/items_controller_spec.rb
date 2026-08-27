@@ -51,4 +51,19 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
     expect(response).to have_http_status(:forbidden)
     expect(DiscourseUserCosmetics::UserSelection.where(user_id: user.id)).to be_empty
   end
+
+  it "does not expose restricted group names through the user catalog" do
+    restricted_group = Fabricate(:group, name: "private-cosmetics-group")
+    frame = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Private frame")
+    frame.item_groups.create!(group: restricted_group)
+
+    get "/user-cosmetics/mine.json"
+
+    expect(response).to be_successful
+    serialized =
+      response.parsed_body.dig("items", "avatar_frame").find { |item| item["id"] == frame.id }
+    expect(serialized).to include("owned" => false)
+    expect(serialized).not_to have_key("group_names")
+    expect(response.body).not_to include("private-cosmetics-group")
+  end
 end
