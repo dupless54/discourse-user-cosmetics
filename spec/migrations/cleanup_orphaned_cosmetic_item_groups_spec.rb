@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../../db/migrate/20260828000000_cleanup_orphaned_cosmetic_item_groups"
+require_relative "../../db/migrate/20260827223000_cleanup_orphaned_cosmetic_item_groups"
 
 RSpec.describe CleanupOrphanedCosmeticItemGroups do
   before { enable_current_plugin }
