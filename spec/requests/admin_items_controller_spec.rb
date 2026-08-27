@@ -80,7 +80,7 @@ RSpec.describe DiscourseUserCosmetics::AdminItemsController, type: :request do
           },
         }
 
-    expect(response.status).to be >= 400
+    expect(response).to have_http_status(:unprocessable_entity)
 
     item.reload
     expect(item.name).to eq("Original effect")
@@ -89,6 +89,65 @@ RSpec.describe DiscourseUserCosmetics::AdminItemsController, type: :request do
     expect(item.effect_layers.pluck(:anchor, :stack_order, :image_url)).to eq(
       [["top", "front", "https://example.com/original.webp"]],
     )
+  end
+
+  it "rejects an invalid layer coordinate instead of silently dropping it" do
+    sign_in(admin)
+
+    original_group = Fabricate(:group)
+    replacement_group = Fabricate(:group)
+    item = DiscourseUserCosmetics::Item.create!(kind: "profile_effect", name: "Original effect")
+    item.item_groups.create!(group: original_group)
+    item.effect_layers.create!(
+      anchor: "top",
+      stack_order: "front",
+      image_url: "https://example.com/original.webp",
+    )
+
+    put "/admin/plugins/user-cosmetics/items/#{item.id}.json",
+        params: {
+          item: {
+            name: "Should roll back",
+            group_ids: [replacement_group.id],
+            layers: [
+              {
+                anchor: "diagonal",
+                stack_order: "front",
+                image_url: "https://example.com/invalid.webp",
+              },
+            ],
+          },
+        }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+
+    item.reload
+    expect(item.name).to eq("Original effect")
+    expect(item.groups.pluck(:id)).to eq([original_group.id])
+    expect(item.effect_layers.pluck(:anchor, :stack_order, :image_url)).to eq(
+      [["top", "front", "https://example.com/original.webp"]],
+    )
+  end
+
+  it "rejects an assetless layer and rolls back new item creation" do
+    sign_in(admin)
+
+    post "/admin/plugins/user-cosmetics/items.json",
+         params: {
+           item: {
+             kind: "profile_effect",
+             name: "Incomplete effect",
+             layers: [
+               {
+                 anchor: "top",
+                 stack_order: "front",
+               },
+             ],
+           },
+         }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(DiscourseUserCosmetics::Item.where(name: "Incomplete effect")).to be_empty
   end
 
   it "preserves groups and profile-effect layers when a partial update omits them" do
