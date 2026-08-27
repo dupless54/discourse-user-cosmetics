@@ -9,6 +9,7 @@ on:
       - fix/user-catalog-active-entitlement
       - fix/deleted-group-item-group-cleanup
       - fix/deleted-user-cosmetic-reference-cleanup
+      - fix/private-stylesheet-access
 
 permissions:
   contents: read
