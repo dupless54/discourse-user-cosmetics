@@ -15,6 +15,7 @@ module ::DiscourseUserCosmetics
                            dependent: :destroy
     has_many :effect_layers, -> { order(:anchor, :stack_order) },
              class_name: "DiscourseUserCosmetics::EffectLayer", foreign_key: :item_id, dependent: :destroy
+    has_many :upload_references, as: :target, dependent: :destroy
 
     belongs_to :image_upload, class_name: "::Upload", optional: true
     belongs_to :created_by, class_name: "::User", optional: true
@@ -37,6 +38,7 @@ module ::DiscourseUserCosmetics
     validate :slug_unique_within_kind
 
     before_validation :ensure_slug
+    after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
 
     scope :enabled, -> { where(enabled: true) }
     scope :for_kind, ->(kind) { where(kind: kind) }
@@ -71,6 +73,10 @@ module ::DiscourseUserCosmetics
     end
 
     private
+
+    def sync_image_upload_reference
+      ::UploadReference.ensure_exist!(upload_ids: [image_upload_id], target: self)
+    end
 
     def slug_unique_within_kind
       return if slug.blank? || kind.blank?
