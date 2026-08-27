@@ -128,15 +128,9 @@ module ::DiscourseUserCosmetics
         layer = layer_params.to_h.with_indifferent_access
         anchor = layer[:anchor].to_s.downcase
         stack_order = (layer[:stack_order] || layer[:stackOrder]).to_s.downcase
-
-        next unless DiscourseUserCosmetics::EffectLayer::ANCHORS.include?(anchor)
-        next unless DiscourseUserCosmetics::EffectLayer::STACK_ORDERS.include?(stack_order)
-
         image_upload_id = (layer[:image_upload_id] || layer[:imageUploadId]).presence
         image_url =
           (layer[:image_url] || layer[:imageUrl] || layer[:raw_image_url] || layer[:rawImageUrl]).presence
-
-        next if image_upload_id.blank? && image_url.blank?
 
         item.effect_layers.create!(
           anchor: anchor,
