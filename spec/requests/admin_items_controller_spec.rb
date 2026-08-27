@@ -91,6 +91,53 @@ RSpec.describe DiscourseUserCosmetics::AdminItemsController, type: :request do
     )
   end
 
+  it "clears a selection after the final admin group set removes access" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    restricted_group = Fabricate(:group)
+    item = DiscourseUserCosmetics::Item.create!(kind: "card_decoration", name: "Public card")
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "card_decoration",
+      item_id: item.id,
+    )
+
+    put "/admin/plugins/user-cosmetics/items/#{item.id}.json",
+        params: { item: { group_ids: [restricted_group.id] } }
+
+    expect(response).to be_successful
+    expect(
+      DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id).card_decoration_item_id,
+    ).to be_nil
+  end
+
+  it "keeps a selection when the completed admin group set still grants access" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    denied_group = Fabricate(:group)
+    allowed_group = Fabricate(:group)
+    allowed_group.add(user)
+    item = DiscourseUserCosmetics::Item.create!(kind: "card_decoration", name: "Public card")
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "card_decoration",
+      item_id: item.id,
+    )
+
+    # The denied group is intentionally first. Cleanup must run only after the
+    # complete replacement set exists, otherwise this valid selection can be
+    # cleared while the allowed group has not been inserted yet.
+    put "/admin/plugins/user-cosmetics/items/#{item.id}.json",
+        params: { item: { group_ids: [denied_group.id, allowed_group.id] } }
+
+    expect(response).to be_successful
+    expect(
+      DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id).card_decoration_item_id,
+    ).to eq(item.id)
+  end
+
   it "does not allow moderators to manage the cosmetic catalog" do
     sign_in(moderator)
 
