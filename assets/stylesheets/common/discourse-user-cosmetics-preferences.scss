@@ -141,6 +141,7 @@
   align-items: center;
   justify-content: center;
   align-self: center;
+  overflow: hidden;
   border: 1px solid var(--primary-low);
   border-radius: 50%;
   background-color: var(--primary-very-low);
@@ -161,6 +162,20 @@
     height: 92px;
     border-radius: var(--d-border-radius, 6px);
     background-size: cover;
+  }
+}
+
+.duc-cosmetics-item__preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+
+  .duc-cosmetics-item__preview--nameplate &,
+  .duc-cosmetics-item__preview--card_decoration &,
+  .duc-cosmetics-item__preview--profile_effect & {
+    object-fit: cover;
   }
 }
 
