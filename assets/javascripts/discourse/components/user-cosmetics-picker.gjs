@@ -3,14 +3,15 @@ import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
+import { service } from "@ember/service";
 import { trustHTML } from "@ember/template";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
+import { enabledCosmeticKinds } from "../lib/duc-cosmetic-kinds";
 import { t } from "../lib/duc-i18n";
 
-const KINDS = ["avatar_frame", "nameplate", "card_decoration", "profile_effect"];
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
 
 function safeHexColor(value) {
@@ -23,9 +24,9 @@ function safeColorStyle(property, value) {
 }
 
 export default class UserCosmeticsPicker extends Component {
-  kinds = KINDS;
+  @service siteSettings;
 
-  @tracked activeKind = KINDS[0];
+  @tracked activeKind = null;
   @tracked items = null;
   @tracked active = null;
   @tracked loading = true;
@@ -34,7 +35,12 @@ export default class UserCosmeticsPicker extends Component {
 
   constructor() {
     super(...arguments);
+    this.activeKind = this.kinds[0] ?? null;
     this.load();
+  }
+
+  get kinds() {
+    return enabledCosmeticKinds(this.siteSettings);
   }
 
   @action
@@ -42,11 +48,20 @@ export default class UserCosmeticsPicker extends Component {
     this.loading = true;
     this.errorMessage = null;
 
+    const kinds = this.kinds;
+
+    if (!kinds.length) {
+      this.items = {};
+      this.active = {};
+      this.loading = false;
+      return;
+    }
+
     try {
       const response = await ajax("/user-cosmetics/mine.json");
       const decorated = {};
 
-      KINDS.forEach((kind) => {
+      kinds.forEach((kind) => {
         decorated[kind] = (response.items?.[kind] ?? []).map((item) =>
           this.decorate(item)
         );
@@ -101,10 +116,14 @@ export default class UserCosmeticsPicker extends Component {
   }
 
   get currentActiveId() {
-    return this.active ? this.active[this.activeKind] : null;
+    return this.activeKind && this.active ? this.active[this.activeKind] : null;
   }
 
   get currentItems() {
+    if (!this.activeKind) {
+      return [];
+    }
+
     const list = this.items?.[this.activeKind] ?? [];
     const activeId = this.currentActiveId;
 
@@ -126,7 +145,9 @@ export default class UserCosmeticsPicker extends Component {
   }
 
   get currentKindLabel() {
-    return t(`discourse_user_cosmetics.kinds.${this.activeKind}`);
+    return this.activeKind
+      ? t(`discourse_user_cosmetics.kinds.${this.activeKind}`)
+      : "";
   }
 
   get currentItemCountLabel() {
@@ -137,6 +158,10 @@ export default class UserCosmeticsPicker extends Component {
 
   @action
   setKind(kind, event) {
+    if (!this.kinds.includes(kind)) {
+      return;
+    }
+
     this.activeKind = kind;
     event?.currentTarget?.scrollIntoView({
       behavior: "smooth",
@@ -147,7 +172,7 @@ export default class UserCosmeticsPicker extends Component {
 
   @action
   async equip(item) {
-    if (!item.owned || this.savingId) {
+    if (!this.activeKind || !item.owned || this.savingId) {
       return;
     }
 
@@ -171,6 +196,10 @@ export default class UserCosmeticsPicker extends Component {
 
   @action
   async unequip() {
+    if (!this.activeKind) {
+      return;
+    }
+
     const kind = this.activeKind;
     const previous = this.active ? this.active[kind] : null;
 
@@ -201,23 +230,25 @@ export default class UserCosmeticsPicker extends Component {
         <p>{{t "discourse_user_cosmetics.picker.subtitle"}}</p>
       </header>
 
-      <div
-        class="duc-cosmetics-tabs"
-        role="tablist"
-        aria-label={{t "discourse_user_cosmetics.preferences.title"}}
-      >
-        {{#each this.tabs as |tab|}}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={{if tab.active "true" "false"}}
-            class="duc-cosmetics-tab {{if tab.active 'active'}}"
-            {{on "click" (fn this.setKind tab.kind)}}
-          >
-            {{tab.label}}
-          </button>
-        {{/each}}
-      </div>
+      {{#if this.activeKind}}
+        <div
+          class="duc-cosmetics-tabs"
+          role="tablist"
+          aria-label={{t "discourse_user_cosmetics.preferences.title"}}
+        >
+          {{#each this.tabs as |tab|}}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={{if tab.active "true" "false"}}
+              class="duc-cosmetics-tab {{if tab.active 'active'}}"
+              {{on "click" (fn this.setKind tab.kind)}}
+            >
+              {{tab.label}}
+            </button>
+          {{/each}}
+        </div>
+      {{/if}}
 
       <div class="duc-cosmetics-page__body">
         {{#if this.loading}}
@@ -228,11 +259,11 @@ export default class UserCosmeticsPicker extends Component {
             <DButton
               @icon="rotate"
               @action={{this.load}}
-              @translatedLabel={{t "discourse_user_cosmetics.picker.title"}}
+              @translatedLabel={{t "discourse_user_cosmetics.picker.retry"}}
               class="btn-default"
             />
           </div>
-        {{else}}
+        {{else if this.activeKind}}
           <div class="duc-cosmetics-section-heading">
             <div>
               <h3>{{this.currentKindLabel}}</h3>
@@ -320,6 +351,10 @@ export default class UserCosmeticsPicker extends Component {
               {{t "discourse_user_cosmetics.picker.none_for_kind"}}
             </p>
           {{/if}}
+        {{else}}
+          <p class="duc-cosmetics-empty">
+            {{t "discourse_user_cosmetics.picker.none_enabled"}}
+          </p>
         {{/if}}
       </div>
     </section>
