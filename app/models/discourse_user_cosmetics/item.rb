@@ -44,10 +44,13 @@ module ::DiscourseUserCosmetics
               }, allow_nil: true
     validate :slug_unique_within_kind
     validate :validate_image_asset
+    validate :kind_cannot_change, on: :update
 
     before_validation :ensure_slug
     before_destroy :clear_active_selections
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
+    after_update_commit :clear_invalid_active_selections_after_access_change,
+                        if: :access_restricting_update?
     after_destroy :bump_cosmetics_cache
 
     scope :enabled, -> { where(enabled: true) }
@@ -89,6 +92,16 @@ module ::DiscourseUserCosmetics
 
     private
 
+    def access_restricting_update?
+      disabled_now = saved_change_to_enabled? && !enabled?
+      default_removed = saved_change_to_is_default? && !is_default?
+      disabled_now || default_removed
+    end
+
+    def clear_invalid_active_selections_after_access_change
+      DiscourseUserCosmetics::SelectionService.clear_invalid_for_item!(self)
+    end
+
     def clear_active_selections
       DiscourseUserCosmetics::SelectionService.clear_item!(self, bump: false)
     end
@@ -108,6 +121,10 @@ module ::DiscourseUserCosmetics
         upload: image_upload,
         url: image_url,
       )
+    end
+
+    def kind_cannot_change
+      errors.add(:kind, :invalid) if will_save_change_to_kind?
     end
 
     def slug_unique_within_kind
