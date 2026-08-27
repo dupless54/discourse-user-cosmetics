@@ -1,0 +1,62 @@
+name: PR7 Runtime Test
+
+on:
+  push:
+    branches:
+      - feat/native-cosmetics-preferences
+
+permissions:
+  contents: read
+
+jobs:
+  discourse-frontend:
+    runs-on: ubuntu-latest
+    container: discourse/discourse_test:release
+    timeout-minutes: 25
+    env:
+      RAILS_ENV: test
+      PGUSER: discourse
+      PGPASSWORD: discourse
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Discourse
+        uses: actions/checkout@v4
+        with:
+          repository: discourse/discourse
+          path: discourse
+          fetch-depth: 1
+
+      - name: Checkout plugin branch
+        uses: actions/checkout@v4
+        with:
+          path: discourse/plugins/discourse-user-cosmetics
+          fetch-depth: 1
+
+      - name: Prepare Discourse test environment
+        working-directory: discourse
+        run: |
+          chown root:root .
+          redis-server /etc/redis/redis.conf &
+          chown -R postgres /var/run/postgresql
+          sudo -E -u postgres script/start_test_db.rb
+          sudo -u postgres psql -c "CREATE ROLE $PGUSER LOGIN SUPERUSER PASSWORD '$PGPASSWORD';" || true
+          ln -s /var/www/discourse/vendor/bundle vendor/bundle
+          bundle config --local path vendor/bundle
+          bundle config --local deployment true
+          bundle config --local without development
+          bundle install --jobs $(($(nproc) - 1))
+          pnpm install --frozen-lockfile
+
+      - name: Load plugin Ruby
+        working-directory: discourse
+        run: bin/rails runner 'abort "plugin disabled" unless SiteSetting.discourse_user_cosmetics_enabled; puts "plugin ruby load OK"'
+
+      - name: Build Ember with plugin
+        working-directory: discourse
+        run: script/assemble_ember_build.rb
+
+      - name: Run plugin QUnit target
+        working-directory: discourse
+        run: bin/rake 'plugin:qunit[discourse-user-cosmetics]'
