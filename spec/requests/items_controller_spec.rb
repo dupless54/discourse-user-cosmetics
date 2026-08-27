@@ -53,7 +53,7 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
   end
 
   it "does not expose restricted group names through the user catalog" do
-    restricted_group = Fabricate(:group, name: "private-cosmetics-group")
+    restricted_group = Fabricate(:group, name: "private-cosmetic")
     frame = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Private frame")
     frame.item_groups.create!(group: restricted_group)
 
@@ -64,6 +64,6 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
       response.parsed_body.dig("items", "avatar_frame").find { |item| item["id"] == frame.id }
     expect(serialized).to include("owned" => false)
     expect(serialized).not_to have_key("group_names")
-    expect(response.body).not_to include("private-cosmetics-group")
+    expect(response.body).not_to include("private-cosmetic")
   end
 end
