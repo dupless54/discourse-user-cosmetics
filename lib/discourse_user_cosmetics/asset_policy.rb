@@ -6,7 +6,7 @@ module ::DiscourseUserCosmetics
   class AssetPolicy
     ALLOWED_UPLOAD_EXTENSIONS = %w[png jpg jpeg gif webp].freeze
     SAFE_RELATIVE_PREFIXES = %w[/uploads/ /plugins/discourse-user-cosmetics/].freeze
-    UNSAFE_CSS_STRING_CHARACTERS = /[\x00-\x1F\x7F"\\]/
+    UNSAFE_CSS_STRING_CHARACTERS = /[\x00-\x1F\x7F"\\<>]/
 
     def self.validate(record, upload_id:, upload:, url:, attribute: :image_url)
       validate_upload(record, upload_id: upload_id, upload: upload, attribute: attribute)
