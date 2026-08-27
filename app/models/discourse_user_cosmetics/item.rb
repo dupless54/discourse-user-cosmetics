@@ -69,7 +69,9 @@ module ::DiscourseUserCosmetics
 
     def resolved_image_url
       return image_upload.url if image_upload
-      image_url.presence
+      return image_url if DiscourseUserCosmetics::AssetPolicy.valid_url?(image_url)
+
+      nil
     end
 
     def resolved_effect_inner_width
