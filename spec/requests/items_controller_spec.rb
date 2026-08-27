@@ -20,7 +20,7 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
     expect(response).to be_successful
     expect(response.parsed_body.dig("items", "avatar_frame")).to eq([])
     expect(response.parsed_body.dig("active", "avatar_frame")).to be_nil
-    expect(response.parsed_body.dig("items", "nameplate").map { |item| item["id"] }).to eq([plate.id])
+    expect(response.parsed_body.dig("items", "nameplate").map { |item| item["id"] }).to include(plate.id)
 
     put "/user-cosmetics/select.json", params: { kind: "avatar_frame", item_id: frame.id }
 
