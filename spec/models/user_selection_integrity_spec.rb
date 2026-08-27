@@ -54,7 +54,7 @@ RSpec.describe "DiscourseUserCosmetics selection integrity" do
     expect(selection.avatar_frame_item_id).to eq(item.id)
   end
 
-  it "clears active selections when a catalog item is disabled" do
+  it "clears active selections automatically when a catalog item is disabled" do
     item = DiscourseUserCosmetics::Item.create!(kind: "nameplate", name: "Temporary plate")
 
     DiscourseUserCosmetics::SelectionService.select!(
@@ -64,9 +64,48 @@ RSpec.describe "DiscourseUserCosmetics selection integrity" do
     )
 
     item.update!(enabled: false)
-    DiscourseUserCosmetics::SelectionService.clear_invalid_for_item!(item)
 
     selection = DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id)
     expect(selection.nameplate_item_id).to be_nil
+  end
+
+  it "clears a public selection when a new group restriction removes access" do
+    item = DiscourseUserCosmetics::Item.create!(kind: "card_decoration", name: "Public card")
+    restricted_group = Fabricate(:group)
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "card_decoration",
+      item_id: item.id,
+    )
+
+    item.item_groups.create!(group: restricted_group)
+
+    selection = DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id)
+    expect(selection.card_decoration_item_id).to be_nil
+  end
+
+  it "clears active selections when an item is destroyed directly" do
+    item = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Deleted frame")
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+
+    item.destroy!
+
+    selection = DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id)
+    expect(selection.avatar_frame_item_id).to be_nil
+  end
+
+  it "does not allow a persisted catalog item to change kind" do
+    item = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Stable kind")
+
+    item.kind = "nameplate"
+
+    expect(item).not_to be_valid
+    expect(item.errors[:kind]).to be_present
   end
 end
