@@ -33,3 +33,6 @@ Run targeted checks for changed behavior. Never claim an unrun test passed; repo
 Preserve unrelated work and `.claude/settings.local.json`. No force-push/reset/clean/branch deletion/deploy/destructive DB actions. Commit/push/PR/merge only when explicitly authorized by the current task. Prefer symbol/path-targeted reads and diffs over broad repo scans or repeated summaries.
 
 Reusable task procedures live under `.agents/skills/`; read only the matching `SKILL.md`, including `task-packet` for non-trivial work.
+
+## Adaptive model / effort routing
+Classify execution risk with `docs/ai/EFFORT_ROUTER.md` before broad reads. Start at the lowest sufficient tier: T0 mechanical, T1 routine, T2 high-risk, T3 exceptional. Escalate for risk/ambiguity rather than task size, and de-escalate when the risky phase ends. Use platform-native workers under `.claude/agents/` or `.codex/agents/` when supported; never trade away correctness, security, or validation to save tokens.
