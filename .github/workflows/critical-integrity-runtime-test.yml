@@ -10,6 +10,7 @@ on:
       - fix/deleted-group-item-group-cleanup
       - fix/deleted-user-cosmetic-reference-cleanup
       - fix/private-stylesheet-access
+      - fix/username-stylesheet-invalidation
 
 permissions:
   contents: read
