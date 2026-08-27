@@ -13,7 +13,7 @@ module ::DiscourseUserCosmetics
 
       grouped =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
-          memo[kind] = items.select { |i| i.kind == kind }.map { |item| serialize_for_user(item) }
+          memo[kind] = items.select { |item| item.kind == kind }.map { |item| serialize_for_user(item) }
         end
 
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: current_user.id)
@@ -28,22 +28,11 @@ module ::DiscourseUserCosmetics
     # PUT /user-cosmetics/select.json { kind:, item_id: }
     # item_id may be blank/nil to unequip that slot.
     def select
-      kind = params[:kind].to_s
-      raise Discourse::InvalidParameters.new(:kind) unless DiscourseUserCosmetics::Item::KINDS.include?(kind)
-
-      item_id = params[:item_id].presence
-
-      if item_id
-        item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
-        raise Discourse::NotFound unless item
-        raise Discourse::InvalidAccess unless item.usable_by?(current_user)
-      end
-
-      selection = DiscourseUserCosmetics::UserSelection.find_or_initialize_by(user_id: current_user.id)
-      selection.public_send("#{DiscourseUserCosmetics::UserSelection.field_for(kind)}=", item_id)
-      selection.save!
-
-      DiscourseUserCosmetics::Presenter.bump_version!
+      DiscourseUserCosmetics::SelectionService.select!(
+        user: current_user,
+        kind: params[:kind],
+        item_id: params[:item_id].presence,
+      )
 
       render json: success_json
     end
@@ -66,8 +55,8 @@ module ::DiscourseUserCosmetics
         group_names: item.groups.map(&:name),
       }
 
-      # Profil efektlerinde tekil bir image_url yoktur (katmanlardan oluşur);
-      # seçim ekranındaki önizleme için temsili görseli buradan alıyoruz.
+      # Profile effects use positioned layers rather than one canonical image;
+      # expose a representative image for the picker preview.
       base[:image_url] = DiscourseUserCosmetics::Presenter.effect_fields(item)[:image_url] if item.kind == "profile_effect"
 
       base
