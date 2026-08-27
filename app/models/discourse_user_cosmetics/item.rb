@@ -46,7 +46,9 @@ module ::DiscourseUserCosmetics
     validate :validate_image_asset
 
     before_validation :ensure_slug
+    before_destroy :clear_active_selections
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
+    after_destroy :bump_cosmetics_cache
 
     scope :enabled, -> { where(enabled: true) }
     scope :for_kind, ->(kind) { where(kind: kind) }
@@ -86,6 +88,14 @@ module ::DiscourseUserCosmetics
     end
 
     private
+
+    def clear_active_selections
+      DiscourseUserCosmetics::SelectionService.clear_item!(self, bump: false)
+    end
+
+    def bump_cosmetics_cache
+      DiscourseUserCosmetics::Presenter.bump_version!
+    end
 
     def sync_image_upload_reference
       ::UploadReference.ensure_exist!(upload_ids: [image_upload_id], target: self)
