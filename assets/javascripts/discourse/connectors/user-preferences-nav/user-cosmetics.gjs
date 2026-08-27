@@ -1,11 +1,12 @@
 import Component from "@glimmer/component";
 import { LinkTo } from "@ember/routing";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
+import { hasEnabledCosmetics } from "../../lib/duc-cosmetic-kinds";
 import { t } from "../../lib/duc-i18n";
 
 export default class UserCosmeticsPreferencesNav extends Component {
   static shouldRender(_args, { siteSettings }) {
-    return siteSettings.discourse_user_cosmetics_enabled;
+    return hasEnabledCosmetics(siteSettings);
   }
 
   <template>
