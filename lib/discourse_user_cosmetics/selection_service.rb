@@ -8,6 +8,8 @@ module ::DiscourseUserCosmetics
 
       item = nil
       if item_id.present?
+        raise Discourse::InvalidAccess unless DiscourseUserCosmetics::Item.kind_enabled?(kind)
+
         item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
         raise Discourse::NotFound unless item
         raise Discourse::InvalidAccess unless item.usable_by?(user)
