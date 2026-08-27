@@ -5,6 +5,12 @@ module ::DiscourseUserCosmetics
     self.table_name = "discourse_user_cosmetics_items"
 
     KINDS = %w[avatar_frame nameplate card_decoration profile_effect].freeze
+    SITE_SETTING_FOR_KIND = {
+      "avatar_frame" => :discourse_user_cosmetics_avatar_frames_enabled,
+      "nameplate" => :discourse_user_cosmetics_nameplates_enabled,
+      "card_decoration" => :discourse_user_cosmetics_card_decorations_enabled,
+      "profile_effect" => :discourse_user_cosmetics_profile_effects_enabled,
+    }.freeze
     HEX_COLOR_REGEX = /\A#[0-9a-fA-F]{3}([0-9a-fA-F]{3}([0-9a-fA-F]{2})?)?\z/
     DEFAULT_EFFECT_INNER_WIDTH = 1200
 
@@ -46,6 +52,11 @@ module ::DiscourseUserCosmetics
     scope :for_kind, ->(kind) { where(kind: kind) }
     scope :ordered, -> { order(:sort_order, :id) }
 
+    def self.kind_enabled?(kind)
+      setting = SITE_SETTING_FOR_KIND[kind.to_s]
+      setting && SiteSetting.public_send(setting)
+    end
+
     # An item with no group restrictions is available to every logged in user.
     def public_access?
       !item_groups.exists?
@@ -70,7 +81,7 @@ module ::DiscourseUserCosmetics
     end
 
     def self.usable_item_ids_for(user, kind)
-      return [] unless user
+      return [] unless user && kind_enabled?(kind)
       for_kind(kind).enabled.select { |item| item.usable_by?(user) }.map(&:id)
     end
 
