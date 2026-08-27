@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
+import { trustHTML } from "@ember/template";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
@@ -10,6 +11,16 @@ import dIcon from "discourse/ui-kit/helpers/d-icon";
 import { t } from "../lib/duc-i18n";
 
 const KINDS = ["avatar_frame", "nameplate", "card_decoration", "profile_effect"];
+const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
+
+function safeHexColor(value) {
+  return typeof value === "string" && HEX_COLOR_REGEX.test(value) ? value : null;
+}
+
+function safeColorStyle(property, value) {
+  const color = safeHexColor(value);
+  return color ? trustHTML(`${property}: ${color};`) : null;
+}
 
 export default class UserCosmeticsPicker extends Component {
   kinds = KINDS;
@@ -59,7 +70,7 @@ export default class UserCosmeticsPicker extends Component {
     return {
       ...item,
       previewStyle: this.previewStyleFor(item),
-      rarityStyle: item.rarity_color ? `color: ${item.rarity_color};` : null,
+      rarityStyle: safeColorStyle("color", item.rarity_color),
       lockedTooltip: groupNamesLabel
         ? t("discourse_user_cosmetics.picker.locked_group_tooltip", {
             groups: groupNamesLabel,
@@ -69,15 +80,16 @@ export default class UserCosmeticsPicker extends Component {
   }
 
   previewStyleFor(item) {
-    if (item.image_url) {
-      return `background-image: url("${item.image_url}");`;
+    const from = safeHexColor(item.gradient_from);
+    const to = safeHexColor(item.gradient_to);
+
+    if (from && to) {
+      return trustHTML(
+        `background-image: linear-gradient(135deg, ${from}, ${to});`
+      );
     }
 
-    if (item.gradient_from && item.gradient_to) {
-      return `background-image: linear-gradient(135deg, ${item.gradient_from}, ${item.gradient_to});`;
-    }
-
-    return "";
+    return null;
   }
 
   get tabs() {
@@ -250,6 +262,14 @@ export default class UserCosmeticsPicker extends Component {
                       duc-cosmetics-item__preview--{{this.activeKind}}"
                     style={{item.previewStyle}}
                   >
+                    {{#if item.image_url}}
+                      <img
+                        class="duc-cosmetics-item__preview-image"
+                        src={{item.image_url}}
+                        alt=""
+                      />
+                    {{/if}}
+
                     {{#unless item.owned}}
                       <span class="duc-cosmetics-item__lock" title={{item.lockedTooltip}}>
                         {{dIcon "lock"}}
