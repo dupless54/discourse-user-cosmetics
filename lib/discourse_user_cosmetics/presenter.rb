@@ -7,6 +7,7 @@ module ::DiscourseUserCosmetics
   # user entitlement changes can invalidate only the affected user's cache.
   class Presenter
     CACHE_NAMESPACE = "discourse_user_cosmetics"
+    STYLESHEET_KINDS = %w[avatar_frame nameplate].freeze
 
     def self.cache_version
       Discourse.cache.fetch("#{CACHE_NAMESPACE}/version", expires_in: 30.days) { 1 }
@@ -32,6 +33,44 @@ module ::DiscourseUserCosmetics
         SecureRandom.hex(12),
         expires_in: 30.days,
       )
+    end
+
+    # frames.css is a single public stylesheet shared by all visitors. It needs
+    # a version independent from per-user summary caches so a group membership
+    # change can invalidate CSS without flushing every user's presentation data.
+    def self.stylesheet_version
+      Discourse.cache.fetch("#{CACHE_NAMESPACE}/stylesheet-version", expires_in: 30.days) { 1 }
+    end
+
+    def self.bump_stylesheet_version!
+      Discourse.cache.write(
+        "#{CACHE_NAMESPACE}/stylesheet-version",
+        SecureRandom.hex(12),
+        expires_in: 30.days,
+      )
+    end
+
+    def self.invalidate_group_membership!(user_id:, group_id:)
+      return if user_id.blank?
+
+      bump_user_version!(user_id)
+      return if group_id.blank?
+
+      selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
+      return unless selection
+
+      selected_stylesheet_item_ids =
+        STYLESHEET_KINDS.filter_map do |kind|
+          selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
+        end
+
+      return if selected_stylesheet_item_ids.empty?
+      return unless DiscourseUserCosmetics::ItemGroup.where(
+        group_id: group_id,
+        item_id: selected_stylesheet_item_ids,
+      ).exists?
+
+      bump_stylesheet_version!
     end
 
     def self.feature_gate_signature
