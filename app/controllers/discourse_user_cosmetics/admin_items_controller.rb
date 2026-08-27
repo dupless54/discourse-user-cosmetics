@@ -4,11 +4,8 @@ module ::DiscourseUserCosmetics
   class AdminItemsController < ::Admin::AdminController
     requires_plugin DiscourseUserCosmetics::PLUGIN_NAME
 
-    # Belt-and-suspenders: Admin::AdminController already restricts to staff,
-    # but management of cosmetics (including image uploads) is intentionally
-    # limited to full admins only. Written against only `current_user` and
-    # `Discourse::InvalidAccess` (both rock solid) rather than a helper
-    # method name that could vary between Discourse versions.
+    # Admin::AdminController already restricts this surface to staff. Cosmetic
+    # catalog management is intentionally limited further to full admins.
     before_action :ensure_current_user_is_admin
 
     # GET /admin/plugins/user-cosmetics/items.json?kind=avatar_frame
@@ -96,43 +93,43 @@ module ::DiscourseUserCosmetics
     end
 
     def save_item(item)
-      if item.save
-        group_ids = Array(params.dig(:item, :group_ids)).map(&:to_i).reject(&:zero?)
-        item.item_groups.destroy_all
-        group_ids.uniq.each { |gid| item.item_groups.create!(group_id: gid) }
+      serialized = nil
 
+      ActiveRecord::Base.transaction do
+        item.save!
+        replace_groups!(item)
         save_effect_layers(item) if item.kind == "profile_effect"
-
-        DiscourseUserCosmetics::Presenter.bump_version!
-        render json: admin_serialize(item.reload)
-      else
-        render_json_error(item)
+        serialized = admin_serialize(item.reload)
       end
+
+      DiscourseUserCosmetics::Presenter.bump_version!
+      render json: serialized
+    rescue ActiveRecord::RecordInvalid => e
+      render_json_error(e.record)
     end
 
-    # İŞTE MUCİZE BURADA: Tüm verileri kusursuz bir şekilde yakalıyoruz!
+    def replace_groups!(item)
+      group_ids = Array(params.dig(:item, :group_ids)).map(&:to_i).reject(&:zero?).uniq
+
+      item.item_groups.destroy_all
+      group_ids.each { |group_id| item.item_groups.create!(group_id: group_id) }
+    end
+
     def save_effect_layers(item)
       item.effect_layers.destroy_all
 
-      # Rails Strong Parameters (Dizi Koruması) zırhını kaldırıp veriyi saf halinde (unsafe) alıyoruz
-      raw_item = params.to_unsafe_h[:item] || {}
-      layers = raw_item[:layers] || []
-      
-      # Ember, dizileri bazen numaralı hash { "0" => {...}, "1" => {...} } olarak gönderir
-      layers = layers.values if layers.is_a?(Hash)
-
-      layers.each do |layer|
-        # Ember camelCase gönderiyor olabilir, bu yüzden hem snake_case hem camelCase arıyoruz
-        anchor = (layer[:anchor] || layer[:Anchor]).to_s.downcase
+      effect_layers_params.each do |layer_params|
+        layer = layer_params.to_h.with_indifferent_access
+        anchor = layer[:anchor].to_s.downcase
         stack_order = (layer[:stack_order] || layer[:stackOrder]).to_s.downcase
-        
+
         next unless DiscourseUserCosmetics::EffectLayer::ANCHORS.include?(anchor)
         next unless DiscourseUserCosmetics::EffectLayer::STACK_ORDERS.include?(stack_order)
 
-        # Görsel ID'sini ve linkini her iki isimlendirme formatıyla da kontrol ederek yakalıyoruz
         image_upload_id = (layer[:image_upload_id] || layer[:imageUploadId]).presence
-        image_url = (layer[:image_url] || layer[:imageUrl] || layer[:raw_image_url] || layer[:rawImageUrl]).presence
-        
+        image_url =
+          (layer[:image_url] || layer[:imageUrl] || layer[:raw_image_url] || layer[:rawImageUrl]).presence
+
         next if image_upload_id.blank? && image_url.blank?
 
         item.effect_layers.create!(
@@ -142,6 +139,28 @@ module ::DiscourseUserCosmetics
           image_url: image_upload_id.present? ? nil : image_url,
         )
       end
+    end
+
+    def effect_layers_params
+      permitted =
+        params.require(:item).permit(
+          layers: %i[
+            anchor
+            stack_order
+            stackOrder
+            image_upload_id
+            imageUploadId
+            image_url
+            imageUrl
+            raw_image_url
+            rawImageUrl
+          ],
+        )
+
+      layers = permitted[:layers]
+      return [] if layers.blank?
+
+      layers.is_a?(ActionController::Parameters) ? layers.values : Array(layers)
     end
 
     def admin_serialize(item)
@@ -170,7 +189,9 @@ module ::DiscourseUserCosmetics
         effect_overflow_top: item.effect_overflow_top || 0,
         effect_overflow_bottom: item.effect_overflow_bottom || 0,
         effect_overflow_horizontal: item.effect_overflow_horizontal || 0,
-        layers: item.effect_layers.map { |l| admin_serialize_layer(l) },
+        effect_side_offset_top: item.effect_side_offset_top || 0,
+        effect_side_offset_bottom: item.effect_side_offset_bottom || 0,
+        layers: item.effect_layers.map { |layer| admin_serialize_layer(layer) },
       }
     end
 
@@ -202,6 +223,8 @@ module ::DiscourseUserCosmetics
         :effect_overflow_top,
         :effect_overflow_bottom,
         :effect_overflow_horizontal,
+        :effect_side_offset_top,
+        :effect_side_offset_bottom,
       )
     end
   end
