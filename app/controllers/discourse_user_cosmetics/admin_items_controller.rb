@@ -37,13 +37,7 @@ module ::DiscourseUserCosmetics
     # DELETE /admin/plugins/user-cosmetics/items/:id.json
     def destroy
       item = DiscourseUserCosmetics::Item.find(params[:id])
-
-      ActiveRecord::Base.transaction do
-        DiscourseUserCosmetics::SelectionService.clear_item!(item, bump: false)
-        item.destroy!
-      end
-
-      DiscourseUserCosmetics::Presenter.bump_version!
+      item.destroy!
       render json: success_json
     end
 
