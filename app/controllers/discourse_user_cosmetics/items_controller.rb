@@ -67,7 +67,6 @@ module ::DiscourseUserCosmetics
         rarity_label: item.rarity_label,
         rarity_color: item.rarity_color,
         owned: item.usable_by?(current_user),
-        group_names: item.groups.map(&:name),
       }
 
       # Profile effects use positioned layers rather than one canonical image;
