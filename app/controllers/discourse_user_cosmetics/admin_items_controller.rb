@@ -37,7 +37,12 @@ module ::DiscourseUserCosmetics
     # DELETE /admin/plugins/user-cosmetics/items/:id.json
     def destroy
       item = DiscourseUserCosmetics::Item.find(params[:id])
-      item.destroy!
+
+      ActiveRecord::Base.transaction do
+        DiscourseUserCosmetics::SelectionService.clear_item!(item, bump: false)
+        item.destroy!
+      end
+
       DiscourseUserCosmetics::Presenter.bump_version!
       render json: success_json
     end
@@ -51,6 +56,7 @@ module ::DiscourseUserCosmetics
         ui.granted_by_id = current_user.id
       end
 
+      # A grant can make a previously stale selection usable again.
       DiscourseUserCosmetics::Presenter.bump_version!
       render json: success_json.merge(owners: owner_usernames(item))
     end
@@ -60,9 +66,10 @@ module ::DiscourseUserCosmetics
       item = DiscourseUserCosmetics::Item.find(params[:id])
       user = find_user!(params[:username])
 
+      # UserItem#after_destroy clears the active slot only when this revoke
+      # actually removes the user's final entitlement to the item.
       DiscourseUserCosmetics::UserItem.where(item_id: item.id, user_id: user.id).destroy_all
 
-      DiscourseUserCosmetics::Presenter.bump_version!
       render json: success_json.merge(owners: owner_usernames(item))
     end
 
@@ -99,6 +106,7 @@ module ::DiscourseUserCosmetics
         item.save!
         replace_groups!(item)
         save_effect_layers(item) if item.kind == "profile_effect"
+        DiscourseUserCosmetics::SelectionService.clear_invalid_for_item!(item, bump: false)
         serialized = admin_serialize(item.reload)
       end
 
