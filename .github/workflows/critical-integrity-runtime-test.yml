@@ -11,6 +11,7 @@ on:
       - fix/deleted-user-cosmetic-reference-cleanup
       - fix/private-stylesheet-access
       - fix/username-stylesheet-invalidation
+      - perf/bulk-cosmetics-css-entitlements
 
 permissions:
   contents: read
