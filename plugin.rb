@@ -57,6 +57,14 @@ after_initialize do
     end
   end
 
+  DiscourseEvent.on(:user_added_to_group) do |user, _group, **_kwargs|
+    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
+  end
+
+  DiscourseEvent.on(:user_removed_from_group) do |user, _group|
+    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
+  end
+
   # --- expose "what am I wearing" on the serializers the front-end reads ---
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }
