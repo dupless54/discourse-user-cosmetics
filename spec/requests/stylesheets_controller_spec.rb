@@ -26,7 +26,8 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.media_type).to eq("text/css")
-    expect(response.headers["Cache-Control"]).to include("public", "no-cache", "must-revalidate")
+    expect(response.headers["Cache-Control"]).to include("public", "no-cache")
+    expect(response.headers["Cache-Control"]).not_to include("max-age")
     expect(response.body).to include(user.username_lower)
 
     first_etag = response.headers.fetch("ETag")
