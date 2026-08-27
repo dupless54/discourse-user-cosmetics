@@ -6,7 +6,7 @@ Canonical instructions for ChatGPT/Codex, Claude, and Gemini.
 Current source/tests > `docs/ai/CURRENT_STATE.md` > nearest local `AGENTS.md` > stable docs > plans/history. Read only the minimum context. Always read this file, then route by touched area:
 - models/controllers/admin behavior -> `app/AGENTS.md`
 - presenter/CSS/seeding helpers -> `lib/AGENTS.md`
-- Discourse/Glimmer/admin frontend -> `assets/javascripts/AGENTS.md`
+- Discourse/Glimmer/admin frontend -> `docs/ai/scopes/frontend/AGENTS.md`
 - migrations/schema -> `db/AGENTS.md`
 For multi-session work, use `docs/ai/work/<feature>/{state.md,progress.md,implementation-plan.md}` and read only the active slice.
 
