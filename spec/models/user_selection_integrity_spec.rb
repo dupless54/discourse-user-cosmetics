@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "DiscourseUserCosmetics selection integrity" do
+RSpec.describe DiscourseUserCosmetics::UserSelection do
   fab!(:user)
 
   before { enable_current_plugin }
