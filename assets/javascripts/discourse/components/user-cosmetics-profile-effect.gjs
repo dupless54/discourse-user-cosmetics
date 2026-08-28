@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import { get } from "@ember/object";
 import { modifier } from "ember-modifier";
 import { htmlSafe } from "@ember/template";
 
@@ -145,7 +146,7 @@ export default class UserCosmeticsProfileEffect extends Component {
   }
 
   get effect() {
-    return this.user?.cosmetics?.profile_effect;
+    return get(this.user, "cosmetics")?.profile_effect;
   }
 
   get globalStyle() {
