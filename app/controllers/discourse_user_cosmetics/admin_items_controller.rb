@@ -12,9 +12,12 @@ module ::DiscourseUserCosmetics
     def index
       items = DiscourseUserCosmetics::Item.ordered.includes(:groups, :image_upload, effect_layers: :image_upload)
       items = items.for_kind(params[:kind]) if params[:kind].present?
+      items = items.to_a
+      owner_counts =
+        DiscourseUserCosmetics::UserItem.where(item_id: items.map(&:id)).group(:item_id).count
 
       render json: {
-               items: items.map { |item| admin_serialize(item) },
+               items: items.map { |item| admin_serialize(item, owner_count: owner_counts.fetch(item.id, 0)) },
                groups: ::Group.order(:name).pluck(:id, :name).map { |id, name| { id: id, name: name } },
              }
     end
@@ -172,7 +175,9 @@ module ::DiscourseUserCosmetics
       layers.is_a?(ActionController::Parameters) ? layers.values : Array(layers)
     end
 
-    def admin_serialize(item)
+    def admin_serialize(item, owner_count: nil)
+      groups = item.groups.to_a
+
       {
         id: item.id,
         kind: item.kind,
@@ -190,9 +195,9 @@ module ::DiscourseUserCosmetics
         sort_order: item.sort_order,
         enabled: item.enabled,
         is_default: item.is_default,
-        group_ids: item.groups.pluck(:id),
-        group_names: item.groups.pluck(:name),
-        owner_count: item.user_items.count,
+        group_ids: groups.map(&:id),
+        group_names: groups.map(&:name),
+        owner_count: owner_count.nil? ? item.user_items.count : owner_count,
         created_at: item.created_at,
         effect_inner_width: item.resolved_effect_inner_width,
         effect_overflow_top: item.effect_overflow_top || 0,
