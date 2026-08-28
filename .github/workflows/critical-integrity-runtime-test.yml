@@ -29,6 +29,7 @@ on:
       - fix/admin-stale-cosmetic-upload-repair
       - fix/inherit-discourse-image-size-limit
       - fix/live-cross-browser-cosmetics-sync
+      - fix/cosmetics-entitlement-deeplink
 
 permissions:
   contents: read
