@@ -48,10 +48,10 @@ module ::DiscourseUserCosmetics
 
     before_validation :ensure_slug
     before_destroy :clear_active_selections
+    after_destroy :bump_cosmetics_cache
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
     after_update_commit :clear_invalid_active_selections_after_access_change,
                         if: :access_restricting_update?
-    after_destroy :bump_cosmetics_cache
 
     scope :enabled, -> { where(enabled: true) }
     scope :for_kind, ->(kind) { where(kind: kind) }
