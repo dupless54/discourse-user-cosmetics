@@ -16,7 +16,8 @@ RSpec.describe DiscourseUserCosmetics::EntitlementResolver do
     restricted_group = Fabricate(:group)
     item = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Extended frame")
     item.item_groups.create!(group: restricted_group)
-    item.define_singleton_method(:usable_by?) { |candidate| candidate.id == user.id }
+    allowed_user_id = user.id
+    item.define_singleton_method(:usable_by?) { |candidate| candidate.id == allowed_user_id }
 
     usable = described_class.usable_item_ids(user: user, items: [item])
 
