@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/critical-integrity-hardening
+      - fix/profile-effect-layer-validation
 
 permissions:
   contents: read

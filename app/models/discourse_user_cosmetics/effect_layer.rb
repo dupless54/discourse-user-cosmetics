@@ -15,6 +15,7 @@ module ::DiscourseUserCosmetics
     validates :stack_order, inclusion: { in: STACK_ORDERS }
     validates :image_url, length: { maximum: 1000 }, allow_blank: true
     validates :anchor, uniqueness: { scope: %i[item_id stack_order] }
+    validate :image_asset_present
     validate :validate_image_asset
 
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
@@ -27,6 +28,10 @@ module ::DiscourseUserCosmetics
     end
 
     private
+
+    def image_asset_present
+      errors.add(:image_url, :blank) if image_upload_id.blank? && image_url.blank?
+    end
 
     def sync_image_upload_reference
       ::UploadReference.ensure_exist!(upload_ids: [image_upload_id], target: self)
