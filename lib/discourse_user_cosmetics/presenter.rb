@@ -123,20 +123,35 @@ module ::DiscourseUserCosmetics
     end
 
     def self.build_summary(user)
+      result = DiscourseUserCosmetics::Item::KINDS.index_with(nil)
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user.id)
-      result = {}
+      return result unless selection
 
-      DiscourseUserCosmetics::Item::KINDS.each do |kind|
-        result[kind] = nil
-        next unless DiscourseUserCosmetics::Item.kind_enabled?(kind)
-        next unless selection
+      selected_by_kind =
+        DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
+          next unless DiscourseUserCosmetics::Item.kind_enabled?(kind)
 
-        item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
-        next unless item_id
+          item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
+          memo[kind] = item_id if item_id.present?
+        end
 
-        item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
-        next unless item
-        next unless item.usable_by?(user)
+      return result if selected_by_kind.empty?
+
+      items =
+        DiscourseUserCosmetics::Item.enabled
+          .where(id: selected_by_kind.values)
+          .includes(:image_upload, effect_layers: :image_upload)
+          .to_a
+      items_by_id = items.index_by(&:id)
+      usable_item_ids =
+        DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+          user: user,
+          items: items,
+        )
+
+      selected_by_kind.each do |kind, item_id|
+        item = items_by_id[item_id]
+        next unless item&.kind == kind && usable_item_ids.key?(item.id)
 
         result[kind] = serialize_item(item)
       end
