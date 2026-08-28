@@ -227,7 +227,8 @@ module ::DiscourseUserCosmetics
 
     def safe_admin_asset_url(url)
       return if url.blank?
-      return url if DiscourseUserCosmetics::AssetPolicy.valid_url?(url)
+
+      url if DiscourseUserCosmetics::AssetPolicy.valid_url?(url)
     end
 
     def item_params
