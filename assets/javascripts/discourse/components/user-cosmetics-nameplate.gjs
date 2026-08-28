@@ -1,4 +1,5 @@
 import Component from "@glimmer/component";
+import { get } from "@ember/object";
 import { htmlSafe } from "@ember/template";
 
 export default class UserCosmeticsNameplate extends Component {
@@ -11,7 +12,7 @@ export default class UserCosmeticsNameplate extends Component {
   }
 
   get nameplate() {
-    return this.user?.cosmetics?.nameplate;
+    return get(this.user, "cosmetics")?.nameplate;
   }
 
   get nameplateStyle() {
