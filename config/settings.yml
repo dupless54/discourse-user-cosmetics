@@ -26,6 +26,6 @@ plugins:
     client: true
 
   discourse_user_cosmetics_max_image_kb:
-    default: 2048
-    min: 32
-    max: 10240
+    default: 0
+    min: 0
+    max: 102400

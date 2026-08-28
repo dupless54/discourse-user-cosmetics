@@ -27,6 +27,7 @@ on:
       - ux/native-responsive-cosmetics-admin
       - audit/final-release-readiness
       - fix/admin-stale-cosmetic-upload-repair
+      - fix/inherit-discourse-image-size-limit
 
 permissions:
   contents: read
