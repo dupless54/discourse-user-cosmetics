@@ -338,6 +338,10 @@
     white-space: normal;
   }
 
+  .duc-admin-row-actions::before {
+    grid-row: 1 / span 2;
+  }
+
   .duc-admin-row-actions .btn {
     width: 100%;
     justify-content: flex-start;
