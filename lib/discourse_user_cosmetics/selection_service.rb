@@ -93,14 +93,7 @@ module ::DiscourseUserCosmetics
     end
 
     def self.publish_selection_change!(user:, kind:)
-      MessageBus.publish(
-        CHANGE_CHANNEL,
-        {
-          user_id: user.id,
-          username_lower: user.username_lower,
-          kind: kind,
-        },
-      )
+      MessageBus.publish(CHANGE_CHANNEL, { user_id: user.id, kind: kind })
     end
     private_class_method :publish_selection_change!
   end
