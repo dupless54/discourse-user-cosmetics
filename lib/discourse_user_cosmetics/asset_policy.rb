@@ -24,6 +24,16 @@ module ::DiscourseUserCosmetics
       false
     end
 
+    def self.maximum_image_kb
+      plugin_max_kb = SiteSetting.discourse_user_cosmetics_max_image_kb.to_i
+      discourse_max_kb = SiteSetting.max_image_size_kb.to_i
+
+      return discourse_max_kb unless plugin_max_kb.positive?
+      return plugin_max_kb unless discourse_max_kb.positive?
+
+      [plugin_max_kb, discourse_max_kb].min
+    end
+
     def self.validate_upload(record, upload_id:, upload:, attribute:)
       return if upload_id.blank?
 
@@ -37,7 +47,7 @@ module ::DiscourseUserCosmetics
         record.errors.add(attribute, I18n.t("discourse_user_cosmetics.errors.unsupported_image_format"))
       end
 
-      max_kb = SiteSetting.discourse_user_cosmetics_max_image_kb.to_i
+      max_kb = maximum_image_kb
       if max_kb.positive? && upload.filesize.to_i > max_kb.kilobytes
         record.errors.add(
           attribute,
