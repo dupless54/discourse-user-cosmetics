@@ -200,28 +200,65 @@
 // Admin page
 // ---------------------------------------------------------------------------
 .duc-admin-page {
-  max-width: 900px;
+  width: 100%;
+  max-width: 1040px;
+}
+
+.duc-admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.duc-admin-heading {
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 0.35em;
+  }
 }
 
 .duc-admin-intro {
+  max-width: 720px;
+  margin: 0;
   color: var(--primary-medium);
+}
+
+.duc-admin-new-item {
+  flex: 0 0 auto;
 }
 
 .duc-admin-tabs {
   display: flex;
-  gap: 0.5em;
+  gap: 0.25em;
+  margin-bottom: 1.25em;
+  overflow-x: auto;
   border-bottom: 1px solid var(--primary-low);
-  margin-bottom: 1em;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .duc-admin-tab {
-  background: none;
-  border: none;
-  padding: 0.6em 1em;
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--primary-medium);
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0.65em 0.9em;
+  border: 0;
   border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--primary-medium);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--primary);
+    background: var(--primary-very-low);
+    outline: none;
+  }
 
   &.active {
     color: var(--tertiary);
@@ -229,48 +266,78 @@
   }
 }
 
-.duc-admin-toolbar {
-  margin-bottom: 1em;
+.duc-admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .duc-admin-table {
   width: 100%;
   border-collapse: collapse;
 
+  th {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    font-weight: 600;
+  }
+
   th,
   td {
-    text-align: left;
-    padding: 0.6em 0.5em;
+    padding: 0.7em 0.6em;
     border-bottom: 1px solid var(--primary-low);
+    text-align: left;
     vertical-align: middle;
   }
+
+  tbody tr:hover {
+    background: var(--primary-very-low);
+  }
+}
+
+.duc-admin-preview-cell {
+  width: 52px;
 }
 
 .duc-admin-preview-swatch {
   width: 40px;
   height: 40px;
+  border: 1px solid var(--primary-low);
   border-radius: 50%;
   background-color: var(--primary-very-low);
-  background-size: cover;
   background-position: center;
+  background-size: cover;
+}
+
+.duc-admin-item-name {
+  font-weight: 600;
 }
 
 .duc-admin-default-badge {
+  display: inline-flex;
+  align-items: center;
   margin-left: 0.5em;
-  font-size: var(--font-down-2);
   padding: 0.1em 0.5em;
   border-radius: 999px;
   background: var(--tertiary-low);
   color: var(--tertiary);
+  font-size: var(--font-down-2);
 }
 
 .duc-admin-row-actions {
   white-space: nowrap;
+
+  .btn + .btn {
+    margin-left: 0.25em;
+  }
 }
 
 .duc-admin-empty {
+  margin: 0;
+  padding: 1.5em;
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--primary-very-low);
   color: var(--primary-medium);
-  padding: 1.5em 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +537,146 @@
   display: flex;
   gap: 0.5em;
   margin-top: 1em;
+}
+
+@media (max-width: 700px) {
+  .duc-admin-header {
+    flex-direction: column;
+    gap: 0.85em;
+  }
+
+  .duc-admin-new-item {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .duc-admin-tabs {
+    margin-inline: -0.5em;
+    padding-inline: 0.5em;
+  }
+
+  .duc-admin-table-wrap {
+    overflow: visible;
+  }
+
+  .duc-admin-table,
+  .duc-admin-table tbody,
+  .duc-admin-table tr,
+  .duc-admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .duc-admin-table thead {
+    display: none;
+  }
+
+  .duc-admin-table tbody {
+    display: grid;
+    gap: 0.75em;
+  }
+
+  .duc-admin-table tbody tr {
+    position: relative;
+    box-sizing: border-box;
+    padding: 0.85em;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius, 6px);
+    background: var(--secondary);
+  }
+
+  .duc-admin-table tbody tr:hover {
+    background: var(--secondary);
+  }
+
+  .duc-admin-table td {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    padding: 0.45em 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .duc-admin-table td::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .duc-admin-table .duc-admin-preview-cell {
+    position: absolute;
+    top: 0.85em;
+    left: 0.85em;
+    width: 44px;
+    padding: 0;
+  }
+
+  .duc-admin-table .duc-admin-preview-cell::before {
+    display: none;
+  }
+
+  .duc-admin-table .duc-admin-name-cell {
+    min-height: 44px;
+    padding-left: 56px;
+    justify-content: flex-end;
+  }
+
+  .duc-admin-name-cell::before {
+    display: none;
+  }
+
+  .duc-admin-item-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .duc-admin-default-badge {
+    margin-left: 0.35em;
+  }
+
+  .duc-admin-row-actions {
+    justify-content: flex-end;
+    white-space: normal;
+  }
+
+  .duc-admin-form {
+    padding: 0.85em;
+  }
+
+  .duc-admin-field input[type="text"],
+  .duc-admin-field input[type="number"],
+  .duc-admin-url-input,
+  .duc-admin-owners-add input {
+    box-sizing: border-box;
+    max-width: none;
+  }
+
+  .duc-admin-field-row {
+    gap: 0.85em;
+  }
+
+  .duc-admin-field-row > label {
+    flex: 1 1 140px;
+  }
+
+  .duc-layer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .duc-admin-owners-add {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .duc-admin-form-actions {
+    flex-wrap: wrap;
+  }
 }
 
 // ---------------------------------------------------------------------------
