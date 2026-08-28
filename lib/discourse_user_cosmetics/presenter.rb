@@ -6,11 +6,12 @@ module ::DiscourseUserCosmetics
   # cosmetics on every request. Catalog changes use one global version while
   # user entitlement changes can invalidate only the affected user's cache.
   class Presenter
-    CACHE_NAMESPACE = "discourse_user_cosmetics"
+    CACHE_SCHEMA_VERSION = 2
+    CACHE_NAMESPACE = "discourse_user_cosmetics/v#{CACHE_SCHEMA_VERSION}"
     STYLESHEET_KINDS = %w[avatar_frame nameplate].freeze
 
     def self.cache_version
-      Discourse.cache.fetch("#{CACHE_NAMESPACE}/version", expires_in: 30.days) { 1 }
+      Discourse.cache.fetch("#{CACHE_NAMESPACE}/version", expires_in: 30.days) { CACHE_SCHEMA_VERSION }
     end
 
     def self.bump_version!
@@ -22,7 +23,7 @@ module ::DiscourseUserCosmetics
     end
 
     def self.user_cache_version(user_id)
-      Discourse.cache.fetch("#{CACHE_NAMESPACE}/user-version/#{user_id}", expires_in: 30.days) { 1 }
+      Discourse.cache.fetch("#{CACHE_NAMESPACE}/user-version/#{user_id}", expires_in: 30.days) { CACHE_SCHEMA_VERSION }
     end
 
     def self.bump_user_version!(user_id)
@@ -39,7 +40,7 @@ module ::DiscourseUserCosmetics
     # a version independent from per-user summary caches so a group membership
     # change can invalidate CSS without flushing every user's presentation data.
     def self.stylesheet_version
-      Discourse.cache.fetch("#{CACHE_NAMESPACE}/stylesheet-version", expires_in: 30.days) { 1 }
+      Discourse.cache.fetch("#{CACHE_NAMESPACE}/stylesheet-version", expires_in: 30.days) { CACHE_SCHEMA_VERSION }
     end
 
     def self.bump_stylesheet_version!
