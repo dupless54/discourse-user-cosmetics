@@ -20,6 +20,7 @@ on:
       - perf/bulk-invalid-selection-cleanup
       - test/frontend-preferences-outlet
       - feat/native-cosmetics-preferences-v2
+      - ux/live-cosmetics-selection-refresh
 
 permissions:
   contents: read
