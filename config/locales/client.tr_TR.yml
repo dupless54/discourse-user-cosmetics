@@ -12,15 +12,10 @@ tr_TR:
       preferences:
         title: "Kozmetikler"
         description: "Bir avatar çerçevesi, bir isim plakası, bir kart dekorasyonu ve bir profil efekti seçin."
-        open: "Kozmetik seçiciyi aç"
 
       picker:
-        eyebrow: "Profil özelleştirme"
-        title: "Kozmetiklerim"
         subtitle: "Sahip olduğunuz kozmetikleri inceleyin ve profil görünümünüzü tek yerden değiştirin."
         item_count: "%{count} kozmetik"
-        scroll_back: "Önceki kozmetik sekmelerini göster"
-        scroll_forward: "Sonraki kozmetik sekmelerini göster"
         equip: "Kullan"
         equipped: "Kullanılıyor"
         remove: "Kaldır"
@@ -31,15 +26,13 @@ tr_TR:
         none_enabled: "Şu anda etkin bir kozmetik kategorisi yok."
         save_error: "Seçiminiz kaydedilemedi, lütfen tekrar deneyin."
         retry: "Tekrar dene"
-        close: "Kapat"
-        preview: "Önizleme"
 
       user_card:
         message: "@%{username} kullanıcısına mesaj gönder"
 
       admin:
         title: "Kullanıcı Kozmetikleri"
-        intro: "Üyelerin kullanabileceği avatar çerçevelerini, isim plakalarını ve kullanıcı kartı dekorasyonlarını yönetin."
+        intro: "Üyelerin kullanabileceği avatar çerçevelerini, isim plakalarını, kullanıcı kartı dekorasyonlarını ve profil efektlerini yönetin."
         new_item: "Yeni öğe"
         edit_item: "Öğeyi düzenle"
         no_items: "Henüz öğe yok. İlk öğenizi eklemek için \"Yeni öğe\"ye tıklayın."
