@@ -9,6 +9,13 @@ module ::DiscourseUserCosmetics
       item_ids = items.map(&:id)
       return {} if item_ids.empty?
 
+      # Companion plugins may prepend/override Item#usable_by? to add access
+      # rules (for example, store-exclusive ownership). In that case the
+      # extended method is the canonical authorization contract and must be
+      # used by both catalog serialization and selection. Keep the optimized
+      # bulk path below for the base implementation.
+      return canonical_usable_item_ids(user: user, items: items) if custom_item_access?(items)
+
       restrictions_by_item = Hash.new { |hash, item_id| hash[item_id] = [] }
       DiscourseUserCosmetics::ItemGroup.where(item_id: item_ids).pluck(:item_id, :group_id).each do |item_id, group_id|
         restrictions_by_item[item_id] << group_id
@@ -50,5 +57,17 @@ module ::DiscourseUserCosmetics
 
       usable
     end
+
+    def self.custom_item_access?(items)
+      items.any? { |item| item.method(:usable_by?).owner != DiscourseUserCosmetics::Item }
+    end
+    private_class_method :custom_item_access?
+
+    def self.canonical_usable_item_ids(user:, items:)
+      items.each_with_object({}) do |item, usable|
+        usable[item.id] = true if item.usable_by?(user)
+      end
+    end
+    private_class_method :canonical_usable_item_ids
   end
 end
