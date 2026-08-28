@@ -26,6 +26,7 @@ on:
       - i18n/native-cosmetics-copy-cleanup
       - ux/native-responsive-cosmetics-admin
       - audit/final-release-readiness
+      - fix/admin-stale-cosmetic-upload-repair
 
 permissions:
   contents: read
