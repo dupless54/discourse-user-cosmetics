@@ -221,6 +221,141 @@ RSpec.describe DiscourseUserCosmetics::AdminItemsController, type: :request do
     ).to eq(item.id)
   end
 
+  it "reactivates a stale selected card with only targeted user-cache invalidation" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    item = DiscourseUserCosmetics::Item.create!(kind: "card_decoration", name: "Grant card")
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "card_decoration",
+      item_id: item.id,
+    )
+    item.item_groups.create!(group: Fabricate(:group))
+
+    expect(DiscourseUserCosmetics::Presenter.summary_for(user)["card_decoration"]).to be_nil
+
+    global_version = DiscourseUserCosmetics::Presenter.cache_version
+    user_version = DiscourseUserCosmetics::Presenter.user_cache_version(user.id)
+    stylesheet_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    post "/admin/plugins/user-cosmetics/items/#{item.id}/grant.json",
+         params: { username: user.username }
+
+    expect(response).to be_successful
+    expect(DiscourseUserCosmetics::Presenter.cache_version).to eq(global_version)
+    expect(DiscourseUserCosmetics::Presenter.user_cache_version(user.id)).not_to eq(user_version)
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).to eq(stylesheet_version)
+    expect(DiscourseUserCosmetics::Presenter.summary_for(user)["card_decoration"]).to include(id: item.id)
+    expect(
+      DiscourseUserCosmetics::UserItem.find_by!(user_id: user.id, item_id: item.id).granted_by_id,
+    ).to eq(admin.id)
+  end
+
+  it "reactivates stale frame CSS without globally invalidating presentation caches" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Grant frame",
+        image_url: "https://example.com/grant-frame.webp",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+    item.item_groups.create!(group: Fabricate(:group))
+
+    expect(DiscourseUserCosmetics::Presenter.summary_for(user)["avatar_frame"]).to be_nil
+
+    global_version = DiscourseUserCosmetics::Presenter.cache_version
+    user_version = DiscourseUserCosmetics::Presenter.user_cache_version(user.id)
+    stylesheet_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    post "/admin/plugins/user-cosmetics/items/#{item.id}/grant.json",
+         params: { username: user.username }
+
+    expect(response).to be_successful
+    expect(DiscourseUserCosmetics::Presenter.cache_version).to eq(global_version)
+    expect(DiscourseUserCosmetics::Presenter.user_cache_version(user.id)).not_to eq(user_version)
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).not_to eq(stylesheet_version)
+    expect(DiscourseUserCosmetics::Presenter.summary_for(user)["avatar_frame"]).to include(id: item.id)
+  end
+
+  it "does not invalidate presentation caches when granting an unselected restricted item" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    item = DiscourseUserCosmetics::Item.create!(kind: "profile_effect", name: "Unselected effect")
+    item.item_groups.create!(group: Fabricate(:group))
+
+    global_version = DiscourseUserCosmetics::Presenter.cache_version
+    user_version = DiscourseUserCosmetics::Presenter.user_cache_version(user.id)
+    stylesheet_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    post "/admin/plugins/user-cosmetics/items/#{item.id}/grant.json",
+         params: { username: user.username }
+
+    expect(response).to be_successful
+    expect(DiscourseUserCosmetics::Presenter.cache_version).to eq(global_version)
+    expect(DiscourseUserCosmetics::Presenter.user_cache_version(user.id)).to eq(user_version)
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).to eq(stylesheet_version)
+  end
+
+  it "does not invalidate caches when a direct grant adds no new effective access" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Already public frame",
+        image_url: "https://example.com/public-frame.webp",
+      )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+
+    global_version = DiscourseUserCosmetics::Presenter.cache_version
+    user_version = DiscourseUserCosmetics::Presenter.user_cache_version(user.id)
+    stylesheet_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    post "/admin/plugins/user-cosmetics/items/#{item.id}/grant.json",
+         params: { username: user.username }
+
+    expect(response).to be_successful
+    expect(DiscourseUserCosmetics::Presenter.cache_version).to eq(global_version)
+    expect(DiscourseUserCosmetics::Presenter.user_cache_version(user.id)).to eq(user_version)
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).to eq(stylesheet_version)
+  end
+
+  it "does not invalidate caches for a duplicate direct grant" do
+    sign_in(admin)
+
+    user = Fabricate(:user)
+    item = DiscourseUserCosmetics::Item.create!(kind: "card_decoration", name: "Duplicate grant card")
+    item.item_groups.create!(group: Fabricate(:group))
+    DiscourseUserCosmetics::UserItem.create!(user: user, item: item, granted_by: admin)
+
+    global_version = DiscourseUserCosmetics::Presenter.cache_version
+    user_version = DiscourseUserCosmetics::Presenter.user_cache_version(user.id)
+    stylesheet_version = DiscourseUserCosmetics::Presenter.stylesheet_version
+
+    post "/admin/plugins/user-cosmetics/items/#{item.id}/grant.json",
+         params: { username: user.username }
+
+    expect(response).to be_successful
+    expect(DiscourseUserCosmetics::UserItem.where(user_id: user.id, item_id: item.id).count).to eq(1)
+    expect(DiscourseUserCosmetics::Presenter.cache_version).to eq(global_version)
+    expect(DiscourseUserCosmetics::Presenter.user_cache_version(user.id)).to eq(user_version)
+    expect(DiscourseUserCosmetics::Presenter.stylesheet_version).to eq(stylesheet_version)
+  end
+
   it "does not allow moderators to manage the cosmetic catalog" do
     sign_in(moderator)
 

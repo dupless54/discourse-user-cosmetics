@@ -13,6 +13,7 @@ on:
       - fix/username-stylesheet-invalidation
       - perf/bulk-cosmetics-css-entitlements
       - perf/target-user-selection-cache
+      - perf/target-direct-grant-cache
 
 permissions:
   contents: read
@@ -69,6 +70,10 @@ jobs:
         working-directory: discourse
         run: bin/rails runner 'abort "plugin disabled" unless SiteSetting.discourse_user_cosmetics_enabled; puts "plugin ruby load OK"'
 
-      - name: Run plugin specs
+      - name: Run plugin specs directly
         working-directory: discourse
         run: bin/rspec plugins/discourse-user-cosmetics/spec
+
+      - name: Run plugin specs via Discourse plugin task
+        working-directory: discourse
+        run: bin/rake 'plugin:spec[discourse-user-cosmetics]'

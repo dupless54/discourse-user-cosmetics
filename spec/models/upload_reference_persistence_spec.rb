@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "DiscourseUserCosmetics upload reference persistence" do
+RSpec.describe DiscourseUserCosmetics do
   before { enable_current_plugin }
 
   def references_for(target)

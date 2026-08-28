@@ -17,3 +17,20 @@ module ::DiscourseUserCosmetics
     end
   end
 end
+
+# == Schema Information
+#
+# Table name: discourse_user_cosmetics_user_items
+#
+#  id            :bigint           not null, primary key
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  granted_by_id :bigint
+#  item_id       :bigint           not null
+#  user_id       :bigint           not null
+#
+# Indexes
+#
+#  idx_duc_user_items_item       (item_id)
+#  idx_duc_user_items_user_item  (user_id,item_id) UNIQUE
+#

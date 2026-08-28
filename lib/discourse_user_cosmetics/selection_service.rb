@@ -4,7 +4,7 @@ module ::DiscourseUserCosmetics
   class SelectionService
     def self.select!(user:, kind:, item_id:)
       kind = kind.to_s
-      raise Discourse::InvalidParameters.new(:kind) unless DiscourseUserCosmetics::Item::KINDS.include?(kind)
+      raise Discourse::InvalidParameters.new(:kind) if DiscourseUserCosmetics::Item::KINDS.exclude?(kind)
 
       item = nil
       if item_id.present?

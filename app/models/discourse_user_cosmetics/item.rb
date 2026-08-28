@@ -48,10 +48,10 @@ module ::DiscourseUserCosmetics
 
     before_validation :ensure_slug
     before_destroy :clear_active_selections
+    after_destroy :bump_cosmetics_cache
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
     after_update_commit :clear_invalid_active_selections_after_access_change,
                         if: :access_restricting_update?
-    after_destroy :bump_cosmetics_cache
 
     scope :enabled, -> { where(enabled: true) }
     scope :for_kind, ->(kind) { where(kind: kind) }
@@ -153,3 +153,38 @@ module ::DiscourseUserCosmetics
     end
   end
 end
+
+# == Schema Information
+#
+# Table name: discourse_user_cosmetics_items
+#
+#  id                         :bigint           not null, primary key
+#  description                :text
+#  effect_inner_width         :integer
+#  effect_overflow_bottom     :integer
+#  effect_overflow_horizontal :integer
+#  effect_overflow_top        :integer
+#  effect_side_offset_bottom  :integer          default(0), not null
+#  effect_side_offset_top     :integer          default(0), not null
+#  enabled                    :boolean          default(TRUE), not null
+#  glow_color                 :string(20)
+#  gradient_from              :string(20)
+#  gradient_to                :string(20)
+#  image_url                  :string(1000)
+#  is_default                 :boolean          default(FALSE), not null
+#  kind                       :string(30)       not null
+#  name                       :string(100)      not null
+#  rarity_color               :string(20)
+#  rarity_label               :string(40)
+#  slug                       :string(120)      not null
+#  sort_order                 :integer          default(0), not null
+#  created_at                 :datetime         not null
+#  updated_at                 :datetime         not null
+#  created_by_id              :bigint
+#  image_upload_id            :bigint
+#
+# Indexes
+#
+#  idx_duc_items_kind_enabled_sort  (kind,enabled,sort_order)
+#  idx_duc_items_kind_slug          (kind,slug) UNIQUE
+#

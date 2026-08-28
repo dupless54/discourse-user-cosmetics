@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "cosmetic user reference integrity" do
+RSpec.describe DiscourseUserCosmetics::UserReferenceCleanup do
   before { enable_current_plugin }
 
   it "cleans deleted-user ownership while preserving catalog and recipient grants" do

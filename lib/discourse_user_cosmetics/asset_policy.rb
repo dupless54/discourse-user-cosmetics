@@ -33,7 +33,7 @@ module ::DiscourseUserCosmetics
       end
 
       extension = upload.extension.to_s.downcase
-      unless ALLOWED_UPLOAD_EXTENSIONS.include?(extension)
+      if ALLOWED_UPLOAD_EXTENSIONS.exclude?(extension)
         record.errors.add(attribute, I18n.t("discourse_user_cosmetics.errors.unsupported_image_format"))
       end
 

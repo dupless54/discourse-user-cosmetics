@@ -58,6 +58,18 @@ module ::DiscourseUserCosmetics
       bump_stylesheet_version! if STYLESHEET_KINDS.include?(kind.to_s)
     end
 
+    def self.invalidate_direct_entitlement_change!(user_id:, item:)
+      return if user_id.blank? || item.blank?
+
+      selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
+      return unless selection
+
+      field = DiscourseUserCosmetics::UserSelection.field_for(item.kind)
+      return unless selection.public_send(field) == item.id
+
+      invalidate_user_selection!(user_id: user_id, kind: item.kind)
+    end
+
     def self.invalidate_group_membership!(user_id:, group_id:)
       return if user_id.blank?
 

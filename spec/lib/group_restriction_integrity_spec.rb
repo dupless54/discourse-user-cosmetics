@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "cosmetic group restriction integrity" do
+RSpec.describe DiscourseUserCosmetics::ItemGroup do
   before { enable_current_plugin }
 
   it "removes the deleted group's restriction and invalidates presentation caches" do

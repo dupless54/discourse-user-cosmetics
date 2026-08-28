@@ -47,3 +47,21 @@ module ::DiscourseUserCosmetics
     end
   end
 end
+
+# == Schema Information
+#
+# Table name: discourse_user_cosmetics_effect_layers
+#
+#  id              :bigint           not null, primary key
+#  anchor          :string(10)       not null
+#  image_url       :string(1000)
+#  stack_order     :string(10)       not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  image_upload_id :bigint
+#  item_id         :bigint           not null
+#
+# Indexes
+#
+#  idx_duc_effect_layers_item_anchor_order  (item_id,anchor,stack_order) UNIQUE
+#
