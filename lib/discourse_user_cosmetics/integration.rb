@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module ::DiscourseUserCosmetics
   # Public server-side integration contract for companion plugins.
   #
@@ -55,7 +53,7 @@ module ::DiscourseUserCosmetics
 
           decisions.each_pair do |raw_item_id, decision|
             item_id = raw_item_id.to_i
-            unless valid_item_ids.include?(item_id) && [true, false].include?(decision)
+            if valid_item_ids.exclude?(item_id) || [true, false].exclude?(decision)
               raise InvalidEntitlementProviderResult,
                     "entitlement provider returned an invalid item or decision"
             end
