@@ -14,10 +14,16 @@ export function cosmeticsUsername(user) {
 }
 
 export function matchesCosmeticsChange(user, data) {
-  const username = cosmeticsUsername(user);
-  const changedUsername = String(data?.username_lower ?? "").toLowerCase();
+  const userId = user?.id;
+  const changedUserId = data?.user_id;
 
-  return Boolean(username && changedUsername && username === changedUsername);
+  return Boolean(
+    userId !== undefined &&
+      userId !== null &&
+      changedUserId !== undefined &&
+      changedUserId !== null &&
+      String(userId) === String(changedUserId)
+  );
 }
 
 export function fetchLatestCosmetics(username) {
