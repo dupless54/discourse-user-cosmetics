@@ -110,7 +110,6 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     this.currentUser.setProperties({
       id: 7,
       username: "alice",
-      username_lower: "alice",
       cosmetics: this.freshCosmetics,
     });
 
@@ -134,6 +133,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
       </template>
     );
 
+    document.getElementById(FRAMES_CSS_LINK_ID)?.remove();
     const link = document.createElement("link");
     link.id = FRAMES_CSS_LINK_ID;
     link.rel = "stylesheet";
@@ -159,8 +159,9 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
       this.cardUrls[0].includes("duc_refresh="),
       "bootstrap bypasses stale card caches"
     );
+    const refreshedLink = document.getElementById(FRAMES_CSS_LINK_ID);
     assert.true(
-      new URL(link.href).searchParams.has("duc_refresh"),
+      new URL(refreshedLink.href).searchParams.has("duc_refresh"),
       "bootstrap cache-busts the shared cosmetics stylesheet"
     );
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
