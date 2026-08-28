@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { get } from "@ember/object";
 import { htmlSafe } from "@ember/template";
 import { later, cancel } from "@ember/runloop"; // Ember zamanlayıcıları
 import { modifier } from "ember-modifier";
@@ -80,7 +81,7 @@ export default class UserCosmeticsCardDecoration extends Component {
   }
 
   get decoration() {
-    return this.user?.cosmetics?.card_decoration;
+    return get(this.user, "cosmetics")?.card_decoration;
   }
 
   get bannerStyle() {
