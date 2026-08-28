@@ -14,7 +14,13 @@ module ::DiscourseUserCosmetics
 
         item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
         raise Discourse::NotFound unless item
-        raise Discourse::InvalidAccess unless item.usable_by?(user)
+
+        usable_item_ids =
+          DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+            user: user,
+            items: [item],
+          )
+        raise Discourse::InvalidAccess unless usable_item_ids.key?(item.id)
       end
 
       field = DiscourseUserCosmetics::UserSelection.field_for(kind)
