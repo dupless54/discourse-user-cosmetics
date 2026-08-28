@@ -40,3 +40,21 @@ module ::DiscourseUserCosmetics
     end
   end
 end
+
+# == Schema Information
+#
+# Table name: discourse_user_cosmetics_user_selections
+#
+#  id                      :bigint           not null, primary key
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
+#  avatar_frame_item_id    :bigint
+#  card_decoration_item_id :bigint
+#  nameplate_item_id       :bigint
+#  profile_effect_item_id  :bigint
+#  user_id                 :bigint           not null
+#
+# Indexes
+#
+#  idx_duc_user_selections_user  (user_id) UNIQUE
+#
