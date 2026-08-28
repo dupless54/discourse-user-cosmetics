@@ -85,4 +85,4 @@ jobs:
 
       - name: Run plugin QUnit
         working-directory: discourse
-        run: bin/qunit --target discourse-user-cosmetics
+        run: bin/qunit --standalone --target discourse-user-cosmetics
