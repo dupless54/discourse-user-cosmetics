@@ -2,7 +2,6 @@ import { apiInitializer } from "discourse/lib/api";
 import UserCosmeticsNameplate from "../components/user-cosmetics-nameplate";
 import UserCosmeticsCardDecoration from "../components/user-cosmetics-card-decoration";
 import UserCosmeticsCardMessage from "../components/user-cosmetics-card-message";
-import UserCosmeticsPreferencesEntry from "../components/user-cosmetics-preferences-entry";
 import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
 
 const FRAMES_CSS_LINK_ID = "discourse-user-cosmetics-frames-css";
@@ -62,7 +61,6 @@ export default apiInitializer("1.8.0", (api) => {
       "user-card-below-message-button",
       UserCosmeticsCardMessage
     );
-    api.renderInOutlet("user-custom-preferences", UserCosmeticsPreferencesEntry);
     api.renderInOutlet("user-card-metadata", UserCosmeticsProfileEffect);
     api.renderInOutlet("user-profile-primary", UserCosmeticsProfileEffect);
   }

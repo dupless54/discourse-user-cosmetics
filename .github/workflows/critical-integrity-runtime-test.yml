@@ -19,6 +19,7 @@ on:
       - perf/admin-catalog-serialization
       - perf/bulk-invalid-selection-cleanup
       - test/frontend-preferences-outlet
+      - feat/native-cosmetics-preferences-v2
 
 permissions:
   contents: read
