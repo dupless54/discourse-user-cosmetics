@@ -17,6 +17,7 @@ import {
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
+import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
 export default apiInitializer("1.8.0", (api) => {
   const siteSettings = api.container.lookup("service:site-settings");
@@ -38,6 +39,15 @@ export default apiInitializer("1.8.0", (api) => {
     currentUser?.cosmetics?.avatar_frame,
     siteSettings.discourse_user_cosmetics_frame_overhang_percent
   );
+
+  // Mobil tarayıcılar ve PWA'lar arka planda MessageBus olaylarını kaçırabilir.
+  // Sayfa tekrar görünür olduğunda server state ile yeniden uzlaş ve paylaşılan
+  // frames.css dosyasını da yenile ki açık sekme eski kozmetiklerde takılmasın.
+  installCosmeticsResumeSync({
+    currentUser,
+    siteSettings,
+    appEvents,
+  });
 
   // 3. Başka bir sekmede/tarayıcıda yapılan seçimleri açık sayfalara taşı.
   messageBus.subscribe(COSMETICS_CHANGE_CHANNEL, (data) => {

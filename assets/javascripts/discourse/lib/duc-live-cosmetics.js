@@ -26,22 +26,24 @@ export function matchesCosmeticsChange(user, data) {
   );
 }
 
-export function fetchLatestCosmetics(username) {
+export function fetchLatestCosmetics(username, { fresh = false } = {}) {
   const key = String(username ?? "").trim().toLowerCase();
   if (!key) {
     return Promise.resolve(undefined);
   }
 
-  const pending = pendingByUsername.get(key);
+  const pendingKey = `${key}:${fresh ? "fresh" : "normal"}`;
+  const pending = pendingByUsername.get(pendingKey);
   if (pending) {
     return pending;
   }
 
-  const request = ajax(`/u/${encodeURIComponent(key)}/card.json`)
+  const suffix = fresh ? `?duc_refresh=${Date.now()}` : "";
+  const request = ajax(`/u/${encodeURIComponent(key)}/card.json${suffix}`)
     .then((json) => json?.user?.cosmetics ?? null)
     .catch(() => undefined)
-    .finally(() => pendingByUsername.delete(key));
+    .finally(() => pendingByUsername.delete(pendingKey));
 
-  pendingByUsername.set(key, request);
+  pendingByUsername.set(pendingKey, request);
   return request;
 }

@@ -43,6 +43,11 @@ export default class UserCosmeticsLiveSync extends Component {
       return;
     }
 
+    if (data?.cosmetics !== undefined) {
+      set(user, "cosmetics", data.cosmetics);
+      return;
+    }
+
     const cosmetics = await fetchLatestCosmetics(cosmeticsUsername(user));
     if (cosmetics === undefined || this.user !== user) {
       return;
