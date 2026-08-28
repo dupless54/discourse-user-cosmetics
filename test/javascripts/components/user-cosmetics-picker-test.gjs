@@ -149,15 +149,22 @@ module("Component | UserCosmeticsPicker", function (hooks) {
       document.head.appendChild(link);
     }
     const originalHref = link.href;
+    const styleTag = document.getElementById(CURRENT_USER_STYLE_ID);
 
-    assert
-      .dom(`#${CURRENT_USER_STYLE_ID}`)
-      .includesText("inset: -23%", "current site overhang is used");
+    assert.true(Boolean(styleTag), "current-user frame style is installed");
+    assert.true(
+      styleTag.textContent.includes("inset: -23%"),
+      "current site overhang is used"
+    );
 
     await click(".duc-cosmetics-section-heading .btn");
 
     assert.strictEqual(this.currentUser.cosmetics.avatar_frame, null);
-    assert.dom(`#${CURRENT_USER_STYLE_ID}`).doesNotExist();
+    assert.strictEqual(
+      document.getElementById(CURRENT_USER_STYLE_ID),
+      null,
+      "current-user frame style is removed"
+    );
     assert.notStrictEqual(
       link.href,
       originalHref,
