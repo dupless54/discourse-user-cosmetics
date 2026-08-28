@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 module ::DiscourseUserCosmetics
   # Public server-side integration contract for companion plugins.
   #
