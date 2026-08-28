@@ -11,7 +11,7 @@ tr_TR:
 
       preferences:
         title: "Kozmetikler"
-        description: "Bir avatar çerçevesi, bir isim plakası ve bir kart dekorasyonu seçin."
+        description: "Bir avatar çerçevesi, bir isim plakası, bir kart dekorasyonu ve bir profil efekti seçin."
         open: "Kozmetik seçiciyi aç"
 
       picker:
@@ -28,7 +28,9 @@ tr_TR:
         locked_tooltip: "Bu öğeye henüz sahip değilsiniz."
         locked_group_tooltip: "Şu gruplar için açık: %{groups}"
         none_for_kind: "Bu kategori için henüz öğe eklenmedi."
+        none_enabled: "Şu anda etkin bir kozmetik kategorisi yok."
         save_error: "Seçiminiz kaydedilemedi, lütfen tekrar deneyin."
+        retry: "Tekrar dene"
         close: "Kapat"
         preview: "Önizleme"
 

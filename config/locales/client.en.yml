@@ -11,7 +11,7 @@ en:
 
       preferences:
         title: "Cosmetics"
-        description: "Choose an avatar frame, a nameplate, and a card decoration."
+        description: "Choose an avatar frame, a nameplate, a card decoration, and a profile effect."
         open: "Open cosmetics picker"
 
       picker:
@@ -28,7 +28,9 @@ en:
         locked_tooltip: "You don't own this item yet."
         locked_group_tooltip: "Unlocked for: %{groups}"
         none_for_kind: "No items have been added for this category yet."
+        none_enabled: "No cosmetic categories are currently enabled."
         save_error: "Couldn't save your selection, please try again."
+        retry: "Try again"
         close: "Close"
         preview: "Preview"
 
