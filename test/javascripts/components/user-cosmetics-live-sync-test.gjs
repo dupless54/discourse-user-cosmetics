@@ -52,7 +52,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     });
   });
 
-  test("reloads the visible user's cosmetics after a live marker", async function (assert) {
+  test("reloads and rerenders the visible user's cosmetics after a live marker", async function (assert) {
     await render(
       <template>
         <UserCosmeticsLiveSync @model={{this.user}} />
