@@ -9,7 +9,7 @@
 // renders instead of crashing.
 //
 // Because this is a plain function, it can be used directly as a template
-// helper in .gjs files: {{t "discourse_user_cosmetics.picker.title"}}
+// helper in .gjs files: {{t "discourse_user_cosmetics.preferences.title"}}
 export function t(key, options) {
   try {
     const I18n = globalThis.I18n;
