@@ -18,6 +18,43 @@ RSpec.describe DiscourseUserCosmetics::AssetPolicy do
     expect(described_class.valid_url?("https://user:pass@example.com/frame.webp")).to eq(false)
   end
 
+  it "inherits Discourse's image size limit when the plugin-specific cap is zero" do
+    SiteSetting.discourse_user_cosmetics_max_image_kb = 0
+    SiteSetting.max_image_size_kb = 4096
+
+    upload = Fabricate(:upload, extension: "webp")
+    upload.update_column(:filesize, 3072.kilobytes)
+
+    item =
+      DiscourseUserCosmetics::Item.new(
+        kind: "avatar_frame",
+        name: "Inherited limit frame",
+        image_upload: upload,
+      )
+
+    expect(described_class.maximum_image_kb).to eq(4096)
+    expect(item).to be_valid
+  end
+
+  it "keeps an explicit plugin image cap as a stricter optional limit" do
+    SiteSetting.discourse_user_cosmetics_max_image_kb = 2048
+    SiteSetting.max_image_size_kb = 4096
+
+    upload = Fabricate(:upload, extension: "webp")
+    upload.update_column(:filesize, 3072.kilobytes)
+
+    item =
+      DiscourseUserCosmetics::Item.new(
+        kind: "avatar_frame",
+        name: "Plugin capped frame",
+        image_upload: upload,
+      )
+
+    expect(described_class.maximum_image_kb).to eq(2048)
+    expect(item).not_to be_valid
+    expect(item.errors[:image_url]).to be_present
+  end
+
   it "rejects missing, unsupported, and oversized uploads" do
     SiteSetting.discourse_user_cosmetics_max_image_kb = 32
 
