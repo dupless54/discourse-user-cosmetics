@@ -3,6 +3,7 @@ import { set } from "@ember/object";
 import { service } from "@ember/service";
 import {
   COSMETICS_CHANGE_EVENT,
+  cosmeticsUsername,
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
@@ -42,7 +43,7 @@ export default class UserCosmeticsLiveSync extends Component {
       return;
     }
 
-    const cosmetics = await fetchLatestCosmetics(data.username_lower);
+    const cosmetics = await fetchLatestCosmetics(cosmeticsUsername(user));
     if (cosmetics === undefined || this.user !== user) {
       return;
     }
