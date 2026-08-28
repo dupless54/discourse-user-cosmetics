@@ -13,6 +13,7 @@ import {
   COSMETICS_CHANGE_CHANNEL,
   COSMETICS_CHANGE_EVENT,
   CSS_BACKED_COSMETIC_KINDS,
+  cosmeticsUsername,
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
@@ -40,7 +41,7 @@ export default apiInitializer("1.8.0", (api) => {
 
   // 3. Başka bir sekmede/tarayıcıda yapılan seçimleri açık sayfalara taşı.
   messageBus.subscribe(COSMETICS_CHANGE_CHANNEL, (data) => {
-    if (!data?.username_lower || !data?.kind) {
+    if (data?.user_id === undefined || !data?.kind) {
       return;
     }
 
@@ -54,7 +55,7 @@ export default apiInitializer("1.8.0", (api) => {
       return;
     }
 
-    fetchLatestCosmetics(data.username_lower).then((cosmetics) => {
+    fetchLatestCosmetics(cosmeticsUsername(currentUser)).then((cosmetics) => {
       if (cosmetics === undefined || !currentUser) {
         return;
       }
