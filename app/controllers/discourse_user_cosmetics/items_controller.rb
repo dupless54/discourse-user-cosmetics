@@ -14,10 +14,14 @@ module ::DiscourseUserCosmetics
         DiscourseUserCosmetics::Item.enabled
           .where(kind: enabled_kinds)
           .ordered
-          .includes(:groups, :image_upload, effect_layers: :image_upload)
+          .includes(:image_upload, effect_layers: :image_upload)
           .to_a
 
-      usable_item_ids = usable_item_ids_for(items)
+      usable_item_ids =
+        DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+          user: current_user,
+          items: items,
+        )
       items_by_kind = items.group_by(&:kind)
       items_by_id = items.index_by(&:id)
 
@@ -56,18 +60,6 @@ module ::DiscourseUserCosmetics
     end
 
     private
-
-    def usable_item_ids_for(items)
-      item_ids = items.map(&:id)
-      group_ids = ::GroupUser.where(user_id: current_user.id).pluck(:group_id).index_with(true)
-      direct_item_ids =
-        DiscourseUserCosmetics::UserItem.where(user_id: current_user.id, item_id: item_ids).pluck(:item_id).index_with(true)
-
-      items.each_with_object({}) do |item, memo|
-        group_allowed = item.groups.empty? || item.groups.any? { |group| group_ids.key?(group.id) }
-        memo[item.id] = true if item.is_default? || group_allowed || direct_item_ids.key?(item.id)
-      end
-    end
 
     def visible_active_item_id(kind, selection, items_by_id, enabled_kinds, usable_item_ids)
       return nil unless selection && enabled_kinds.include?(kind)
