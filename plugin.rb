@@ -58,31 +58,31 @@ after_initialize do
     end
   end
 
-  DiscourseEvent.on(:user_added_to_group) do |user, group, **_kwargs|
+  on(:user_added_to_group) do |user, group, **_kwargs|
     DiscourseUserCosmetics::Presenter.invalidate_group_membership!(
       user_id: user&.id,
       group_id: group&.id,
     )
   end
 
-  DiscourseEvent.on(:user_removed_from_group) do |user, group|
+  on(:user_removed_from_group) do |user, group|
     DiscourseUserCosmetics::Presenter.invalidate_group_membership!(
       user_id: user&.id,
       group_id: group&.id,
     )
   end
 
-  DiscourseEvent.on(:group_destroyed) do |group, _cached_user_ids|
+  on(:group_destroyed) do |group, _cached_user_ids|
     removed = DiscourseUserCosmetics::ItemGroup.where(group_id: group&.id).delete_all
     DiscourseUserCosmetics::Presenter.bump_version! if removed.positive?
   end
 
-  DiscourseEvent.on(:user_destroyed) do |user|
+  on(:user_destroyed) do |user|
     DiscourseUserCosmetics::UserReferenceCleanup.cleanup!(user_id: user&.id)
   end
 
-  DiscourseEvent.on(:user_updated) do |user, changed_fields|
-    next unless Array(changed_fields).map(&:to_s).include?("username")
+  on(:user_updated) do |user, changed_fields|
+    next if Array(changed_fields).map(&:to_s).exclude?("username")
 
     DiscourseUserCosmetics::Presenter.invalidate_username_change!(user_id: user&.id)
   end
