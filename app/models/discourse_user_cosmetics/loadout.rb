@@ -5,7 +5,7 @@ module ::DiscourseUserCosmetics
     self.table_name = "discourse_user_cosmetics_loadouts"
 
     MAX_NAME_LENGTH = 80
-    SLOT_FIELD_FOR_KIND = DiscourseUserCosmetics::UserSelection::FIELD_FOR_KIND.freeze
+    SLOT_FIELD_FOR_KIND = DiscourseUserCosmetics::UserSelection::FIELD_FOR_KIND
 
     belongs_to :user, class_name: "::User"
     belongs_to :avatar_frame_item, class_name: "DiscourseUserCosmetics::Item", optional: true
@@ -42,13 +42,28 @@ module ::DiscourseUserCosmetics
         item_id = public_send(field)
         next if item_id.blank?
 
-        item = public_send(kind_item_association(kind))
+        item = public_send("#{kind}_item")
         errors.add(field, :invalid) unless item&.kind == kind
       end
     end
-
-    def kind_item_association(kind)
-      "#{kind}_item"
-    end
   end
 end
+
+# == Schema Information
+#
+# Table name: discourse_user_cosmetics_loadouts
+#
+#  id                      :bigint           not null, primary key
+#  created_at              :datetime         not null
+#  name                    :string(80)       not null
+#  updated_at              :datetime         not null
+#  avatar_frame_item_id    :bigint
+#  card_decoration_item_id :bigint
+#  nameplate_item_id       :bigint
+#  profile_effect_item_id  :bigint
+#  user_id                 :bigint           not null
+#
+# Indexes
+#
+#  idx_duc_loadouts_user_updated  (user_id,updated_at)
+#
