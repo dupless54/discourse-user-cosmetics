@@ -28,6 +28,7 @@ on:
       - audit/final-release-readiness
       - fix/admin-stale-cosmetic-upload-repair
       - fix/inherit-discourse-image-size-limit
+      - fix/live-cross-browser-cosmetics-sync
 
 permissions:
   contents: read
