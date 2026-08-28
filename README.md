@@ -67,7 +67,7 @@ Görsellerinizi hazırlarken en iyi görünüm için şu standartları referans 
 | --- | --- | --- |
 | **Avatar Çerçevesi** | Kare (En az 400×400, tercihen 512×512) | Avatarın görünmesi için ortası kesinlikle şeffaf PNG/GIF olmalıdır. Halka kalınlığı toplam genişliğin %12-15'i civarında olduğunda kusursuz durur. |
 | **İsim Plakası** | Geniş (Örn: 400×120) | Görsel yükleyebilirsiniz ancak iki renkli CSS gradyanı kullanmak çoğu zaman çok daha net ve şık bir sonuç verir. |
-| **Kart Dekorasyonu** | Geniş (Örn: 900×320) | Kartın içinde bir afiş gibi kırılarak gösterilir. Üzerindeki beyaz yazıların okunabilmesi için koyu tonlar tercih edilmelidir. |
+| **Kart Dekorasyonu** | Geniş (Örn: 900×320) | Kartın içinde bir afiş gibi kırpılarak gösterilir. Üzerindeki beyaz yazıların okunabilmesi için koyu tonlar tercih edilmelidir. |
 
 Animasyonlu (GIF/WEBP) dosyalar tarayıcı tarafından otomatik olarak döngüye sokulur ve ekstra bir ayar gerektirmez.
 
