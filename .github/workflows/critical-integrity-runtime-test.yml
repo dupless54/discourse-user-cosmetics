@@ -16,6 +16,7 @@ on:
       - perf/target-direct-grant-cache
       - perf/bulk-mine-entitlements
       - perf/bulk-presenter-entitlements
+      - perf/admin-catalog-serialization
 
 permissions:
   contents: read
