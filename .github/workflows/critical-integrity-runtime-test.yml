@@ -22,6 +22,7 @@ on:
       - feat/native-cosmetics-preferences-v2
       - ux/live-cosmetics-selection-refresh
       - cleanup/remove-legacy-cosmetics-modal
+      - docs/native-preferences-release-readiness
 
 permissions:
   contents: read

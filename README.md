@@ -4,7 +4,7 @@ Discourse forumunuza Discord tarzı kullanıcı kozmetikleri ekleyin! Bu eklenti
 
 ## Eklenti Ne İşe Yarıyor?
 
-Kullanıcılar profil ayarlarındaki **Tercihler** sekmesinden kendi kozmetiklerini seçip anında kullanmaya başlayabilirler. Eklenti dört farklı kozmetik türü sunar:
+Kullanıcılar profil ayarlarındaki **Tercihler → Kozmetikler** sayfasından kendi kozmetiklerini seçebilir; seçim veya çıkarma işlemleri sayfayı yenilemeden mevcut oturuma uygulanır. Eklenti dört farklı kozmetik türü sunar:
 
 | Kategori | Nerede Görünür? | Desteklenen Formatlar |
 | --- | --- | --- |
@@ -138,11 +138,13 @@ Eklentinin arka planında performansı ve güvenliği sağlamak için modern sta
 
 ## Bu Sürümde Neler Değişti?
 
-* **Crimson Channels ile tam kart uyumu:** 450×880 kart dekorasyonu artık temanın user-card ölçüsünü değiştirmez. Görsel doğrudan gerçek kart köküne bağlanır ve kartın iç yüzeyini kenardan kenara doldurur; böylece tema kartından daha dar görünen animasyon sorunu giderilir.
-* **Doğru katman sırası:** Kart dekorasyonu mesaj gönderme alanının üzerinde görünür; `pointer-events: none` sayesinde alttaki mesaj eylemi kullanılmaya devam eder.
-* **Mobilde kalıcı kapatma eylemi:** My Cosmetics penceresinin altına, içerik ne kadar kaydırılırsa kaydırılsın erişilebilir kalan tam genişlikte bir **Kapat** düğmesi eklendi.
-* **Yeni kozmetik seçici tasarımı:** Profil ayarlarındaki seçici, Crimson temasına uyumlu koyu/gradyan yüzeyler, daha okunaklı öğe kartları ve modern durum düğmeleriyle yenilendi.
-* **Kaydırılabilir dört sekme:** Avatar Çerçeveleri, İsim Plakaları, Kart Dekorasyonları ve Profil Efektleri sekmeleri hem dokunarak/yatay kaydırmayla hem de sağ-sol ok düğmeleriyle gezilebilir.
-* **User-card mesaj alanı:** Mesaj gönderilebilen kullanıcıların kartında `@kullanıcıadı kullanıcısına mesaj gönder` alanı görünür ve Discourse'un yerleşik özel mesaj oluşturucusunu açar.
-* **Yeni:** Profil Efektleri (Discord JSON şemasına dayalı, 4 katmanlı, kart sınırlarını taşabilen efektler).
-* Mevcut avatar çerçevesi / isim plakası / kart dekorasyonu / admin altyapısı dokunulmadan korundu; yeni özellik tamamen ek (additive) olarak eklendi.
+* **Native Discourse Tercihler entegrasyonu:** Kozmetik seçimi artık özel bir modal yerine kullanıcının **Tercihler → Kozmetikler** sayfasında, Discourse'un kendi navigasyon yapısı içinde açılır.
+* **Tema ile doğal uyum:** Kozmetik sayfası Discourse'un renk ve tipografi değişkenlerini kullanır; açık/koyu mod ve özel tema renklerine ayrı bir yapay arayüz oluşturmadan uyum sağlar.
+* **Mobil ve masaüstü uyumu:** Dört kozmetik kategorisi aynı inline sayfa içinde responsive sekmeler ve grid düzeniyle gösterilir; eski tam ekran/modal kapatma akışı kaldırılmıştır.
+* **Anında seçim yenilemesi:** Kullan/Kaldır işlemlerinden sonra aktif kozmetik özeti `currentUser` üzerinde güncellenir; kullanıcı sonucu görmek için sayfayı yenilemek zorunda kalmaz.
+* **Avatar çerçevesinde canlı güncelleme:** Avatar çerçevesi veya isim plakası değiştiğinde paylaşılan `frames.css` kaynağı yenilenir; üst menüdeki mevcut kullanıcı avatarı da aynı oturumda yeni çerçeveyi kullanır.
+* **Ayarla uyumlu çerçeve taşması:** Üst menü avatar çerçevesi artık sabit bir değer yerine `discourse_user_cosmetics_frame_overhang_percent` site ayarını kullanır.
+* **Legacy arayüz temizliği:** Native Preferences geçişinden sonra kullanılmayan preferences-entry bileşeni ve eski `.duc-picker-*` modal stilleri kaldırılmıştır.
+* **Crimson Channels kart uyumu korunuyor:** Kart dekorasyonu gerçek user-card yüzeyine bağlanır; dekorasyon katmanı `pointer-events: none` ile kart kontrollerinin kullanılabilirliğini korur.
+* **Profil Efektleri:** Discord JSON şemasından esinlenen, en fazla dört katmanlı ve kart sınırlarını taşabilen profil efektleri desteklenmeye devam eder.
+* **Sunucu otoritesi korunuyor:** Sahiplik, grup erişimi ve kullanılabilirlik kararları backend'deki yetkilendirme/entitlement kontrollerinde kalır; frontend yalnız sunucunun izin verdiği durumu gösterir.
