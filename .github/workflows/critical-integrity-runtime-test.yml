@@ -21,6 +21,7 @@ on:
       - test/frontend-preferences-outlet
       - feat/native-cosmetics-preferences-v2
       - ux/live-cosmetics-selection-refresh
+      - cleanup/remove-legacy-cosmetics-modal
 
 permissions:
   contents: read
