@@ -3,9 +3,9 @@
 module ::DiscourseUserCosmetics
   # Public server-side integration contract for companion plugins.
   #
-  # The base plugin remains the authority for direct ownership and active
-  # selections. Companion plugins may contribute entitlement decisions in
-  # batches without patching Item#usable_by?.
+  # The base plugin remains the authority for direct ownership, active
+  # selections, and saved loadouts. Companion plugins may contribute
+  # entitlement decisions in batches without patching Item#usable_by?.
   class Integration
     class InvalidEntitlementProviderResult < StandardError; end
 
@@ -149,7 +149,133 @@ module ::DiscourseUserCosmetics
         DiscourseUserCosmetics::SelectionService.select!(user: user, kind: kind, item_id: nil)
       end
 
+      def loadouts_supported?
+        true
+      end
+
+      def loadouts_for(user:)
+        raise ArgumentError, "user is required" unless user
+
+        loadouts =
+          DiscourseUserCosmetics::Loadout
+            .where(user_id: user.id)
+            .ordered
+            .includes(
+              :avatar_frame_item,
+              :nameplate_item,
+              :card_decoration_item,
+              :profile_effect_item,
+            )
+            .to_a
+        serialize_loadouts(user: user, loadouts: loadouts)
+      end
+
+      def create_loadout!(user:, name:)
+        loadout =
+          DiscourseUserCosmetics::LoadoutService.create_from_current!(
+            user: user,
+            name: name,
+          )
+        serialize_loadouts(user: user, loadouts: [loadout]).first
+      end
+
+      def rename_loadout!(user:, loadout_id:, name:)
+        loadout =
+          DiscourseUserCosmetics::LoadoutService.rename!(
+            user: user,
+            loadout_id: loadout_id,
+            name: name,
+          )
+        serialize_loadouts(user: user, loadouts: [loadout]).first
+      end
+
+      def delete_loadout!(user:, loadout_id:)
+        DiscourseUserCosmetics::LoadoutService.destroy!(
+          user: user,
+          loadout_id: loadout_id,
+        )
+      end
+
+      def apply_loadout!(user:, loadout_id:)
+        loadout =
+          DiscourseUserCosmetics::LoadoutService.apply!(
+            user: user,
+            loadout_id: loadout_id,
+          )
+
+        {
+          loadout: serialize_loadouts(user: user, loadouts: [loadout]).first,
+          cosmetics: DiscourseUserCosmetics::Presenter.summary_for(user),
+        }
+      end
+
       private
+
+      def serialize_loadouts(user:, loadouts:)
+        item_ids =
+          loadouts.flat_map { |loadout| loadout.selection_item_ids.values.compact }.uniq
+        items =
+          if item_ids.empty?
+            []
+          else
+            DiscourseUserCosmetics::Item
+              .where(id: item_ids)
+              .includes(:image_upload, effect_layers: :image_upload)
+              .to_a
+          end
+        items_by_id = items.index_by(&:id)
+        entitlement_candidates =
+          items.select do |item|
+            item.enabled? && DiscourseUserCosmetics::Item.kind_enabled?(item.kind)
+          end
+        usable_item_ids =
+          DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+            user: user,
+            items: entitlement_candidates,
+          )
+
+        loadouts.map do |loadout|
+          slots =
+            DiscourseUserCosmetics::Loadout::SLOT_FIELD_FOR_KIND.each_with_object({}) do |(kind, field), memo|
+              item_id = loadout.public_send(field)
+              item = items_by_id[item_id]
+              available =
+                item_id.blank? ||
+                  (item&.enabled? && item.kind == kind &&
+                    DiscourseUserCosmetics::Item.kind_enabled?(kind) &&
+                    usable_item_ids.key?(item.id))
+
+              memo[kind] = {
+                item_id: item_id,
+                available: available,
+                item: item ? serialize_loadout_item(item) : nil,
+              }
+            end
+
+          {
+            id: loadout.id,
+            name: loadout.name,
+            updated_at: loadout.updated_at&.iso8601,
+            can_apply: slots.values.all? { |slot| slot[:available] },
+            slots: slots,
+          }
+        end
+      end
+
+      def serialize_loadout_item(item)
+        presentation = DiscourseUserCosmetics::Presenter.serialize_item(item)
+        {
+          id: item.id,
+          kind: item.kind,
+          name: item.name,
+          image_url: presentation[:image_url],
+          gradient_from: presentation[:gradient_from],
+          gradient_to: presentation[:gradient_to],
+          glow_color: presentation[:glow_color],
+          rarity_label: item.rarity_label,
+          rarity_color: item.rarity_color,
+        }
+      end
 
       def entitlement_providers
         @entitlement_providers ||= {}
