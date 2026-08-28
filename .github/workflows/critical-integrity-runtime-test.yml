@@ -12,6 +12,7 @@ on:
       - fix/private-stylesheet-access
       - fix/username-stylesheet-invalidation
       - perf/bulk-cosmetics-css-entitlements
+      - perf/target-user-selection-cache
 
 permissions:
   contents: read
