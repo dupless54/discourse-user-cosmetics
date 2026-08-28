@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "DiscourseUserCosmetics relation id widths" do
+RSpec.describe DiscourseUserCosmetics do
   before { enable_current_plugin }
 
   EXPECTED_BIGINT_COLUMNS = {
