@@ -3,11 +3,14 @@ import UserCosmeticsNameplate from "../components/user-cosmetics-nameplate";
 import UserCosmeticsCardDecoration from "../components/user-cosmetics-card-decoration";
 import UserCosmeticsCardMessage from "../components/user-cosmetics-card-message";
 import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
-
-const FRAMES_CSS_LINK_ID = "discourse-user-cosmetics-frames-css";
-const CURRENT_USER_STYLE_ID = "discourse-user-cosmetics-current-user-style";
+import {
+  FRAMES_CSS_LINK_ID,
+  syncCurrentUserAvatarFrame,
+} from "../lib/duc-current-user-presentation";
 
 export default apiInitializer("1.8.0", (api) => {
+  const siteSettings = api.container.lookup("service:site-settings");
+
   // 1. CSS Dosyasını Ekleme
   if (!document.getElementById(FRAMES_CSS_LINK_ID)) {
     const link = document.createElement("link");
@@ -17,40 +20,12 @@ export default apiInitializer("1.8.0", (api) => {
     document.head.appendChild(link);
   }
 
-  // 2. Geçerli Kullanıcı (Current User) için Inline CSS Ayarları
+  // 2. Geçerli Kullanıcı (Current User) avatar çerçevesini senkronize et.
   const currentUser = api.getCurrentUser();
-  const frame = currentUser?.cosmetics?.avatar_frame;
-
-  if (frame?.image_url) {
-    let styleTag = document.getElementById(CURRENT_USER_STYLE_ID);
-    if (!styleTag) {
-      styleTag = document.createElement("style");
-      styleTag.id = CURRENT_USER_STYLE_ID;
-      document.head.appendChild(styleTag);
-    }
-
-    const safeUrl = frame.image_url.replace(/"/g, '\\"');
-    styleTag.textContent = `
-      /* Avatarı saran dış buton/kutuya position veriyoruz, img etiketine değil! */
-      #current-user,
-      .header-dropdown-toggle.current-user {
-        position: relative;
-      }
-      /* Çerçeveyi doğrudan dış kutunun üzerine (::after) ekliyoruz */
-      #current-user::after,
-      .header-dropdown-toggle.current-user::after {
-        content: "";
-        position: absolute;
-        inset: -14%;
-        background-image: url("${safeUrl}");
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        pointer-events: none;
-        z-index: 2;
-      }
-    `;
-  }
+  syncCurrentUserAvatarFrame(
+    currentUser?.cosmetics?.avatar_frame,
+    siteSettings.discourse_user_cosmetics_frame_overhang_percent
+  );
 
   // 3. Outlet Bileşenlerini (Bileşenleri) Yükleme
   if (typeof api.renderInOutlet === "function") {

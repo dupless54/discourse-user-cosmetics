@@ -56,7 +56,7 @@ module ::DiscourseUserCosmetics
         item_id: params[:item_id].presence,
       )
 
-      render json: success_json
+      render json: success_json.merge(cosmetics: DiscourseUserCosmetics::Presenter.summary_for(current_user))
     end
 
     private

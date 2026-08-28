@@ -10,9 +10,14 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
 import { enabledCosmeticKinds } from "../lib/duc-cosmetic-kinds";
+import {
+  refreshCosmeticsStylesheet,
+  syncCurrentUserAvatarFrame,
+} from "../lib/duc-current-user-presentation";
 import { t } from "../lib/duc-i18n";
 
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
+const STYLESHEET_KINDS = ["avatar_frame", "nameplate"];
 
 function safeHexColor(value) {
   return typeof value === "string" && HEX_COLOR_REGEX.test(value) ? value : null;
@@ -24,6 +29,7 @@ function safeColorStyle(property, value) {
 }
 
 export default class UserCosmeticsPicker extends Component {
+  @service currentUser;
   @service siteSettings;
 
   @tracked activeKind = null;
@@ -156,6 +162,23 @@ export default class UserCosmeticsPicker extends Component {
     });
   }
 
+  applySelectionResponse(response, kind) {
+    const cosmetics = response?.cosmetics;
+    if (!cosmetics || !this.currentUser) {
+      return;
+    }
+
+    this.currentUser.set("cosmetics", cosmetics);
+    syncCurrentUserAvatarFrame(
+      cosmetics.avatar_frame,
+      this.siteSettings.discourse_user_cosmetics_frame_overhang_percent
+    );
+
+    if (STYLESHEET_KINDS.includes(kind)) {
+      refreshCosmeticsStylesheet();
+    }
+  }
+
   @action
   setKind(kind, event) {
     if (!this.kinds.includes(kind)) {
@@ -182,10 +205,11 @@ export default class UserCosmeticsPicker extends Component {
     this.active = { ...this.active, [kind]: item.id };
 
     try {
-      await ajax("/user-cosmetics/select.json", {
+      const response = await ajax("/user-cosmetics/select.json", {
         type: "PUT",
         data: { kind, item_id: item.id },
       });
+      this.applySelectionResponse(response, kind);
     } catch (e) {
       this.active = { ...this.active, [kind]: previous };
       popupAjaxError(e);
@@ -211,10 +235,11 @@ export default class UserCosmeticsPicker extends Component {
     this.active = { ...this.active, [kind]: null };
 
     try {
-      await ajax("/user-cosmetics/select.json", {
+      const response = await ajax("/user-cosmetics/select.json", {
         type: "PUT",
         data: { kind, item_id: "" },
       });
+      this.applySelectionResponse(response, kind);
     } catch (e) {
       this.active = { ...this.active, [kind]: previous };
       popupAjaxError(e);

@@ -41,6 +41,26 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
     ).to be_nil
   end
 
+  it "returns the refreshed presentation summary after equip and unequip" do
+    frame =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Live frame",
+        image_upload: Fabricate(:upload),
+      )
+
+    put "/user-cosmetics/select.json", params: { kind: "avatar_frame", item_id: frame.id }
+
+    expect(response).to be_successful
+    expect(response.parsed_body["success"]).to eq("OK")
+    expect(response.parsed_body.dig("cosmetics", "avatar_frame", "id")).to eq(frame.id)
+
+    put "/user-cosmetics/select.json", params: { kind: "avatar_frame", item_id: "" }
+
+    expect(response).to be_successful
+    expect(response.parsed_body.dig("cosmetics", "avatar_frame")).to be_nil
+  end
+
   it "rejects an item the authenticated user cannot use" do
     restricted_group = Fabricate(:group)
     frame = DiscourseUserCosmetics::Item.create!(kind: "avatar_frame", name: "Private frame")
