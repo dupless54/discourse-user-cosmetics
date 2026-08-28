@@ -11,6 +11,7 @@ enabled_site_setting :discourse_user_cosmetics_enabled
 
 register_asset "stylesheets/common/discourse-user-cosmetics.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-preferences.scss"
+register_asset "stylesheets/common/discourse-user-cosmetics-showcase.scss"
 
 module ::DiscourseUserCosmetics
   PLUGIN_NAME = "discourse-user-cosmetics"
@@ -29,11 +30,14 @@ after_initialize do
   require_relative "lib/discourse_user_cosmetics/presenter"
   require_relative "lib/discourse_user_cosmetics/selection_service"
   require_relative "lib/discourse_user_cosmetics/loadout_service"
+  require_relative "lib/discourse_user_cosmetics/showcase_service"
   require_relative "lib/discourse_user_cosmetics/integration"
+  require_relative "lib/discourse_user_cosmetics/showcase_integration"
   require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
   require_relative "lib/discourse_user_cosmetics/css_builder"
   require_relative "lib/discourse_user_cosmetics/seeder"
   require_relative "app/controllers/discourse_user_cosmetics/items_controller"
+  require_relative "app/controllers/discourse_user_cosmetics/showcase_controller"
   require_relative "app/controllers/discourse_user_cosmetics/admin_items_controller"
   require_relative "app/controllers/discourse_user_cosmetics/stylesheets_controller"
 
@@ -56,6 +60,7 @@ after_initialize do
 
     get "/user-cosmetics/mine" => "discourse_user_cosmetics/items#mine", defaults: { format: :json }
     put "/user-cosmetics/select" => "discourse_user_cosmetics/items#select", defaults: { format: :json }
+    put "/user-cosmetics/showcase" => "discourse_user_cosmetics/showcase#update", defaults: { format: :json }
     get "/user-cosmetics/frames.css" => "discourse_user_cosmetics/stylesheets#frames"
 
     scope "/admin/plugins/user-cosmetics", constraints: StaffConstraint.new do
@@ -100,9 +105,13 @@ after_initialize do
     DiscourseUserCosmetics::Presenter.invalidate_username_change!(user_id: user&.id)
   end
 
-  # --- expose "what am I wearing" on the serializers the front-end reads ---
+  # --- expose presentation-only cosmetics data on native serializers -------
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }
+  end
+
+  add_to_serializer(:user, :cosmetics_showcase) do
+    ::DiscourseUserCosmetics::ShowcaseService.serialize_for(user: object)
   end
 
   # --- starter content so the admin screen isn't empty on first install ----
