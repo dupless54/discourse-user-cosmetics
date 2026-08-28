@@ -125,6 +125,18 @@ module("Component | UserCosmeticsPicker", function (hooks) {
 
     this.currentUser.set("cosmetics", cosmetics);
     this.siteSettings.discourse_user_cosmetics_frame_overhang_percent = 23;
+    this.selectResponse = {
+      success: "OK",
+      cosmetics: {
+        avatar_frame: null,
+        nameplate: null,
+        card_decoration: null,
+        profile_effect: null,
+      },
+    };
+
+    await render(<template><UserCosmeticsPicker /></template>);
+
     syncCurrentUserAvatarFrame(frame, 23);
 
     let link = document.getElementById(FRAMES_CSS_LINK_ID);
@@ -137,18 +149,6 @@ module("Component | UserCosmeticsPicker", function (hooks) {
       document.head.appendChild(link);
     }
     const originalHref = link.href;
-
-    this.selectResponse = {
-      success: "OK",
-      cosmetics: {
-        avatar_frame: null,
-        nameplate: null,
-        card_decoration: null,
-        profile_effect: null,
-      },
-    };
-
-    await render(<template><UserCosmeticsPicker /></template>);
 
     assert
       .dom(`#${CURRENT_USER_STYLE_ID}`)
