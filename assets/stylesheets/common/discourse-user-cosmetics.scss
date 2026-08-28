@@ -207,30 +207,23 @@
   color: var(--primary-medium);
 }
 
-.duc-admin-tabs {
-  display: flex;
-  gap: 0.5em;
-  border-bottom: 1px solid var(--primary-low);
-  margin-bottom: 1em;
+.duc-admin-controls {
+  margin: 1em 0;
 }
 
-.duc-admin-tab {
-  background: none;
-  border: none;
-  padding: 0.6em 1em;
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--primary-medium);
-  border-bottom: 2px solid transparent;
-
-  &.active {
-    color: var(--tertiary);
-    border-bottom-color: var(--tertiary);
-  }
+.duc-admin-kind-nav {
+  margin: 0;
 }
 
 .duc-admin-toolbar {
+  display: flex;
+  justify-content: flex-end;
   margin-bottom: 1em;
+}
+
+.duc-admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .duc-admin-table {
@@ -265,12 +258,90 @@
 }
 
 .duc-admin-row-actions {
+  display: flex;
+  gap: 0.35em;
   white-space: nowrap;
 }
 
 .duc-admin-empty {
   color: var(--primary-medium);
   padding: 1.5em 0;
+}
+
+@media (max-width: 700px) {
+  .duc-admin-page {
+    max-width: none;
+  }
+
+  .duc-admin-controls {
+    overflow-x: auto;
+  }
+
+  .duc-admin-kind-nav {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+
+  .duc-admin-toolbar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .duc-admin-table-wrap {
+    overflow: visible;
+  }
+
+  .duc-admin-table,
+  .duc-admin-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .duc-admin-table thead {
+    display: none;
+  }
+
+  .duc-admin-table tbody {
+    display: grid;
+    gap: 0.75em;
+  }
+
+  .duc-admin-table tr {
+    display: block;
+    padding: 0.25em 0.75em;
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius, 6px);
+    background: var(--secondary);
+  }
+
+  .duc-admin-table td {
+    display: grid;
+    grid-template-columns: minmax(7.25rem, 0.45fr) minmax(0, 1fr);
+    gap: 0.75em;
+    align-items: center;
+    width: auto;
+    padding: 0.65em 0;
+    border-bottom: 1px solid var(--primary-low);
+  }
+
+  .duc-admin-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .duc-admin-table td::before {
+    content: attr(data-label);
+    color: var(--primary-medium);
+    font-weight: 600;
+  }
+
+  .duc-admin-row-actions {
+    white-space: normal;
+  }
+
+  .duc-admin-row-actions .btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 // ---------------------------------------------------------------------------
