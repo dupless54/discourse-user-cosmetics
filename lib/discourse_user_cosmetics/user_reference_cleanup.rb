@@ -13,6 +13,11 @@ module ::DiscourseUserCosmetics
 
       selections_deleted = DiscourseUserCosmetics::UserSelection.where(user_id: user_id).delete_all
       loadouts_deleted = DiscourseUserCosmetics::Loadout.where(user_id: user_id).delete_all
+      showcase_fields_deleted =
+        ::UserCustomField.where(
+          user_id: user_id,
+          name: DiscourseUserCosmetics::ShowcaseService::FIELD_NAME,
+        ).delete_all
       owned_grants_deleted = DiscourseUserCosmetics::UserItem.where(user_id: user_id).delete_all
       grant_provenance_cleared =
         DiscourseUserCosmetics::UserItem.where(granted_by_id: user_id).update_all(
@@ -30,6 +35,7 @@ module ::DiscourseUserCosmetics
       {
         selections_deleted: selections_deleted,
         loadouts_deleted: loadouts_deleted,
+        showcase_fields_deleted: showcase_fields_deleted,
         owned_grants_deleted: owned_grants_deleted,
         grant_provenance_cleared: grant_provenance_cleared,
         item_provenance_cleared: item_provenance_cleared,
