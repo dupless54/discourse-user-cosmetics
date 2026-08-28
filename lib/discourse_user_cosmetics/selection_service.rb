@@ -64,20 +64,22 @@ module ::DiscourseUserCosmetics
       selections = DiscourseUserCosmetics::UserSelection.where(field => item.id)
 
       changed =
-        if !item.enabled?
-          selections.update_all(field => nil, updated_at: Time.zone.now)
-        elsif item.is_default? || item.public_access?
-          0
-        else
-          group_user_ids =
-            ::GroupUser.where(group_id: item.item_groups.select(:group_id)).select(:user_id)
-          direct_user_ids =
-            DiscourseUserCosmetics::UserItem.where(item_id: item.id).select(:user_id)
+        if item.enabled?
+          if item.is_default? || item.public_access?
+            0
+          else
+            group_user_ids =
+              ::GroupUser.where(group_id: item.item_groups.select(:group_id)).select(:user_id)
+            direct_user_ids =
+              DiscourseUserCosmetics::UserItem.where(item_id: item.id).select(:user_id)
 
-          selections
-            .where.not(user_id: group_user_ids)
-            .where.not(user_id: direct_user_ids)
-            .update_all(field => nil, updated_at: Time.zone.now)
+            selections
+              .where.not(user_id: group_user_ids)
+              .where.not(user_id: direct_user_ids)
+              .update_all(field => nil, updated_at: Time.zone.now)
+          end
+        else
+          selections.update_all(field => nil, updated_at: Time.zone.now)
         end
 
       DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
