@@ -23,6 +23,7 @@ after_initialize do
   require_relative "app/models/discourse_user_cosmetics/user_item"
   require_relative "app/models/discourse_user_cosmetics/user_selection"
   require_relative "app/models/discourse_user_cosmetics/effect_layer"
+  require_relative "lib/discourse_user_cosmetics/entitlement_resolver"
   require_relative "lib/discourse_user_cosmetics/presenter"
   require_relative "lib/discourse_user_cosmetics/selection_service"
   require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
