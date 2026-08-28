@@ -25,12 +25,8 @@ RSpec.describe DiscourseUserCosmetics::SelectionService do
     message = messages.find { |candidate| candidate.channel == described_class::CHANGE_CHANNEL }
 
     expect(message).to be_present
-    expect(message.data).to eq(
-      user_id: user.id,
-      username_lower: user.username_lower,
-      kind: "card_decoration",
-    )
-    expect(message.data).not_to have_key(:cosmetics)
+    expect(message.data).to eq(user_id: user.id, kind: "card_decoration")
+    expect(message.data.keys).to contain_exactly(:user_id, :kind)
   end
 
   it "does not publish another live marker when the selection is unchanged" do
@@ -48,6 +44,8 @@ RSpec.describe DiscourseUserCosmetics::SelectionService do
         described_class.select!(user: user, kind: "avatar_frame", item_id: item.id)
       end
 
-    expect(messages.none? { |candidate| candidate.channel == described_class::CHANGE_CHANNEL }).to eq(true)
+    live_messages =
+      messages.select { |candidate| candidate.channel == described_class::CHANGE_CHANNEL }
+    expect(live_messages).to be_empty
   end
 end
