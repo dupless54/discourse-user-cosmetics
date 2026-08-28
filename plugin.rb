@@ -57,12 +57,18 @@ after_initialize do
     end
   end
 
-  DiscourseEvent.on(:user_added_to_group) do |user, _group, **_kwargs|
-    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
+  DiscourseEvent.on(:user_added_to_group) do |user, group, **_kwargs|
+    DiscourseUserCosmetics::Presenter.invalidate_group_membership!(
+      user_id: user&.id,
+      group_id: group&.id,
+    )
   end
 
-  DiscourseEvent.on(:user_removed_from_group) do |user, _group|
-    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
+  DiscourseEvent.on(:user_removed_from_group) do |user, group|
+    DiscourseUserCosmetics::Presenter.invalidate_group_membership!(
+      user_id: user&.id,
+      group_id: group&.id,
+    )
   end
 
   # --- expose "what am I wearing" on the serializers the front-end reads ---
