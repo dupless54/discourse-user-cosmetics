@@ -18,6 +18,7 @@ on:
       - perf/bulk-presenter-entitlements
       - perf/admin-catalog-serialization
       - perf/bulk-invalid-selection-cleanup
+      - test/frontend-preferences-outlet
 
 permissions:
   contents: read
@@ -81,3 +82,7 @@ jobs:
       - name: Run plugin specs via Discourse plugin task
         working-directory: discourse
         run: bin/rake 'plugin:spec[discourse-user-cosmetics]'
+
+      - name: Run plugin QUnit
+        working-directory: discourse
+        run: bin/qunit --standalone --target discourse-user-cosmetics
