@@ -176,6 +176,8 @@ module ::DiscourseUserCosmetics
     end
 
     def admin_serialize(item, owner_count: nil)
+      image_upload = item.image_upload
+      raw_image_url = image_upload ? nil : safe_admin_asset_url(item.image_url)
       groups = item.groups.to_a
 
       {
@@ -184,9 +186,9 @@ module ::DiscourseUserCosmetics
         name: item.name,
         slug: item.slug,
         description: item.description,
-        image_url: item.resolved_image_url,
-        image_upload_id: item.image_upload_id,
-        raw_image_url: item.image_url,
+        image_url: image_upload ? item.resolved_image_url : raw_image_url,
+        image_upload_id: image_upload&.id,
+        raw_image_url: raw_image_url,
         gradient_from: item.gradient_from,
         gradient_to: item.gradient_to,
         glow_color: item.glow_color,
@@ -205,18 +207,27 @@ module ::DiscourseUserCosmetics
         effect_overflow_horizontal: item.effect_overflow_horizontal || 0,
         effect_side_offset_top: item.effect_side_offset_top || 0,
         effect_side_offset_bottom: item.effect_side_offset_bottom || 0,
-        layers: item.effect_layers.map { |layer| admin_serialize_layer(layer) },
+        layers: item.effect_layers.filter_map { |layer| admin_serialize_layer(layer) },
       }
     end
 
     def admin_serialize_layer(layer)
+      image_upload = layer.image_upload
+      raw_image_url = image_upload ? nil : safe_admin_asset_url(layer.image_url)
+      return if image_upload.blank? && raw_image_url.blank?
+
       {
         anchor: layer.anchor,
         stack_order: layer.stack_order,
-        image_upload_id: layer.image_upload_id,
-        raw_image_url: layer.image_url,
-        image_url: layer.resolved_image_url,
+        image_upload_id: image_upload&.id,
+        raw_image_url: raw_image_url,
+        image_url: image_upload ? layer.resolved_image_url : raw_image_url,
       }
+    end
+
+    def safe_admin_asset_url(url)
+      return if url.blank?
+      return url if DiscourseUserCosmetics::AssetPolicy.valid_url?(url)
     end
 
     def item_params
