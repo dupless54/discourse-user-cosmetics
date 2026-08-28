@@ -2,7 +2,7 @@
 
 RSpec.describe DiscourseUserCosmetics::LoadoutService do
   fab!(:user)
-  fab!(:other_user) { Fabricate(:user) }
+  fab!(:other_user, :user)
 
   before { enable_current_plugin }
 
