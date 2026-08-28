@@ -48,21 +48,12 @@ module ::DiscourseUserCosmetics
     def grant
       item = DiscourseUserCosmetics::Item.find(params[:id])
       user = find_user!(params[:username])
-      was_usable = item.usable_by?(user)
 
-      user_item =
-        DiscourseUserCosmetics::UserItem.find_or_create_by!(item_id: item.id, user_id: user.id) do |ui|
-          ui.granted_by_id = current_user.id
-        end
-
-      if user_item.previously_new_record? && !was_usable
-        # A new direct grant can reactivate a stale selected item. Only that
-        # user's presentation state (and CSS when applicable) needs invalidation.
-        DiscourseUserCosmetics::Presenter.invalidate_direct_entitlement_change!(
-          user_id: user.id,
-          item: item,
-        )
-      end
+      DiscourseUserCosmetics::Integration.grant!(
+        user: user,
+        item: item,
+        granted_by: current_user,
+      )
 
       render json: success_json.merge(owners: owner_usernames(item))
     end
@@ -72,9 +63,7 @@ module ::DiscourseUserCosmetics
       item = DiscourseUserCosmetics::Item.find(params[:id])
       user = find_user!(params[:username])
 
-      # UserItem#after_destroy clears the active slot only when this revoke
-      # actually removes the user's final entitlement to the item.
-      DiscourseUserCosmetics::UserItem.where(item_id: item.id, user_id: user.id).destroy_all
+      DiscourseUserCosmetics::Integration.revoke!(user: user, item: item)
 
       render json: success_json.merge(owners: owner_usernames(item))
     end
