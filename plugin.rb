@@ -81,6 +81,12 @@ after_initialize do
     DiscourseUserCosmetics::UserReferenceCleanup.cleanup!(user_id: user&.id)
   end
 
+  DiscourseEvent.on(:user_updated) do |user, changed_fields|
+    next unless Array(changed_fields).map(&:to_s).include?("username")
+
+    DiscourseUserCosmetics::Presenter.invalidate_username_change!(user_id: user&.id)
+  end
+
   # --- expose "what am I wearing" on the serializers the front-end reads ---
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }

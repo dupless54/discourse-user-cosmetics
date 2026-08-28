@@ -74,6 +74,20 @@ module ::DiscourseUserCosmetics
       bump_stylesheet_version!
     end
 
+    def self.invalidate_username_change!(user_id:)
+      return if user_id.blank?
+
+      selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
+      return unless selection
+
+      has_stylesheet_selection =
+        STYLESHEET_KINDS.any? do |kind|
+          selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind)).present?
+        end
+
+      bump_stylesheet_version! if has_stylesheet_selection
+    end
+
     def self.feature_gate_signature
       DiscourseUserCosmetics::Item::KINDS.map do |kind|
         DiscourseUserCosmetics::Item.kind_enabled?(kind) ? "1" : "0"
