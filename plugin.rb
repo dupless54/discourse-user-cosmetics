@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # name: discourse-user-cosmetics
-# about: Discord tarzı kullanıcı kozmetikleri -- avatar çerçeveleri, isim plakaları ve kullanıcı kartı dekorasyonları.
+# about: Discord tarzı kullanıcı kozmetikleri -- avatar çerçeveleri, isim plakaları, kullanıcı kartı dekorasyonları ve profil efektleri.
 # version: 1.2.0
 # authors: dupless54
 # url: https://github.com/dupless54/discourse-user-cosmetics

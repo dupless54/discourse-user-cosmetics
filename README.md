@@ -11,7 +11,7 @@ Kullanıcılar profil ayarlarındaki **Tercihler → Kozmetikler** sayfasından 
 | **Avatar Çerçevesi** | Gönderiler, konu listesi, alıntılar, bildirimler ve üst menü dahil avatarın olduğu her yer. | Ortası şeffaf PNG, GIF veya WEBP |
 | **İsim Plakası** | Kullanıcı kartı ve profil sayfasında, kullanıcı adının hemen arkasında. | Görsel veya iki renkli CSS gradyanı |
 | **Kart Dekorasyonu** | Kullanıcı kartının arka planında bir şerit/afiş olarak. | Görsel veya iki renkli CSS gradyanı |
-| **Profil Efekti** | Kullanıcı kartının **çevresinde**, kartın sınırlarını taşarak (Discord'un profil efektleri gibi). | En fazla 4 şeffaf PNG/GIF/WEBP katman |
+| **Profil Efekti** | Kullanıcı kartının **çevresinde**, kartın sınırlarını taşarak (Discord'un profil efektleri gibi). | En fazla 10 isteğe bağlı şeffaf PNG/GIF/WEBP katman |
 
 **Yönetici Özellikleri:**
 Yöneticiler **Admin → Plugins → User Cosmetics** paneli üzerinden sınırsız sayıda yeni kozmetik ekleyebilir. Eklediğiniz her bir öğe için şu ayarları yapabilirsiniz:
@@ -75,22 +75,23 @@ Animasyonlu (GIF/WEBP) dosyalar tarayıcı tarafından otomatik olarak döngüye
 
 ## Profil Efektleri (Discord Tarzı Katmanlı Çerçeve)
 
-Bu özellik, Discord'un "Profil Efektleri" (Profile Effects) ürününün JSON şemasından esinlenerek tasarlandı ve o şemayla birebir eşleşen bir veri modeli kullanır:
+Bu özellik Discord'un "Profil Efektleri" (Profile Effects) yaklaşımından esinlenir, ancak eklenti modeli Discourse kullanıcı kartı için genişletilmiştir. Temel `front/back`, referans genişlik ve overflow mantığı korunurken `left`, `right` ve `full` anchor'ları da desteklenir:
 
-| Discord JSON alanı | Bu eklentideki karşılığı |
+| Profil efekti alanı | Bu eklentideki karşılığı |
 | --- | --- |
-| `items[].layers[].anchor` (`top` / `bottom`) | Katmanın `anchor` alanı |
-| `items[].layers[].order` (`front` / `back`) | Katmanın `stack_order` alanı |
-| `items[].inner_width` | `effect_inner_width` (varsayılan: 1200, Discord ile aynı referans genişlik) |
-| `items[].overflow_top` / `overflow_bottom` / `overflow_horizontal` | Aynı adlarla, admin formunda piksel cinsinden girilen alanlar |
+| `layers[].anchor` | `top`, `bottom`, `left`, `right` veya `full` |
+| `layers[].order` | Katmanın `stack_order` alanı: `front` veya `back` |
+| Referans genişlik | `effect_inner_width` (varsayılan: 1200) |
+| Üst/alt/yatay taşma | `effect_overflow_top`, `effect_overflow_bottom`, `effect_overflow_horizontal` |
+| Yan katman başlangıç/bitiş kesintileri | `effect_side_offset_top`, `effect_side_offset_bottom` |
 
-Bir profil efekti, her biri isteğe bağlı olmak üzere **en fazla 4 katmandan** oluşur: *Üst-Ön*, *Üst-Arka*, *Alt-Ön*, *Alt-Arka*. "Ön" (front) katmanlar kartın **üzerinde**, "arka" (back) katmanlar kartın **arkasında** görünür -- Discord'daki tavşanların kartın üst kenarından sarkması tam olarak bu mekanizmayla mümkün olur.
+Bir profil efekti, her biri isteğe bağlı olmak üzere **en fazla 10 benzersiz katman slotundan** oluşabilir: *Tam*, *Üst*, *Alt*, *Sol* ve *Sağ* anchor'larının her biri için birer **Ön** (`front`) ve **Arka** (`back`) slotu vardır. "Ön" katmanlar kartın üzerinde, "arka" katmanlar kartın arkasında görünür. İhtiyacınız olmayan slotları boş bırakabilirsiniz.
 
 ### Yeni bir profil efekti eklemek
 
 1. **Admin → Plugins → User Cosmetics → Profil Efektleri** sekmesine gidin, **Yeni öğe**'ye tıklayın.
-2. Dört katman kutusundan (Üst-Ön, Üst-Arka, Alt-Ön, Alt-Arka) ihtiyacınız olanlara şeffaf arka planlı **PNG, GIF veya WEBP** yükleyin. Hepsini doldurmak zorunda değilsiniz; örneğin sadece "Üst-Ön" dolu bir efekt de tamamen geçerlidir.
-3. **Taşma (overflow)** değerlerini girin -- bu, efektin kartın kenarlarından piksel cinsinden ne kadar dışarı taşacağını belirler. Değerler 1200px genişliğindeki bir referans karta göredir ve gerçek kart boyutuna otomatik ölçeklenir (Discord'un `inner_width` mantığıyla aynı). Örnek JSON'daki değerler (üstten 304px, alttan 140px, yanlardan 56px) iyi bir başlangıç noktasıdır.
+2. On katman slotundan ihtiyacınız olanlara şeffaf arka planlı **PNG, GIF veya WEBP** yükleyin. Hepsini doldurmak zorunda değilsiniz; örneğin yalnızca "Üst-Ön" veya "Tam-Arka" dolu bir efekt de geçerlidir.
+3. **Taşma (overflow)** değerlerini girin -- bu, efektin kartın kenarlarından piksel cinsinden ne kadar dışarı taşacağını belirler. Değerler 1200px genişliğindeki referans karta göre hesaplanır ve gerçek kart boyutuna otomatik ölçeklenir. Sol/sağ anchor kullanıyorsanız yan katmanların üst ve alt kesintilerini de ilgili offset alanlarıyla ayarlayabilirsiniz.
 4. Kaydedin. Öğe, kilidini açan bir grup seçmediyseniz herkese açık olur; istediğiniz gruplara/kullanıcılara kısıtlamak için formun geri kalanı diğer kozmetik türleriyle birebir aynı şekilde çalışır.
 
 ### Nasıl render ediliyor?
@@ -146,5 +147,5 @@ Eklentinin arka planında performansı ve güvenliği sağlamak için modern sta
 * **Ayarla uyumlu çerçeve taşması:** Üst menü avatar çerçevesi artık sabit bir değer yerine `discourse_user_cosmetics_frame_overhang_percent` site ayarını kullanır.
 * **Legacy arayüz temizliği:** Native Preferences geçişinden sonra kullanılmayan preferences-entry bileşeni ve eski `.duc-picker-*` modal stilleri kaldırılmıştır.
 * **Crimson Channels kart uyumu korunuyor:** Kart dekorasyonu gerçek user-card yüzeyine bağlanır; dekorasyon katmanı `pointer-events: none` ile kart kontrollerinin kullanılabilirliğini korur.
-* **Profil Efektleri:** Discord JSON şemasından esinlenen, en fazla dört katmanlı ve kart sınırlarını taşabilen profil efektleri desteklenmeye devam eder.
+* **Profil Efektleri:** Genişletilmiş `top/bottom/left/right/full × front/back` modeliyle en fazla 10 benzersiz katman slotu ve kart sınırlarını aşan profil efektleri desteklenir.
 * **Sunucu otoritesi korunuyor:** Sahiplik, grup erişimi ve kullanılabilirlik kararları backend'deki yetkilendirme/entitlement kontrollerinde kalır; frontend yalnız sunucunun izin verdiği durumu gösterir.

@@ -65,7 +65,7 @@ en:
           rarity_color: "Rarity color"
           sort_order: "Sort order"
           layers: "Effect layers"
-          layers_help: "Up to 4 transparent PNG/GIF/WEBP layers, matching Discord's profile-effect model. \"Front\" layers draw above the card (e.g. a character peeking over the edge); \"back\" layers draw behind it (visible only where they poke outside the card)."
+          layers_help: "Up to 10 optional PNG/GIF/WEBP layers: front/back slots for top, bottom, left, right, and full-frame anchors. Front layers draw above the card; back layers draw behind it and remain visible where they extend outside the card."
           layer_top_front: "Top - Front"
           layer_top_back: "Top - Back"
           layer_bottom_front: "Bottom - Front"

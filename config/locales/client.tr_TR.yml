@@ -65,7 +65,7 @@ tr_TR:
           rarity_color: "Nadirlik rengi"
           sort_order: "Sıra"
           layers: "Efekt katmanları"
-          layers_help: "Discord'un profil efekti modeliyle birebir uyumlu, en fazla 4 şeffaf PNG/GIF/WEBP katman. \"Ön\" katmanlar kartın ÜSTÜNDE görünür (örn. kenardan sarkan bir karakter); \"arka\" katmanlar kartın ARKASINDA görünür (yalnızca kartın dışına taştığı kısımlarda görünür)."
+          layers_help: "En fazla 10 isteğe bağlı PNG/GIF/WEBP katmanı kullanabilirsiniz: üst, alt, sol, sağ ve tam çerçeve anchor'larının her biri için ön/arka slot vardır. Ön katmanlar kartın üzerinde; arka katmanlar kartın arkasında ve kart dışına taştıkları bölgelerde görünür."
           layer_top_front: "Üst - Ön"
           layer_top_back: "Üst - Arka"
           layer_bottom_front: "Alt - Ön"
