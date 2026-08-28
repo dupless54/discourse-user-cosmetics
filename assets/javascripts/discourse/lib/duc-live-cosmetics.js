@@ -1,4 +1,4 @@
-import User from "discourse/models/user";
+import { ajax } from "discourse/lib/ajax";
 
 export const COSMETICS_CHANGE_CHANNEL = "/user-cosmetics/changes";
 export const COSMETICS_CHANGE_EVENT = "user-cosmetics:changed";
@@ -37,8 +37,8 @@ export function fetchLatestCosmetics(username) {
     return pending;
   }
 
-  const request = User.findByUsername(key, { forCard: true })
-    .then((user) => user?.cosmetics ?? null)
+  const request = ajax(`/u/${encodeURIComponent(key)}/card.json`)
+    .then((json) => json?.user?.cosmetics ?? null)
     .catch(() => undefined)
     .finally(() => pendingByUsername.delete(key));
 
