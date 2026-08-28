@@ -9,13 +9,26 @@ module ::DiscourseUserCosmetics
       item_ids = items.map(&:id)
       return {} if item_ids.empty?
 
-      # Companion plugins may prepend/override Item#usable_by? to add access
-      # rules (for example, store-exclusive ownership). In that case the
-      # extended method is the canonical authorization contract and must be
-      # used by both catalog serialization and selection. Keep the optimized
-      # bulk path below for the base implementation.
-      return canonical_usable_item_ids(user: user, items: items) if custom_item_access?(items)
+      usable =
+        if custom_item_access?(items)
+          # Backward compatibility for companion plugins that still extend
+          # Item#usable_by?. New integrations should use Integration's batch
+          # entitlement-provider contract instead.
+          canonical_usable_item_ids(user: user, items: items)
+        else
+          base_usable_item_ids(user: user, items: items, item_ids: item_ids)
+        end
 
+      return usable unless defined?(DiscourseUserCosmetics::Integration)
+
+      DiscourseUserCosmetics::Integration.apply_entitlement_providers(
+        user: user,
+        items: items,
+        usable_item_ids: usable,
+      )
+    end
+
+    def self.base_usable_item_ids(user:, items:, item_ids:)
       restrictions_by_item = Hash.new { |hash, item_id| hash[item_id] = [] }
       DiscourseUserCosmetics::ItemGroup.where(item_id: item_ids).pluck(:item_id, :group_id).each do |item_id, group_id|
         restrictions_by_item[item_id] << group_id
@@ -57,6 +70,7 @@ module ::DiscourseUserCosmetics
 
       usable
     end
+    private_class_method :base_usable_item_ids
 
     def self.custom_item_access?(items)
       items.any? { |item| item.method(:usable_by?).owner != DiscourseUserCosmetics::Item }
