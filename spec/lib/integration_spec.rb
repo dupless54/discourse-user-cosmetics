@@ -131,10 +131,10 @@ RSpec.describe DiscourseUserCosmetics::Integration do
       "card_decoration" => card.id,
       "profile_effect" => effect.id,
     )
-    expect(result[:cosmetics].dig(:avatar_frame, :id)).to eq(frame.id)
-    expect(result[:cosmetics].dig(:nameplate, :id)).to eq(plate.id)
-    expect(result[:cosmetics].dig(:card_decoration, :id)).to eq(card.id)
-    expect(result[:cosmetics].dig(:profile_effect, :id)).to eq(effect.id)
+    expect(result[:cosmetics].dig("avatar_frame", :id)).to eq(frame.id)
+    expect(result[:cosmetics].dig("nameplate", :id)).to eq(plate.id)
+    expect(result[:cosmetics].dig("card_decoration", :id)).to eq(card.id)
+    expect(result[:cosmetics].dig("profile_effect", :id)).to eq(effect.id)
   end
 
   it "does not partially apply preview selections when one item is unavailable" do
