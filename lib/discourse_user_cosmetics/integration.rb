@@ -70,20 +70,39 @@ module ::DiscourseUserCosmetics
         result
       end
 
-      # Direct ownership only. This intentionally differs from entitled?,
+      # Direct ownership only. This intentionally differs from entitlement,
       # which also accounts for defaults, groups, and companion providers.
+      def owned_item_ids(user:, items:)
+        return {} unless user
+
+        item_ids = Array(items).filter_map(&:id).uniq
+        return {} if item_ids.empty?
+
+        DiscourseUserCosmetics::UserItem
+          .where(user_id: user.id, item_id: item_ids)
+          .pluck(:item_id)
+          .index_with(true)
+      end
+
       def owns?(user:, item:)
         return false unless user && item
 
-        DiscourseUserCosmetics::UserItem.exists?(user_id: user.id, item_id: item.id)
+        owned_item_ids(user: user, items: [item]).key?(item.id)
+      end
+
+      def entitled_item_ids(user:, items:)
+        return {} unless user
+
+        DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+          user: user,
+          items: Array(items),
+        )
       end
 
       def entitled?(user:, item:)
         return false unless user && item
 
-        DiscourseUserCosmetics::EntitlementResolver
-          .usable_item_ids(user: user, items: [item])
-          .key?(item.id)
+        entitled_item_ids(user: user, items: [item]).key?(item.id)
       end
 
       def grant!(user:, item:, granted_by: nil)
