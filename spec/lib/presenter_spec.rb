@@ -189,12 +189,13 @@ RSpec.describe DiscourseUserCosmetics::Presenter do
         "avatar_frame" => "Measured frame",
         "nameplate" => "Measured plate",
         "card_decoration" => "Measured card",
-      }.transform_values do |name|
-        DiscourseUserCosmetics::Item.create!(
-          kind: name.split.last == "frame" ? "avatar_frame" : name.split.last == "plate" ? "nameplate" : "card_decoration",
-          name: name,
-          image_url: "https://example.com/#{name.parameterize}.webp",
-        )
+      }.each_with_object({}) do |(kind, name), memo|
+        memo[kind] =
+          DiscourseUserCosmetics::Item.create!(
+            kind: kind,
+            name: name,
+            image_url: "https://example.com/#{name.parameterize}.webp",
+          )
       end
 
     selected_items.each do |kind, item|
