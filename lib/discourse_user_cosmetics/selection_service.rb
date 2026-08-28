@@ -2,6 +2,8 @@
 
 module ::DiscourseUserCosmetics
   class SelectionService
+    CHANGE_CHANNEL = "/user-cosmetics/changes"
+
     def self.select!(user:, kind:, item_id:)
       kind = kind.to_s
       raise Discourse::InvalidParameters.new(:kind) if DiscourseUserCosmetics::Item::KINDS.exclude?(kind)
@@ -21,10 +23,14 @@ module ::DiscourseUserCosmetics
       changed = selection.will_save_change_to_attribute?(field)
       selection.save!
 
-      DiscourseUserCosmetics::Presenter.invalidate_user_selection!(
-        user_id: user.id,
-        kind: kind,
-      ) if changed
+      if changed
+        DiscourseUserCosmetics::Presenter.invalidate_user_selection!(
+          user_id: user.id,
+          kind: kind,
+        )
+        publish_selection_change!(user: user, kind: kind)
+      end
+
       selection
     end
 
@@ -85,5 +91,17 @@ module ::DiscourseUserCosmetics
       DiscourseUserCosmetics::Presenter.bump_version! if bump && changed.positive?
       changed
     end
+
+    def self.publish_selection_change!(user:, kind:)
+      MessageBus.publish(
+        CHANGE_CHANNEL,
+        {
+          user_id: user.id,
+          username_lower: user.username_lower,
+          kind: kind,
+        },
+      )
+    end
+    private_class_method :publish_selection_change!
   end
 end
