@@ -25,6 +25,7 @@ on:
       - docs/native-preferences-release-readiness
       - i18n/native-cosmetics-copy-cleanup
       - ux/native-responsive-cosmetics-admin
+      - audit/final-release-readiness
 
 permissions:
   contents: read
