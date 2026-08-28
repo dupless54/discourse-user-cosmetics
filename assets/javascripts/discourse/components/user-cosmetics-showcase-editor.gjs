@@ -56,6 +56,10 @@ export default class UserCosmeticsShowcaseEditor extends Component {
     return JSON.stringify(this.selectedIds) !== JSON.stringify(this.savedIds);
   }
 
+  get saveDisabled() {
+    return this.saving || !this.dirty;
+  }
+
   get countLabel() {
     return t("discourse_user_cosmetics.showcase.editor_count", {
       count: this.selectedIds.length,
@@ -136,7 +140,7 @@ export default class UserCosmeticsShowcaseEditor extends Component {
 
   @action
   async save() {
-    if (!this.dirty || this.saving) {
+    if (this.saveDisabled) {
       return;
     }
 
@@ -256,9 +260,8 @@ export default class UserCosmeticsShowcaseEditor extends Component {
 
         <div class="duc-showcase-editor__footer">
           <DButton
-            @icon="floppy-disk"
             @action={{this.save}}
-            @disabled={{this.saving}}
+            @disabled={{this.saveDisabled}}
             @translatedLabel={{t "discourse_user_cosmetics.showcase.save"}}
             class="btn-primary"
           />
