@@ -43,6 +43,14 @@ after_initialize do
     # renders the normal admin shell (the Ember router takes over from there).
     get "/admin/plugins/user-cosmetics" => "admin/plugins#index", constraints: StaffConstraint.new
 
+    # Discourse registers each native Preferences subpage explicitly on the
+    # Rails side. Mirror that pattern for this plugin route so browser refresh,
+    # bookmarks, and direct links render the normal user preferences shell.
+    %w[u users].each do |root_path|
+      get "/#{root_path}/:username/preferences/cosmetics" => "users#preferences",
+          constraints: { username: RouteFormat.username }
+    end
+
     get "/user-cosmetics/mine" => "discourse_user_cosmetics/items#mine", defaults: { format: :json }
     put "/user-cosmetics/select" => "discourse_user_cosmetics/items#select", defaults: { format: :json }
     get "/user-cosmetics/frames.css" => "discourse_user_cosmetics/stylesheets#frames"
