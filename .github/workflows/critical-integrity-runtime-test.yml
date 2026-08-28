@@ -14,6 +14,7 @@ on:
       - perf/bulk-cosmetics-css-entitlements
       - perf/target-user-selection-cache
       - perf/target-direct-grant-cache
+      - perf/bulk-mine-entitlements
 
 permissions:
   contents: read

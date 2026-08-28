@@ -14,14 +14,20 @@ module ::DiscourseUserCosmetics
         DiscourseUserCosmetics::Item.enabled
           .where(kind: enabled_kinds)
           .ordered
-          .includes(:groups, effect_layers: :image_upload)
+          .includes(:groups, :image_upload, effect_layers: :image_upload)
           .to_a
+
+      usable_item_ids = usable_item_ids_for(items)
+      items_by_kind = items.group_by(&:kind)
+      items_by_id = items.index_by(&:id)
 
       grouped =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
           memo[kind] =
             if enabled_kinds.include?(kind)
-              items.select { |item| item.kind == kind }.map { |item| serialize_for_user(item) }
+              Array(items_by_kind[kind]).map do |item|
+                serialize_for_user(item, owned: usable_item_ids.key?(item.id))
+              end
             else
               []
             end
@@ -30,7 +36,8 @@ module ::DiscourseUserCosmetics
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: current_user.id)
       active =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
-          memo[kind] = visible_active_item_id(kind, selection, items, enabled_kinds)
+          memo[kind] =
+            visible_active_item_id(kind, selection, items_by_id, enabled_kinds, usable_item_ids)
         end
 
       render json: { items: grouped, active: active }
@@ -50,19 +57,31 @@ module ::DiscourseUserCosmetics
 
     private
 
-    def visible_active_item_id(kind, selection, items, enabled_kinds)
+    def usable_item_ids_for(items)
+      item_ids = items.map(&:id)
+      group_ids = ::GroupUser.where(user_id: current_user.id).pluck(:group_id).index_with(true)
+      direct_item_ids =
+        DiscourseUserCosmetics::UserItem.where(user_id: current_user.id, item_id: item_ids).pluck(:item_id).index_with(true)
+
+      items.each_with_object({}) do |item, memo|
+        group_allowed = item.groups.empty? || item.groups.any? { |group| group_ids.key?(group.id) }
+        memo[item.id] = true if item.is_default? || group_allowed || direct_item_ids.key?(item.id)
+      end
+    end
+
+    def visible_active_item_id(kind, selection, items_by_id, enabled_kinds, usable_item_ids)
       return nil unless selection && enabled_kinds.include?(kind)
 
       item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
       return nil if item_id.blank?
 
-      item = items.find { |candidate| candidate.id == item_id && candidate.kind == kind }
-      return nil unless item&.usable_by?(current_user)
+      item = items_by_id[item_id]
+      return nil unless item&.kind == kind && usable_item_ids.key?(item.id)
 
       item.id
     end
 
-    def serialize_for_user(item)
+    def serialize_for_user(item, owned:)
       base = {
         id: item.id,
         kind: item.kind,
@@ -74,7 +93,7 @@ module ::DiscourseUserCosmetics
         glow_color: item.glow_color,
         rarity_label: item.rarity_label,
         rarity_color: item.rarity_color,
-        owned: item.usable_by?(current_user),
+        owned: owned,
       }
 
       # Profile effects use positioned layers rather than one canonical image;

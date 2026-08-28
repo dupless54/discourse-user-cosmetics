@@ -102,4 +102,73 @@ RSpec.describe DiscourseUserCosmetics::ItemsController, type: :request do
       response.parsed_body.dig("items", "avatar_frame").find { |item| item["id"] == frame.id }
     expect(restored).to include("owned" => true)
   end
+
+  it "keeps mine query count constant as catalog items grow while preserving entitlements" do
+    member_group = Fabricate(:group)
+    restricted_group = Fabricate(:group)
+    member_group.add(user)
+
+    public_item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Public frame",
+        image_upload: Fabricate(:upload),
+      )
+    group_item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Group frame",
+        image_upload: Fabricate(:upload),
+      )
+    group_item.item_groups.create!(group: member_group)
+    direct_item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Direct frame",
+        image_upload: Fabricate(:upload),
+      )
+    direct_item.item_groups.create!(group: restricted_group)
+    DiscourseUserCosmetics::UserItem.create!(user: user, item: direct_item)
+    blocked_item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Blocked frame",
+        image_upload: Fabricate(:upload),
+      )
+    blocked_item.item_groups.create!(group: restricted_group)
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: group_item.id,
+    )
+
+    get "/user-cosmetics/mine.json"
+    small_queries = track_sql_queries { get "/user-cosmetics/mine.json" }
+
+    serialized = response.parsed_body.dig("items", "avatar_frame").index_by { |item| item["id"] }
+    expect(serialized.fetch(public_item.id)).to include("owned" => true)
+    expect(serialized.fetch(group_item.id)).to include("owned" => true)
+    expect(serialized.fetch(direct_item.id)).to include("owned" => true)
+    expect(serialized.fetch(blocked_item.id)).to include("owned" => false)
+    expect(response.parsed_body.dig("active", "avatar_frame")).to eq(group_item.id)
+
+    18.times do |index|
+      item =
+        DiscourseUserCosmetics::Item.create!(
+          kind: "avatar_frame",
+          name: "Scale frame #{index}",
+          image_upload: Fabricate(:upload),
+        )
+      next if index.odd?
+
+      item.item_groups.create!(group: restricted_group)
+      DiscourseUserCosmetics::UserItem.create!(user: user, item: item) if (index % 4).zero?
+    end
+
+    large_queries = track_sql_queries { get "/user-cosmetics/mine.json" }
+
+    expect(response).to be_successful
+    expect(large_queries.size).to eq(small_queries.size)
+  end
 end
