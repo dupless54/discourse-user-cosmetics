@@ -6,7 +6,7 @@ en:
     discourse_user_cosmetics_card_decorations_enabled: "Allow members to equip user card decorations."
     discourse_user_cosmetics_profile_effects_enabled: "Allow members to equip profile effects (Discord-style layered frames around the user card)."
     discourse_user_cosmetics_frame_overhang_percent: "How far an avatar frame extends past the edge of the avatar, as a percentage of the avatar's size."
-    discourse_user_cosmetics_max_image_kb: "Maximum size, in kilobytes, for an uploaded cosmetic image."
+    discourse_user_cosmetics_max_image_kb: "Optional extra cosmetic image limit in KB. Use 0 to inherit Discourse's max_image_size_kb setting."
 
   discourse_user_cosmetics:
     title: "User Cosmetics"
