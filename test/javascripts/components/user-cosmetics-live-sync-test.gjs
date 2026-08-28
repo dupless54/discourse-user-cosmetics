@@ -106,6 +106,26 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     assert.dom("style").hasTextContaining("#333333");
   });
 
+  test("late-mounted current-user surfaces reuse already reconciled cosmetics", async function (assert) {
+    this.currentUser.setProperties({
+      id: 7,
+      username: "alice",
+      username_lower: "alice",
+      cosmetics: this.freshCosmetics,
+    });
+
+    await render(
+      <template>
+        <UserCosmeticsLiveSync @model={{this.user}} />
+        <UserCosmeticsNameplate @model={{this.user}} />
+      </template>
+    );
+
+    assert.strictEqual(this.cardRequests, 0, "no duplicate card request is needed");
+    assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
+    assert.dom("style").hasTextContaining("#333333");
+  });
+
   test("reconciles stale cosmetics and shared CSS on a normal page bootstrap", async function (assert) {
     await render(
       <template>
