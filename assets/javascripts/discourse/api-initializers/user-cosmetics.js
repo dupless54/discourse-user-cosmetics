@@ -40,9 +40,10 @@ export default apiInitializer("1.8.0", (api) => {
     siteSettings.discourse_user_cosmetics_frame_overhang_percent
   );
 
-  // Mobil tarayıcılar ve PWA'lar arka planda MessageBus olaylarını kaçırabilir.
-  // Sayfa tekrar görünür olduğunda server state ile yeniden uzlaş ve paylaşılan
-  // frames.css dosyasını da yenile ki açık sekme eski kozmetiklerde takılmasın.
+  // Normal sayfa açılışında server truth ile bir kez uzlaş. Aynı lifecycle
+  // senkronu mobil/PWA resume ve bfcache dönüşlerinde de tekrar çalışır; böylece
+  // ilk yüklemede eski browser/CDN CSS'i veya preload edilmiş kozmetik verisi
+  // görünür kalmaz.
   installCosmeticsResumeSync({
     currentUser,
     siteSettings,

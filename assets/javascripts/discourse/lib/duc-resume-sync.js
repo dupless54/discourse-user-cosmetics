@@ -64,6 +64,7 @@ export function installCosmeticsResumeSync({
   appEvents,
   documentObject = document,
   windowObject = window,
+  syncOnInstall = true,
 }) {
   let wasHidden = documentObject.visibilityState === "hidden";
   let lastSyncAt = 0;
@@ -106,6 +107,14 @@ export function installCosmeticsResumeSync({
 
   documentObject.addEventListener("visibilitychange", onVisibilityChange);
   windowObject.addEventListener("pageshow", onPageShow);
+
+  // A full reload/new browser session can start from stale browser/CDN CSS and
+  // stale preloaded user presentation data without ever producing a MessageBus
+  // event. Reconcile once during normal bootstrap so server truth wins before a
+  // tab visibility change is required to repair the page.
+  if (syncOnInstall) {
+    refresh();
+  }
 
   return () => {
     documentObject.removeEventListener("visibilitychange", onVisibilityChange);

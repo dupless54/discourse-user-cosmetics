@@ -10,6 +10,7 @@ import {
 
 export default class UserCosmeticsLiveSync extends Component {
   @service appEvents;
+  @service currentUser;
 
   constructor() {
     super(...arguments);
@@ -18,6 +19,7 @@ export default class UserCosmeticsLiveSync extends Component {
       this,
       this.refreshVisibleUserCosmetics
     );
+    this.reconcileVisibleCurrentUser();
   }
 
   willDestroy() {
@@ -35,6 +37,19 @@ export default class UserCosmeticsLiveSync extends Component {
       this.args.outletArgs?.model ??
       this.args.model
     );
+  }
+
+  reconcileVisibleCurrentUser() {
+    const user = this.user;
+    if (
+      !user ||
+      this.currentUser?.cosmetics === undefined ||
+      !matchesCosmeticsChange(user, { user_id: this.currentUser?.id })
+    ) {
+      return;
+    }
+
+    set(user, "cosmetics", this.currentUser.cosmetics);
   }
 
   async refreshVisibleUserCosmetics(data) {
