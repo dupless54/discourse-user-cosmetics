@@ -157,16 +157,7 @@ module ::DiscourseUserCosmetics
         raise ArgumentError, "user is required" unless user
 
         loadouts =
-          DiscourseUserCosmetics::Loadout
-            .where(user_id: user.id)
-            .ordered
-            .includes(
-              :avatar_frame_item,
-              :nameplate_item,
-              :card_decoration_item,
-              :profile_effect_item,
-            )
-            .to_a
+          DiscourseUserCosmetics::Loadout.where(user_id: user.id).ordered.to_a
         serialize_loadouts(user: user, loadouts: loadouts)
       end
 
