@@ -17,6 +17,7 @@ on:
       - perf/bulk-mine-entitlements
       - perf/bulk-presenter-entitlements
       - perf/admin-catalog-serialization
+      - perf/bulk-invalid-selection-cleanup
 
 permissions:
   contents: read
