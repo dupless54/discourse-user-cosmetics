@@ -2,7 +2,7 @@
 
 RSpec.describe DiscourseUserCosmetics::Integration do
   fab!(:user)
-  fab!(:admin) { Fabricate(:admin) }
+  fab!(:admin)
 
   before { enable_current_plugin }
 
