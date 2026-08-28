@@ -161,4 +161,51 @@ RSpec.describe DiscourseUserCosmetics::Presenter do
       DiscourseUserCosmetics::UserSelection.find_by!(user_id: user.id).nameplate_item_id,
     ).to be_nil
   end
+
+  it "keeps cold summary query count constant as selected cosmetic kinds grow" do
+    effect =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "profile_effect",
+        name: "Measured effect",
+        image_url: "https://example.com/measured-effect.webp",
+      )
+    effect.effect_layers.create!(
+      anchor: "top",
+      stack_order: "front",
+      image_url: "https://example.com/measured-layer.webp",
+    )
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "profile_effect",
+      item_id: effect.id,
+    )
+
+    small_summary = nil
+    small_queries = track_sql_queries { small_summary = described_class.build_summary(user) }
+    expect(small_summary["profile_effect"]).to include(id: effect.id)
+
+    selected_items =
+      {
+        "avatar_frame" => "Measured frame",
+        "nameplate" => "Measured plate",
+        "card_decoration" => "Measured card",
+      }.transform_values do |name|
+        DiscourseUserCosmetics::Item.create!(
+          kind: name.split.last == "frame" ? "avatar_frame" : name.split.last == "plate" ? "nameplate" : "card_decoration",
+          name: name,
+          image_url: "https://example.com/#{name.parameterize}.webp",
+        )
+      end
+
+    selected_items.each do |kind, item|
+      DiscourseUserCosmetics::SelectionService.select!(user: user, kind: kind, item_id: item.id)
+    end
+
+    large_summary = nil
+    large_queries = track_sql_queries { large_summary = described_class.build_summary(user) }
+
+    expect(large_queries.size).to eq(small_queries.size)
+    expect(large_summary["profile_effect"]).to include(id: effect.id)
+    selected_items.each { |kind, item| expect(large_summary[kind]).to include(id: item.id) }
+  end
 end
