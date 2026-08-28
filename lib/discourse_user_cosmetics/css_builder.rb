@@ -25,13 +25,12 @@ module ::DiscourseUserCosmetics
         css << "  z-index: 2;\n"
         css << "}\n\n"
 
-        DiscourseUserCosmetics::UserSelection
-          .where.not(avatar_frame_item_id: nil)
-          .includes(:user, :avatar_frame_item)
-          .find_each(batch_size: 500) do |selection|
+        stylesheet_selections(kind: "avatar_frame", item_association: :avatar_frame_item).find_each(
+          batch_size: 500,
+        ) do |selection|
           user = selection.user
           item = selection.avatar_frame_item
-          next unless user && item && item.enabled? && item.kind == "avatar_frame" && item.usable_by?(user)
+          next unless user && item
 
           image = item.resolved_image_url
           next if image.blank?
@@ -58,17 +57,16 @@ module ::DiscourseUserCosmetics
       # ==========================================
       if SiteSetting.discourse_user_cosmetics_nameplates_enabled
         css << "/* --- Username Nameplates --- */\n"
-        
-        DiscourseUserCosmetics::UserSelection
-          .where.not(nameplate_item_id: nil)
-          .includes(:user, :nameplate_item)
-          .find_each(batch_size: 500) do |selection|
+
+        stylesheet_selections(kind: "nameplate", item_association: :nameplate_item).find_each(
+          batch_size: 500,
+        ) do |selection|
           user = selection.user
           item = selection.nameplate_item
-          next unless user && item && item.enabled? && item.kind == "nameplate" && item.usable_by?(user)
+          next unless user && item
 
           uname = escape_css_string(user.username_lower)
-          
+
           bg_css = ""
           if item.resolved_image_url.present?
             bg_css = "background-image: url(\"#{escape_css_url(item.resolved_image_url)}\");"
@@ -112,5 +110,45 @@ module ::DiscourseUserCosmetics
     def self.escape_css_url(str)
       str.to_s.gsub('"', '\\"')
     end
+
+    def self.stylesheet_selections(kind:, item_association:)
+      selection_table = DiscourseUserCosmetics::UserSelection.table_name
+      item_table = DiscourseUserCosmetics::Item.table_name
+      item_group_table = DiscourseUserCosmetics::ItemGroup.table_name
+      user_item_table = DiscourseUserCosmetics::UserItem.table_name
+      field = DiscourseUserCosmetics::UserSelection.field_for(kind)
+
+      DiscourseUserCosmetics::UserSelection
+        .where.not(field => nil)
+        .joins(
+          "INNER JOIN #{item_table} AS selected_cosmetic_items " \
+            "ON selected_cosmetic_items.id = #{selection_table}.#{field}",
+        )
+        .where("selected_cosmetic_items.kind = ? AND selected_cosmetic_items.enabled = TRUE", kind)
+        .where(<<~SQL)
+          selected_cosmetic_items.is_default = TRUE
+          OR NOT EXISTS (
+            SELECT 1
+            FROM #{item_group_table} AS cosmetic_item_groups
+            WHERE cosmetic_item_groups.item_id = selected_cosmetic_items.id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM #{item_group_table} AS cosmetic_group_access
+            INNER JOIN group_users AS cosmetic_group_users
+              ON cosmetic_group_users.group_id = cosmetic_group_access.group_id
+            WHERE cosmetic_group_access.item_id = selected_cosmetic_items.id
+              AND cosmetic_group_users.user_id = #{selection_table}.user_id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM #{user_item_table} AS cosmetic_user_items
+            WHERE cosmetic_user_items.item_id = selected_cosmetic_items.id
+              AND cosmetic_user_items.user_id = #{selection_table}.user_id
+          )
+        SQL
+        .includes(:user, item_association => :image_upload)
+    end
+    private_class_method :stylesheet_selections
   end
 end
