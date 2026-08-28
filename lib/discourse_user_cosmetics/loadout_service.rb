@@ -43,7 +43,6 @@ module ::DiscourseUserCosmetics
           user: user,
           selections: loadout.selection_item_ids,
         )
-        loadout.touch
         loadout
       end
 
