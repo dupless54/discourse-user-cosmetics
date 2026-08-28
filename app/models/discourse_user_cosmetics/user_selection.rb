@@ -26,16 +26,42 @@ module ::DiscourseUserCosmetics
     private
 
     def changed_selections_are_usable
-      FIELD_FOR_KIND.each do |kind, field|
-        next unless will_save_change_to_attribute?(field)
+      changed_slots =
+        FIELD_FOR_KIND.filter_map do |kind, field|
+          next unless will_save_change_to_attribute?(field)
 
-        item_id = public_send(field)
-        next if item_id.blank?
+          item_id = public_send(field)
+          next if item_id.blank?
 
-        item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
-        next if DiscourseUserCosmetics::Item.kind_enabled?(kind) && item && item.usable_by?(user)
+          [kind, field, item_id]
+        end
+      return if changed_slots.empty?
 
-        errors.add(field, :invalid)
+      items_by_id =
+        DiscourseUserCosmetics::Item.enabled
+          .where(id: changed_slots.map(&:last).uniq)
+          .to_a
+          .index_by(&:id)
+      valid_slots = []
+
+      changed_slots.each do |kind, field, item_id|
+        item = items_by_id[item_id]
+        if !DiscourseUserCosmetics::Item.kind_enabled?(kind) || item&.kind != kind
+          errors.add(field, :invalid)
+          next
+        end
+
+        valid_slots << [field, item]
+      end
+
+      usable_item_ids =
+        DiscourseUserCosmetics::EntitlementResolver.usable_item_ids(
+          user: user,
+          items: valid_slots.map(&:last),
+        )
+
+      valid_slots.each do |field, item|
+        errors.add(field, :invalid) unless usable_item_ids.key?(item.id)
       end
     end
   end
