@@ -64,7 +64,6 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     this.owner.lookup("service:app-events").trigger(COSMETICS_CHANGE_EVENT, {
       user_id: 7,
-      username_lower: "alice",
       kind: "nameplate",
     });
     await settled();
@@ -79,7 +78,6 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     this.owner.lookup("service:app-events").trigger(COSMETICS_CHANGE_EVENT, {
       user_id: 8,
-      username_lower: "bob",
       kind: "card_decoration",
     });
     await settled();
