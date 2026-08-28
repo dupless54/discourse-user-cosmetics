@@ -10,6 +10,11 @@ tr_TR:
 
   discourse_user_cosmetics:
     title: "Kullanıcı Kozmetikleri"
+    errors:
+      upload_missing: "artık var olmayan bir yüklemeye başvuruyor"
+      unsupported_image_format: "PNG, JPG, JPEG, GIF veya WEBP biçiminde olmalı"
+      image_too_large: "%{max_kb} KB veya daha küçük olmalı"
+      invalid_image_url: "güvenli bir eklenti/yükleme yolu veya geçerli bir HTTPS adresi olmalı"
 
   activerecord:
     errors:

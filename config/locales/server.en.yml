@@ -10,6 +10,11 @@ en:
 
   discourse_user_cosmetics:
     title: "User Cosmetics"
+    errors:
+      upload_missing: "references an upload that no longer exists"
+      unsupported_image_format: "must use PNG, JPG, JPEG, GIF, or WEBP"
+      image_too_large: "must be %{max_kb} KB or smaller"
+      invalid_image_url: "must be a safe plugin/upload path or a valid HTTPS URL"
 
   activerecord:
     errors:

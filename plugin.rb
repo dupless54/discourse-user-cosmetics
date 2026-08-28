@@ -17,12 +17,14 @@ end
 
 after_initialize do
   # --- load our Ruby code -------------------------------------------------
+  require_relative "lib/discourse_user_cosmetics/asset_policy"
   require_relative "app/models/discourse_user_cosmetics/item"
   require_relative "app/models/discourse_user_cosmetics/item_group"
   require_relative "app/models/discourse_user_cosmetics/user_item"
   require_relative "app/models/discourse_user_cosmetics/user_selection"
   require_relative "app/models/discourse_user_cosmetics/effect_layer"
   require_relative "lib/discourse_user_cosmetics/presenter"
+  require_relative "lib/discourse_user_cosmetics/selection_service"
   require_relative "lib/discourse_user_cosmetics/css_builder"
   require_relative "lib/discourse_user_cosmetics/seeder"
   require_relative "app/controllers/discourse_user_cosmetics/items_controller"
@@ -53,6 +55,14 @@ after_initialize do
         get "/items/:id/owners" => "discourse_user_cosmetics/admin_items#owners", constraints: { id: /\d+/ }
       end
     end
+  end
+
+  DiscourseEvent.on(:user_added_to_group) do |user, _group, **_kwargs|
+    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
+  end
+
+  DiscourseEvent.on(:user_removed_from_group) do |user, _group|
+    DiscourseUserCosmetics::Presenter.bump_user_version!(user&.id)
   end
 
   # --- expose "what am I wearing" on the serializers the front-end reads ---

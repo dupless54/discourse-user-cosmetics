@@ -6,20 +6,35 @@ module ::DiscourseUserCosmetics
     requires_login
 
     # GET /user-cosmetics/mine.json
-    # Returns every enabled item grouped by kind, flagged with whether the
-    # current user owns/can-use it, plus the user's currently active picks.
+    # Returns enabled catalog items for currently enabled cosmetic kinds,
+    # flagged with whether the current user can use each item.
     def mine
-      items = DiscourseUserCosmetics::Item.enabled.ordered.includes(:groups, effect_layers: :image_upload)
+      enabled_kinds = DiscourseUserCosmetics::Item::KINDS.select { |kind| DiscourseUserCosmetics::Item.kind_enabled?(kind) }
+      items =
+        DiscourseUserCosmetics::Item.enabled
+          .where(kind: enabled_kinds)
+          .ordered
+          .includes(:groups, effect_layers: :image_upload)
 
       grouped =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
-          memo[kind] = items.select { |i| i.kind == kind }.map { |item| serialize_for_user(item) }
+          memo[kind] =
+            if enabled_kinds.include?(kind)
+              items.select { |item| item.kind == kind }.map { |item| serialize_for_user(item) }
+            else
+              []
+            end
         end
 
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: current_user.id)
       active =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
-          memo[kind] = selection&.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
+          memo[kind] =
+            if enabled_kinds.include?(kind)
+              selection&.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
+            else
+              nil
+            end
         end
 
       render json: { items: grouped, active: active }
@@ -28,22 +43,11 @@ module ::DiscourseUserCosmetics
     # PUT /user-cosmetics/select.json { kind:, item_id: }
     # item_id may be blank/nil to unequip that slot.
     def select
-      kind = params[:kind].to_s
-      raise Discourse::InvalidParameters.new(:kind) unless DiscourseUserCosmetics::Item::KINDS.include?(kind)
-
-      item_id = params[:item_id].presence
-
-      if item_id
-        item = DiscourseUserCosmetics::Item.find_by(id: item_id, kind: kind, enabled: true)
-        raise Discourse::NotFound unless item
-        raise Discourse::InvalidAccess unless item.usable_by?(current_user)
-      end
-
-      selection = DiscourseUserCosmetics::UserSelection.find_or_initialize_by(user_id: current_user.id)
-      selection.public_send("#{DiscourseUserCosmetics::UserSelection.field_for(kind)}=", item_id)
-      selection.save!
-
-      DiscourseUserCosmetics::Presenter.bump_version!
+      DiscourseUserCosmetics::SelectionService.select!(
+        user: current_user,
+        kind: params[:kind],
+        item_id: params[:item_id].presence,
+      )
 
       render json: success_json
     end
@@ -63,11 +67,10 @@ module ::DiscourseUserCosmetics
         rarity_label: item.rarity_label,
         rarity_color: item.rarity_color,
         owned: item.usable_by?(current_user),
-        group_names: item.groups.map(&:name),
       }
 
-      # Profil efektlerinde tekil bir image_url yoktur (katmanlardan oluşur);
-      # seçim ekranındaki önizleme için temsili görseli buradan alıyoruz.
+      # Profile effects use positioned layers rather than one canonical image;
+      # expose a representative image for the picker preview.
       base[:image_url] = DiscourseUserCosmetics::Presenter.effect_fields(item)[:image_url] if item.kind == "profile_effect"
 
       base
