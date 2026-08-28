@@ -15,6 +15,7 @@ module ::DiscourseUserCosmetics
           .where(kind: enabled_kinds)
           .ordered
           .includes(:groups, effect_layers: :image_upload)
+          .to_a
 
       grouped =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
@@ -29,12 +30,7 @@ module ::DiscourseUserCosmetics
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: current_user.id)
       active =
         DiscourseUserCosmetics::Item::KINDS.each_with_object({}) do |kind, memo|
-          memo[kind] =
-            if enabled_kinds.include?(kind)
-              selection&.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
-            else
-              nil
-            end
+          memo[kind] = visible_active_item_id(kind, selection, items, enabled_kinds)
         end
 
       render json: { items: grouped, active: active }
@@ -53,6 +49,18 @@ module ::DiscourseUserCosmetics
     end
 
     private
+
+    def visible_active_item_id(kind, selection, items, enabled_kinds)
+      return nil unless selection && enabled_kinds.include?(kind)
+
+      item_id = selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind))
+      return nil if item_id.blank?
+
+      item = items.find { |candidate| candidate.id == item_id && candidate.kind == kind }
+      return nil unless item&.usable_by?(current_user)
+
+      item.id
+    end
 
     def serialize_for_user(item)
       base = {
