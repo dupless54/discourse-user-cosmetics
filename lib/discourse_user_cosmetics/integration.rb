@@ -149,6 +149,28 @@ module ::DiscourseUserCosmetics
         DiscourseUserCosmetics::SelectionService.select!(user: user, kind: kind, item_id: nil)
       end
 
+      def current_selections_for(user:)
+        raise ArgumentError, "user is required" unless user
+
+        selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user.id)
+        serialize_current_selections(selection)
+      end
+
+      def apply_selections!(user:, selections:)
+        raise ArgumentError, "user is required" unless user
+
+        selection =
+          DiscourseUserCosmetics::SelectionService.replace_all!(
+            user: user,
+            selections: selections,
+          )
+
+        {
+          selections: serialize_current_selections(selection),
+          cosmetics: DiscourseUserCosmetics::Presenter.summary_for(user),
+        }
+      end
+
       def loadouts_supported?
         true
       end
@@ -201,6 +223,12 @@ module ::DiscourseUserCosmetics
       end
 
       private
+
+      def serialize_current_selections(selection)
+        DiscourseUserCosmetics::UserSelection::FIELD_FOR_KIND.each_with_object({}) do |(kind, field), memo|
+          memo[kind] = selection&.public_send(field)
+        end
+      end
 
       def serialize_loadouts(user:, loadouts:)
         item_ids =
