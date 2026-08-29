@@ -33,6 +33,7 @@ after_initialize do
   require_relative "lib/discourse_user_cosmetics/loadout_service"
   require_relative "lib/discourse_user_cosmetics/showcase_service"
   require_relative "lib/discourse_user_cosmetics/integration"
+  require_relative "lib/discourse_user_cosmetics/integration_contract"
   require_relative "lib/discourse_user_cosmetics/showcase_integration"
   require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
   require_relative "lib/discourse_user_cosmetics/css_builder"
