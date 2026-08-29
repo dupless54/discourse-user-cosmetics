@@ -1,0 +1,29 @@
+// Native Discourse admin navigation for the cosmetics catalog.
+// Loaded after the shared cosmetics stylesheet so the final release candidate
+// can keep its newer responsive table/header behavior while using core admin
+// navigation primitives.
+
+.duc-admin-controls {
+  margin: 1em 0 1.25em;
+
+  nav {
+    min-width: 0;
+  }
+}
+
+.duc-admin-kind-nav {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .duc-admin-controls {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .duc-admin-kind-nav {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+}

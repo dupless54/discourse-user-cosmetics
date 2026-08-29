@@ -170,23 +170,25 @@ export default class UserCosmeticsAdminPage extends Component {
         />
       </div>
 
-      <div
-        class="duc-admin-tabs"
-        role="tablist"
-        aria-label={{t "discourse_user_cosmetics.admin.title"}}
-      >
-        {{#each this.tabs as |tab|}}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={{if tab.active "true" "false"}}
-            class="duc-admin-tab {{if tab.active 'active'}}"
-            {{on "click" (fn this.setKind tab.kind)}}
-          >
-            {{tab.label}}
-          </button>
-        {{/each}}
-      </div>
+      <section class="admin-controls duc-admin-controls">
+        <nav aria-label={{t "discourse_user_cosmetics.admin.title"}}>
+          <ul class="nav nav-pills duc-admin-kind-nav" role="tablist">
+            {{#each this.tabs as |tab|}}
+              <li>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={{if tab.active "true" "false"}}
+                  class={{if tab.active "active"}}
+                  {{on "click" (fn this.setKind tab.kind)}}
+                >
+                  {{tab.label}}
+                </button>
+              </li>
+            {{/each}}
+          </ul>
+        </nav>
+      </section>
 
       {{#if this.editingItem}}
         <UserCosmeticsAdminForm
@@ -214,7 +216,10 @@ export default class UserCosmeticsAdminPage extends Component {
             <tbody>
               {{#each this.visibleItems as |item|}}
                 <tr>
-                  <td class="duc-admin-preview-cell">
+                  <td
+                    data-label={{t "discourse_user_cosmetics.admin.table.preview"}}
+                    class="duc-admin-preview-cell"
+                  >
                     <div class="duc-admin-preview-swatch" style={{item.previewStyle}}></div>
                   </td>
                   <td
@@ -241,11 +246,13 @@ export default class UserCosmeticsAdminPage extends Component {
                   >
                     <DButton
                       @icon="pencil"
+                      @translatedLabel={{t "discourse_user_cosmetics.admin.edit_item"}}
                       @action={{fn this.startEdit item}}
                       class="btn-small"
                     />
                     <DButton
                       @icon="trash-can"
+                      @translatedLabel={{t "discourse_user_cosmetics.admin.delete"}}
                       @action={{fn this.deleteItem item}}
                       class="btn-small btn-danger"
                     />
