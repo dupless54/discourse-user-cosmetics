@@ -1,0 +1,43 @@
+// Accessibility overrides shared by all User Cosmetics surfaces.
+
+.duc-user-card-message:focus-visible,
+.duc-admin-tab:focus-visible,
+.duc-cosmetics-tab:focus-visible,
+.duc-showcase-editor__available-item:focus-visible,
+.duc-showcase-editor__item-actions .btn:focus-visible {
+  outline: 2px solid var(--tertiary) !important;
+  outline-offset: 2px;
+}
+
+.duc-hidden-file-input:focus-visible + *,
+.duc-upload-btn:has(.duc-hidden-file-input:focus-visible) {
+  outline: 2px solid var(--tertiary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duc-user-card-message,
+  .duc-cosmetics-item,
+  .duc-showcase-editor__available-item {
+    transition: none !important;
+  }
+
+  .duc-user-card-message:hover,
+  .duc-user-card-message:focus-visible {
+    transform: none !important;
+  }
+
+  .duc-card-decoration-overlay,
+  .duc-profile-effect-layer {
+    animation: none !important;
+  }
+
+  // These layers may contain animated GIF/WEBP assets. The components avoid
+  // mounting them when reduced motion is active; this is a defensive fallback
+  // for already-mounted DOM during a live OS preference change.
+  .duc-card-decoration-overlay,
+  .duc-profile-effect-portal-back,
+  .duc-profile-effect-portal-front {
+    display: none !important;
+  }
+}

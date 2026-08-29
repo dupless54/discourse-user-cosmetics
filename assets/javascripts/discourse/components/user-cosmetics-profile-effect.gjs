@@ -1,19 +1,28 @@
 import Component from "@glimmer/component";
 import { get } from "@ember/object";
-import { modifier } from "ember-modifier";
 import { htmlSafe } from "@ember/template";
+import { modifier } from "ember-modifier";
+import { prefersReducedMotion } from "../lib/duc-motion";
 
-const CARD_SELECTOR = "#user-card, .user-card"; 
+const CARD_SELECTOR = "#user-card, .user-card";
 
 const attachProfileEffect = modifier((element, [effect]) => {
   const card = element.closest(CARD_SELECTOR);
 
-  if (!card || !effect || !Array.isArray(effect.layers) || effect.layers.length === 0) {
+  if (
+    prefersReducedMotion() ||
+    !card ||
+    !effect ||
+    !Array.isArray(effect.layers) ||
+    effect.layers.length === 0
+  ) {
     return;
   }
 
   const parent = card.parentElement;
-  if (!parent) return;
+  if (!parent) {
+    return;
+  }
 
   if (getComputedStyle(parent).position === "static") {
     parent.style.position = "relative";
@@ -40,21 +49,22 @@ const attachProfileEffect = modifier((element, [effect]) => {
       const img = document.createElement("img");
       img.src = layer.image_url;
       img.alt = "";
+      img.setAttribute("aria-hidden", "true");
       img.className = "duc-profile-effect-layer";
       img.dataset.anchor = layer.anchor;
       img.dataset.stackOrder = layer.stack_order;
       img.style.position = "absolute";
       img.style.display = "block";
-      
+
       if (layer.anchor === "full") {
         img.style.top = "0";
         img.style.left = "0";
         img.style.width = "100%";
         img.style.height = "100%";
       } else if (layer.anchor === "left" || layer.anchor === "right") {
-        // YENİ MATEMATİK: CSS değişkenleri admin panelinden gelen değerleri okuyacak
         img.style.top = "var(--duc-side-offset-top, 0px)";
-        img.style.height = "calc(100% - var(--duc-side-offset-top, 0px) - var(--duc-side-offset-bottom, 0px))";
+        img.style.height =
+          "calc(100% - var(--duc-side-offset-top, 0px) - var(--duc-side-offset-bottom, 0px))";
         img.style.width = "auto";
         img.style[layer.anchor] = "0";
       } else {
@@ -63,18 +73,20 @@ const attachProfileEffect = modifier((element, [effect]) => {
         img.style.height = "auto";
         img.style[layer.anchor === "top" ? "top" : "bottom"] = "0";
       }
-      
+
       if (layer.stack_order === "front") {
         frontPortal.appendChild(img);
       } else {
         backPortal.appendChild(img);
       }
-      
+
       return img;
     });
 
   function layout() {
-    if (!parent.contains(card)) return;
+    if (!parent.contains(card)) {
+      return;
+    }
 
     const width = card.offsetWidth;
     const height = card.offsetHeight;
@@ -83,12 +95,14 @@ const attachProfileEffect = modifier((element, [effect]) => {
 
     const innerWidth = effect.effect_inner_width || effect.inner_width || 1200;
     const scale = width / innerWidth;
-    
-    const overflowH = (effect.effect_overflow_horizontal || effect.overflow_horizontal || 0) * scale;
-    const overflowTop = (effect.effect_overflow_top || effect.overflow_top || 0) * scale;
-    const overflowBottom = (effect.effect_overflow_bottom || effect.overflow_bottom || 0) * scale;
 
-    // YENİ: Admin panelinden gelen özel yan çubuk kesinti değerlerini oranlıyoruz
+    const overflowH =
+      (effect.effect_overflow_horizontal || effect.overflow_horizontal || 0) *
+      scale;
+    const overflowTop =
+      (effect.effect_overflow_top || effect.overflow_top || 0) * scale;
+    const overflowBottom =
+      (effect.effect_overflow_bottom || effect.overflow_bottom || 0) * scale;
     const sideOffsetTop = (effect.effect_side_offset_top || 0) * scale;
     const sideOffsetBottom = (effect.effect_side_offset_bottom || 0) * scale;
 
@@ -103,14 +117,16 @@ const attachProfileEffect = modifier((element, [effect]) => {
       card.style.zIndex = cardZ;
     }
 
-    const applyPortalStyles = (p) => {
-      p.style.left = pLeft;
-      p.style.top = pTop;
-      p.style.width = pWidth;
-      p.style.height = pHeight;
-      // Yan çubukların matematiksel kırpılması için değişkenleri aktarıyoruz
-      p.style.setProperty("--duc-side-offset-top", `${sideOffsetTop}px`);
-      p.style.setProperty("--duc-side-offset-bottom", `${sideOffsetBottom}px`);
+    const applyPortalStyles = (portal) => {
+      portal.style.left = pLeft;
+      portal.style.top = pTop;
+      portal.style.width = pWidth;
+      portal.style.height = pHeight;
+      portal.style.setProperty("--duc-side-offset-top", `${sideOffsetTop}px`);
+      portal.style.setProperty(
+        "--duc-side-offset-bottom",
+        `${sideOffsetBottom}px`
+      );
     };
 
     applyPortalStyles(backPortal);
@@ -130,8 +146,12 @@ const attachProfileEffect = modifier((element, [effect]) => {
 
   return () => {
     resizeObserver?.disconnect();
-    if (parent.contains(backPortal)) backPortal.remove();
-    if (parent.contains(frontPortal)) frontPortal.remove();
+    if (parent.contains(backPortal)) {
+      backPortal.remove();
+    }
+    if (parent.contains(frontPortal)) {
+      frontPortal.remove();
+    }
     images.length = 0;
   };
 });
@@ -150,7 +170,9 @@ export default class UserCosmeticsProfileEffect extends Component {
   }
 
   get globalStyle() {
-    if (!this.effect) return htmlSafe("");
+    if (!this.effect) {
+      return htmlSafe("");
+    }
     return htmlSafe(`
       #user-card, .user-card {
         overflow: visible !important;

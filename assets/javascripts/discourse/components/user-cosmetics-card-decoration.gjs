@@ -2,40 +2,34 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { get } from "@ember/object";
 import { htmlSafe } from "@ember/template";
-import { later, cancel } from "@ember/runloop"; // Ember zamanlayıcıları
+import { later, cancel } from "@ember/runloop";
 import { modifier } from "ember-modifier";
+import { prefersReducedMotion } from "../lib/duc-motion";
 
 const CARD_SELECTOR = "#user-card, .user-card";
 
-// The outlet lives inside Discourse's metadata area. Rendering the image
-// there makes absolute sizing depend on whichever nested element happens to
-// be positioned by the active theme. Mount a dedicated image directly under
-// the real user-card instead, so Crimson Channels is always the size source.
 const attachCardDecoration = modifier((element, [imageUrl]) => {
   const card = element.closest(CARD_SELECTOR);
 
-  if (!card || !imageUrl) {
+  if (!card || !imageUrl || prefersReducedMotion()) {
     return;
   }
 
-  card
-    .querySelector(":scope > .duc-card-decoration-overlay")
-    ?.remove();
+  card.querySelector(":scope > .duc-card-decoration-overlay")?.remove();
 
   const image = document.createElement("img");
   image.src = imageUrl;
   image.alt = "";
   image.draggable = false;
   image.setAttribute("aria-hidden", "true");
-  image.className =
-    "duc-profile-effect-overlay duc-card-decoration-overlay";
+  image.className = "duc-profile-effect-overlay duc-card-decoration-overlay";
   card.appendChild(image);
 
   return () => image.remove();
 });
 
 export default class UserCosmeticsCardDecoration extends Component {
-  @tracked isPlaying = true;
+  @tracked isPlaying = !prefersReducedMotion();
   timer = null;
 
   constructor() {
@@ -44,21 +38,24 @@ export default class UserCosmeticsCardDecoration extends Component {
   }
 
   startLoop() {
-    // Sadece görsel efekt varsa döngüyü başlat
+    if (prefersReducedMotion()) {
+      this.isPlaying = false;
+      return;
+    }
+
     if (this.decoration?.image_url) {
       this.scheduleNextToggle();
     }
   }
 
   scheduleNextToggle() {
-    // isPlaying true ise 4000ms (4 saniye) oynat, false ise 10000ms (10 saniye) bekle
     const delay = this.isPlaying ? 4000 : 10000;
 
     this.timer = later(
       this,
       () => {
-        this.isPlaying = !this.isPlaying; // Durumu tersine çevir
-        this.scheduleNextToggle(); // Bir sonraki aşamayı zamanla
+        this.isPlaying = !this.isPlaying;
+        this.scheduleNextToggle();
       },
       delay
     );
@@ -66,7 +63,6 @@ export default class UserCosmeticsCardDecoration extends Component {
 
   willDestroy() {
     super.willDestroy();
-    // Kullanıcı kartı kapattığında zamanlayıcıyı temizle (Hafıza sızıntısını önler)
     if (this.timer) {
       cancel(this.timer);
     }
@@ -96,9 +92,7 @@ export default class UserCosmeticsCardDecoration extends Component {
 
   <template>
     {{#if this.decoration}}
-      
       {{#if this.decoration.image_url}}
-        {{!-- Efekt sadece isPlaying true olduğunda HTML'e eklenir, false olunca silinir --}}
         {{#if this.isPlaying}}
           <span
             class="duc-card-decoration-anchor"
@@ -110,7 +104,6 @@ export default class UserCosmeticsCardDecoration extends Component {
           <span class="duc-card-banner-label">{{this.decoration.name}}</span>
         </div>
       {{/if}}
-
     {{/if}}
   </template>
 }

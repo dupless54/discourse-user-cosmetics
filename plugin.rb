@@ -12,6 +12,7 @@ enabled_site_setting :discourse_user_cosmetics_enabled
 register_asset "stylesheets/common/discourse-user-cosmetics.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-preferences.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-showcase.scss"
+register_asset "stylesheets/common/discourse-user-cosmetics-accessibility.scss"
 
 module ::DiscourseUserCosmetics
   PLUGIN_NAME = "discourse-user-cosmetics"
@@ -46,13 +47,8 @@ after_initialize do
 
   # --- routes ---------------------------------------------------------------
   Discourse::Application.routes.append do
-    # Server-side fallback so a direct browser visit to the admin page
-    # renders the normal admin shell (the Ember router takes over from there).
     get "/admin/plugins/user-cosmetics" => "admin/plugins#index", constraints: StaffConstraint.new
 
-    # Discourse registers each native Preferences subpage explicitly on the
-    # Rails side. Mirror that pattern for this plugin route so browser refresh,
-    # bookmarks, and direct links render the normal user preferences shell.
     %w[u users].each do |root_path|
       get "/#{root_path}/:username/preferences/cosmetics" => "users#preferences",
           constraints: { username: RouteFormat.username }
@@ -105,7 +101,6 @@ after_initialize do
     DiscourseUserCosmetics::Presenter.invalidate_username_change!(user_id: user&.id)
   end
 
-  # --- expose presentation-only cosmetics data on native serializers -------
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }
   end
@@ -114,6 +109,5 @@ after_initialize do
     ::DiscourseUserCosmetics::ShowcaseService.serialize_for(user: object)
   end
 
-  # --- starter content so the admin screen isn't empty on first install ----
   DiscourseUserCosmetics::Seeder.seed_defaults!
 end
