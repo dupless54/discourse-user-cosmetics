@@ -48,6 +48,7 @@ module ::DiscourseUserCosmetics
 
     before_validation :ensure_slug
     before_destroy :clear_active_selections
+    before_destroy :clear_saved_loadout_references
     after_destroy :bump_cosmetics_cache
     after_save :sync_image_upload_reference, if: :saved_change_to_image_upload_id?
     after_update_commit :clear_invalid_active_selections_after_access_change,
@@ -109,6 +110,10 @@ module ::DiscourseUserCosmetics
 
     def clear_active_selections
       DiscourseUserCosmetics::SelectionService.clear_item!(self, bump: false)
+    end
+
+    def clear_saved_loadout_references
+      DiscourseUserCosmetics::Loadout.clear_item!(self)
     end
 
     def bump_cosmetics_cache
