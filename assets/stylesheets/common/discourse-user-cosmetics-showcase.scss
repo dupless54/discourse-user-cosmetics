@@ -1,0 +1,318 @@
+// Profile showcase + editor. Theme colors intentionally inherit from Discourse.
+
+.duc-profile-showcase {
+  width: 100%;
+  margin-top: 1.25em;
+  padding-top: 1.25em;
+  border-top: 1px solid var(--primary-low);
+}
+
+.duc-profile-showcase__header,
+.duc-showcase-editor__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1em;
+
+  h3 {
+    margin: 0;
+    color: var(--primary);
+    font-size: var(--font-up-1);
+  }
+
+  p {
+    margin: 0.3em 0 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    line-height: 1.4;
+  }
+}
+
+.duc-profile-showcase__count,
+.duc-showcase-editor__count {
+  flex: 0 0 auto;
+  padding: 0.25em 0.55em;
+  border-radius: 999px;
+  background: var(--primary-very-low);
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  font-weight: 600;
+}
+
+.duc-profile-showcase__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.65em;
+  margin-top: 0.9em;
+}
+
+.duc-profile-showcase__item {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--secondary);
+}
+
+.duc-profile-showcase__preview {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  place-items: center;
+  overflow: hidden;
+  background: var(--primary-very-low);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.duc-profile-showcase__placeholder {
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--primary-low);
+}
+
+.duc-profile-showcase__meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15em;
+  padding: 0.55em 0.65em;
+
+  strong {
+    overflow: hidden;
+    color: var(--primary);
+    font-size: var(--font-down-1);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: var(--primary-medium);
+    font-size: var(--font-down-2);
+  }
+}
+
+.duc-showcase-editor {
+  width: 100%;
+  margin-top: 2em;
+  padding-top: 1.5em;
+  border-top: 1px solid var(--primary-low);
+}
+
+.duc-showcase-editor__loading {
+  display: grid;
+  min-height: 140px;
+  place-items: center;
+}
+
+.duc-showcase-editor__selected,
+.duc-showcase-editor__available {
+  margin-top: 1.25em;
+
+  h4 {
+    margin: 0;
+    color: var(--primary);
+    font-size: var(--font-0);
+  }
+}
+
+.duc-showcase-editor__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+
+  span {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+}
+
+.duc-showcase-editor__selected-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.55em;
+  margin-top: 0.7em;
+}
+
+.duc-showcase-editor__selected-item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.45em;
+  padding: 0.55em;
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--secondary);
+
+  > strong {
+    overflow: hidden;
+    color: var(--primary);
+    font-size: var(--font-down-2);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.duc-showcase-editor__position {
+  position: absolute;
+  top: 0.35em;
+  left: 0.35em;
+  z-index: 1;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tertiary);
+  color: var(--secondary);
+  font-size: var(--font-down-2);
+  font-weight: 700;
+}
+
+.duc-showcase-editor__preview {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--primary-very-low);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.duc-showcase-editor__item-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.2em;
+  margin-top: auto;
+
+  .btn {
+    min-width: 0;
+    justify-content: center;
+    padding: 0.35em;
+  }
+}
+
+.duc-showcase-editor__available-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.55em;
+  margin-top: 0.7em;
+}
+
+.duc-showcase-editor__available-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 0.65em;
+  align-items: center;
+  min-width: 0;
+  padding: 0.55em;
+  border: 1px solid var(--primary-low);
+  border-radius: var(--d-border-radius, 6px);
+  background: var(--secondary);
+  color: var(--primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: var(--tertiary);
+    background: var(--primary-very-low);
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .duc-showcase-editor__preview {
+    width: 48px;
+    height: 48px;
+    aspect-ratio: auto;
+  }
+}
+
+.duc-showcase-editor__available-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15em;
+
+  strong,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: var(--primary);
+    font-size: var(--font-down-1);
+  }
+
+  small {
+    color: var(--primary-medium);
+  }
+}
+
+.duc-showcase-editor__empty {
+  margin: 0.7em 0 0;
+  padding: 1em;
+  border: 1px dashed var(--primary-low);
+  color: var(--primary-medium);
+  text-align: center;
+}
+
+.duc-showcase-editor__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-top: 1.25em;
+
+  span {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+}
+
+@media (max-width: 900px) {
+  .duc-showcase-editor__selected-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .duc-profile-showcase__header,
+  .duc-showcase-editor__header {
+    flex-direction: column;
+  }
+
+  .duc-profile-showcase__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .duc-showcase-editor__selected-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .duc-showcase-editor__available-grid {
+    grid-template-columns: 1fr;
+  }
+}

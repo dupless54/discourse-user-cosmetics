@@ -27,6 +27,24 @@ tr_TR:
         save_error: "Seçiminiz kaydedilemedi, lütfen tekrar deneyin."
         retry: "Tekrar dene"
 
+      showcase:
+        profile_title: "Kozmetik Vitrini"
+        profile_subtitle: "Bu üyenin profilinde öne çıkarmayı seçtiği kozmetikler."
+        profile_count: "%{count} öne çıkan"
+        editor_title: "Profil Vitrini"
+        editor_subtitle: "Profilinizde herkese açık göstermek için en fazla altı kozmetik seçin ve sıralarını düzenleyin."
+        editor_count: "%{count} / %{limit} seçili"
+        selected_title: "Öne çıkan kozmetikler"
+        selected_empty: "Vitrininiz boş. Aşağıdaki listeden kozmetik ekleyin."
+        available_title: "Kullanılabilir kozmetikler"
+        available_empty: "Kullanılabilir tüm kozmetikler zaten vitrininizde."
+        limit_reached: "Vitrin dolu"
+        move_previous: "Öne taşı"
+        move_next: "Arkaya taşı"
+        remove: "Vitrinden kaldır"
+        save: "Vitrini kaydet"
+        saved: "Vitrin kaydedildi"
+
       user_card:
         message: "@%{username} kullanıcısına mesaj gönder"
 

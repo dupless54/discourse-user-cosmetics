@@ -27,6 +27,24 @@ en:
         save_error: "Couldn't save your selection, please try again."
         retry: "Try again"
 
+      showcase:
+        profile_title: "Cosmetic Showcase"
+        profile_subtitle: "A collection of cosmetics this member chose to feature."
+        profile_count: "%{count} featured"
+        editor_title: "Profile Showcase"
+        editor_subtitle: "Choose up to six cosmetics to feature publicly on your profile and arrange their order."
+        editor_count: "%{count} / %{limit} selected"
+        selected_title: "Featured cosmetics"
+        selected_empty: "Your showcase is empty. Add cosmetics from the list below."
+        available_title: "Available cosmetics"
+        available_empty: "All available cosmetics are already in your showcase."
+        limit_reached: "Showcase is full"
+        move_previous: "Move earlier"
+        move_next: "Move later"
+        remove: "Remove from showcase"
+        save: "Save showcase"
+        saved: "Showcase is saved"
+
       user_card:
         message: "Message @%{username}"
 

@@ -44,7 +44,15 @@ module ::DiscourseUserCosmetics
             visible_active_item_id(kind, selection, items_by_id, enabled_kinds, usable_item_ids)
         end
 
-      render json: { items: grouped, active: active }
+      showcase_item_ids =
+        DiscourseUserCosmetics::ShowcaseService.items_for(user: current_user).map(&:id)
+
+      render json: {
+               items: grouped,
+               active: active,
+               showcase_item_ids: showcase_item_ids,
+               showcase_limit: DiscourseUserCosmetics::ShowcaseService::MAX_ITEMS,
+             }
     end
 
     # PUT /user-cosmetics/select.json { kind:, item_id: }
