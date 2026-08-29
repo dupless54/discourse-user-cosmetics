@@ -53,7 +53,12 @@ module ::DiscourseUserCosmetics
     end
 
     def self.clear_item_for_user_if_unusable!(item:, user:, bump: true)
-      return 0 if item.enabled? && item.usable_by?(user)
+      entitled =
+        item.enabled? &&
+          DiscourseUserCosmetics::EntitlementResolver
+            .usable_item_ids(user: user, items: [item])
+            .key?(item.id)
+      return 0 if entitled
 
       field = DiscourseUserCosmetics::UserSelection.field_for(item.kind)
       changed =

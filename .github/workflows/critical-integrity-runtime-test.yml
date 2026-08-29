@@ -30,6 +30,7 @@ on:
       - fix/inherit-discourse-image-size-limit
       - fix/live-cross-browser-cosmetics-sync
       - fix/cosmetics-entitlement-deeplink
+      - feature/cosmetics-integration-api-v1
 
 permissions:
   contents: read
