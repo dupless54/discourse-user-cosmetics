@@ -13,6 +13,7 @@ register_asset "stylesheets/common/discourse-user-cosmetics.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-preferences.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-showcase.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-accessibility.scss"
+register_asset "stylesheets/common/discourse-user-cosmetics-admin-native.scss"
 
 module ::DiscourseUserCosmetics
   PLUGIN_NAME = "discourse-user-cosmetics"
