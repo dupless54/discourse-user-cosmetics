@@ -17,6 +17,7 @@ import {
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
+import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
 export default apiInitializer("1.8.0", (api) => {
   const siteSettings = api.container.lookup("service:site-settings");
@@ -38,6 +39,16 @@ export default apiInitializer("1.8.0", (api) => {
     currentUser?.cosmetics?.avatar_frame,
     siteSettings.discourse_user_cosmetics_frame_overhang_percent
   );
+
+  // Normal sayfa açılışında server truth ile bir kez uzlaş. Aynı lifecycle
+  // senkronu mobil/PWA resume ve bfcache dönüşlerinde de tekrar çalışır; böylece
+  // ilk yüklemede eski browser/CDN CSS'i veya preload edilmiş kozmetik verisi
+  // görünür kalmaz.
+  installCosmeticsResumeSync({
+    currentUser,
+    siteSettings,
+    appEvents,
+  });
 
   // 3. Başka bir sekmede/tarayıcıda yapılan seçimleri açık sayfalara taşı.
   messageBus.subscribe(COSMETICS_CHANGE_CHANNEL, (data) => {
