@@ -9,15 +9,17 @@
 - [x] Profile/user-card effects use supported Plugin API/outlets with scoped modifier lifecycle.
 - [x] Profile-effect global `<style>` injection and portal selector mismatch removed.
 - [x] Profile/user-card phase exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
+- [x] Nameplate presentation is scoped to the mounted Discourse user-card/profile surface.
+- [x] Nameplate global `<style>` injection removed with focused teardown/live-sync QUnit coverage.
+- [x] Nameplate exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
 
-## Active nameplate phase
-- [x] Replace client-side global nameplate `<style>` injection with a scoped Ember modifier.
-- [x] Target only the current Discourse user-card/profile name node.
-- [x] Keep static presentation in plugin SCSS and only the validated cosmetic background dynamic.
-- [x] Remove classes/background during modifier teardown so presentation cannot leak between cards.
-- [x] Update live-sync tests for DOM-scoped nameplate rendering.
-- [x] Add focused QUnit coverage for profile and user-card targets plus cleanup.
+## Active client i18n cleanup
+- [x] Preferences navigation imports `i18n` directly from `discourse-i18n`.
+- [x] Admin delete modal imports `i18n` directly from `discourse-i18n`.
+- [x] Admin list page imports `i18n` directly from `discourse-i18n`.
+- [x] Remove the obsolete `globalThis.I18n` compatibility fallback; the temporary alias delegates to current `discourse-i18n`.
+- [ ] Move the remaining large admin form from the transitional alias to a direct `discourse-i18n` import.
 - [ ] Official exact-head Discourse Plugin CI GREEN.
 - [ ] Merge.
 
-Next after merge: audit remaining post/avatar-frame presentation and legacy client helpers, then continue backend route/Zeitwerk/service-object modernization.
+Next after merge: finish the last direct-i18n caller, audit remaining post/avatar-frame presentation, then continue backend route/Zeitwerk/service-object modernization.
