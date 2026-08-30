@@ -1,6 +1,67 @@
 import Component from "@glimmer/component";
 import { get } from "@ember/object";
-import { htmlSafe } from "@ember/template";
+import { modifier } from "ember-modifier";
+
+const CARD_SELECTOR = "#user-card, .user-card";
+const CARD_TARGET_SELECTOR = ".name-username-wrapper";
+const PROFILE_HOST_SELECTOR = ".user-main";
+const PROFILE_TARGET_SELECTOR = ".user-profile-names__primary";
+const TARGET_CLASS = "duc-nameplate-target";
+const CARD_CLASS = "duc-nameplate-target--card";
+const PROFILE_CLASS = "duc-nameplate-target--profile";
+
+function backgroundImageFor(nameplate) {
+  if (nameplate?.image_url) {
+    return `url("${nameplate.image_url}")`;
+  }
+
+  if (nameplate?.gradient_from && nameplate?.gradient_to) {
+    return `linear-gradient(90deg, ${nameplate.gradient_from}, ${nameplate.gradient_to})`;
+  }
+
+  return null;
+}
+
+function targetFor(element) {
+  const directCardTarget = element.closest(CARD_TARGET_SELECTOR);
+  if (directCardTarget) {
+    return { element: directCardTarget, variant: CARD_CLASS };
+  }
+
+  const card = element.closest(CARD_SELECTOR);
+  const cardTarget = card?.querySelector(CARD_TARGET_SELECTOR);
+  if (cardTarget) {
+    return { element: cardTarget, variant: CARD_CLASS };
+  }
+
+  const profile = element.closest(PROFILE_HOST_SELECTOR);
+  const profileTarget = profile?.querySelector(PROFILE_TARGET_SELECTOR);
+  if (profileTarget) {
+    return { element: profileTarget, variant: PROFILE_CLASS };
+  }
+
+  return null;
+}
+
+const attachNameplate = modifier((element, [nameplate]) => {
+  const backgroundImage = backgroundImageFor(nameplate);
+  const target = targetFor(element);
+
+  if (!backgroundImage || !target) {
+    return;
+  }
+
+  const node = target.element;
+  const originalBackgroundImage = node.style.backgroundImage;
+
+  node.classList.add(TARGET_CLASS, target.variant);
+  node.style.backgroundImage = backgroundImage;
+
+  return () => {
+    node.classList.remove(TARGET_CLASS, target.variant);
+    node.style.backgroundImage = originalBackgroundImage;
+  };
+});
 
 export default class UserCosmeticsNameplate extends Component {
   get user() {
@@ -15,62 +76,13 @@ export default class UserCosmeticsNameplate extends Component {
     return get(this.user, "cosmetics")?.nameplate;
   }
 
-  get nameplateStyle() {
-    const n = this.nameplate;
-    if (!n) {
-      return htmlSafe("");
-    }
-
-    let bgCss = "";
-    if (n.image_url) {
-      bgCss = `background-image: url("${n.image_url}");`;
-    } else if (n.gradient_from && n.gradient_to) {
-      bgCss = `background-image: linear-gradient(90deg, ${n.gradient_from}, ${n.gradient_to});`;
-    } else {
-      return htmlSafe("");
-    }
-
-    return htmlSafe(`
-      /* 1. Kullanıcı Kartındaki İsim Alanı */
-      #user-card .name-username-wrapper {
-        ${bgCss}
-        background-size: cover;
-        background-position: center;
-        padding: 4px 10px !important;
-        border-radius: 8px;
-        width: fit-content;
-        max-width: 100%;
-      }
-
-      /* 2. Profil Sayfası (Sadece Ana Nick Alanı: İkiye bölünmeyi önler) */
-      .user-profile-names .user-profile-names__primary {
-        ${bgCss}
-        background-size: cover;
-        background-position: center;
-        padding: 4px 14px !important;
-        border-radius: 10px;
-        display: inline-block !important; /* Sadece yazı kadar yer kaplamasını sağlar */
-        width: fit-content;
-        max-width: 100%;
-      }
-
-      /* YAZI OKUNABİLİRLİĞİ: Her renk arkaplanda kusursuz okunması için 3 katmanlı kalın siyah gölge */
-      #user-card .name-username-wrapper,
-      #user-card .name-username-wrapper *,
-      .user-profile-names .user-profile-names__primary,
-      .user-profile-names .user-profile-names__primary * {
-        color: #ffffff !important;
-        text-shadow: 
-          0px 1px 2px #000000, 
-          0px 0px 4px #000000, 
-          0px 0px 8px #000000 !important;
-      }
-    `);
-  }
-
   <template>
     {{#if this.nameplate}}
-      <style>{{this.nameplateStyle}}</style>
+      <span
+        class="duc-nameplate-anchor"
+        aria-hidden="true"
+        {{attachNameplate this.nameplate}}
+      ></span>
     {{/if}}
   </template>
 }

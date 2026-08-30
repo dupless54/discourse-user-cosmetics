@@ -12,6 +12,14 @@ import {
   reconcileCurrentUserCosmetics,
 } from "discourse/plugins/discourse-user-cosmetics/discourse/lib/duc-resume-sync";
 
+function nameplateTarget() {
+  return document.querySelector(".user-profile-names__primary");
+}
+
+function nameplateBackground() {
+  return nameplateTarget()?.style.backgroundImage ?? "";
+}
+
 module("Component | UserCosmeticsLiveSync", function (hooks) {
   setupRenderingTest(hooks);
 
@@ -68,12 +76,19 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
   test("reloads and rerenders the visible user's cosmetics after a live marker", async function (assert) {
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
 
-    assert.dom("style").hasTextContaining("#111111");
+    assert.dom(".user-profile-names__primary").hasClass("duc-nameplate-target");
+    const initialBackground = nameplateBackground();
+    assert.notStrictEqual(initialBackground, "", "the initial nameplate is applied");
 
     this.owner.lookup("service:app-events").trigger(COSMETICS_CHANGE_EVENT, {
       user_id: 7,
@@ -83,16 +98,27 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     assert.strictEqual(this.cardRequests, 1, "fresh card data is requested once");
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
-    assert.dom("style").hasTextContaining("#333333");
+    assert.notStrictEqual(
+      nameplateBackground(),
+      initialBackground,
+      "the mounted nameplate target is refreshed"
+    );
   });
 
   test("uses a reconciled resume payload without fetching the same user twice", async function (assert) {
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
+
+    const initialBackground = nameplateBackground();
 
     this.owner.lookup("service:app-events").trigger(COSMETICS_CHANGE_EVENT, {
       user_id: 7,
@@ -103,7 +129,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     assert.strictEqual(this.cardRequests, 0, "the inline resume payload is reused");
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
-    assert.dom("style").hasTextContaining("#333333");
+    assert.notStrictEqual(nameplateBackground(), initialBackground);
   });
 
   test("late-mounted current-user surfaces reuse already reconciled cosmetics", async function (assert) {
@@ -115,23 +141,36 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
 
     assert.strictEqual(this.cardRequests, 0, "no duplicate card request is needed");
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
-    assert.dom("style").hasTextContaining("#333333");
+    assert.dom(".user-profile-names__primary").hasClass("duc-nameplate-target");
+    assert.notStrictEqual(nameplateBackground(), "");
   });
 
   test("reconciles stale cosmetics and shared CSS on a normal page bootstrap", async function (assert) {
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
+
+    const initialBackground = nameplateBackground();
 
     document.getElementById(FRAMES_CSS_LINK_ID)?.remove();
     const link = document.createElement("link");
@@ -165,7 +204,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
       "bootstrap cache-busts the shared cosmetics stylesheet"
     );
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
-    assert.dom("style").hasTextContaining("#333333");
+    assert.notStrictEqual(nameplateBackground(), initialBackground);
   });
 
   test("keeps all cosmetics removed after a normal page bootstrap", async function (assert) {
@@ -189,10 +228,17 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
 
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
+
+    assert.dom(".user-profile-names__primary").hasClass("duc-nameplate-target");
 
     const documentObject = new EventTarget();
     documentObject.visibilityState = "visible";
@@ -209,17 +255,24 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     cleanup();
 
     assert.deepEqual(this.user.cosmetics, this.freshCosmetics);
-    assert.dom("style").doesNotExist("removed nameplate presentation stays removed");
+    assert.dom(".user-profile-names__primary").doesNotHaveClass("duc-nameplate-target");
+    assert.strictEqual(nameplateBackground(), "", "removed nameplate presentation stays removed");
   });
 
   test("reconciles stale cosmetics when a suspended mobile page becomes visible", async function (assert) {
     await render(
       <template>
-        <UserCosmeticsLiveSync @model={{this.user}} />
-        <UserCosmeticsNameplate @model={{this.user}} />
+        <section class="user-main">
+          <div class="user-profile-names">
+            <div class="user-profile-names__primary">alice</div>
+          </div>
+          <UserCosmeticsLiveSync @model={{this.user}} />
+          <UserCosmeticsNameplate @model={{this.user}} />
+        </section>
       </template>
     );
 
+    const initialBackground = nameplateBackground();
     const documentObject = new EventTarget();
     documentObject.visibilityState = "visible";
     const windowObject = new EventTarget();
@@ -245,7 +298,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
       "resume bypasses a stale mobile card cache"
     );
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
-    assert.dom("style").hasTextContaining("#333333");
+    assert.notStrictEqual(nameplateBackground(), initialBackground);
   });
 
   test("direct reconciliation refreshes the current user from server truth", async function (assert) {
