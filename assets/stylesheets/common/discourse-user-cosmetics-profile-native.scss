@@ -1,6 +1,35 @@
-// Scoped presentation rules for user-card/profile cosmetic effects.
-// The component adds these classes only while an effect is mounted, so no
-// global user-card style override remains after teardown.
+// Scoped presentation rules for user-card/profile cosmetics.
+// Components add these classes only while their cosmetic is mounted, so no
+// global user-card/profile override remains after teardown.
+
+.duc-nameplate-anchor {
+  display: none;
+}
+
+.duc-nameplate-target {
+  max-width: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fff !important;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000,
+    0 0 8px #000 !important;
+
+  &--card {
+    width: fit-content;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--d-border-radius, 8px);
+  }
+
+  &--profile {
+    display: inline-block !important;
+    width: fit-content;
+    padding: 0.25rem 0.875rem;
+    border-radius: calc(var(--d-border-radius, 6px) + 4px);
+  }
+}
 
 .duc-profile-effect-host {
   overflow: visible;
