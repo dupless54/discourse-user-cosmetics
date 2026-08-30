@@ -9,3 +9,17 @@ on:
 jobs:
   ci:
     uses: discourse/.github/.github/workflows/discourse-plugin.yml@v1
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    container: discourse/discourse_test:slim
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install typecheck dependencies
+        run: pnpm install --no-frozen-lockfile --lockfile=false
+
+      - name: Typecheck plugin JavaScript
+        run: pnpm lint:types
