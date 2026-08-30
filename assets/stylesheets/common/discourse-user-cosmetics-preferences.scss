@@ -1,9 +1,14 @@
+@use "lib/container";
+
 // Native Discourse preferences integration for User Cosmetics.
-// Keep this intentionally restrained: layout and color follow core Discourse
-// variables so custom themes, dark mode, and mobile inherit naturally.
+// Layout and color follow core Discourse variables so custom themes, dark mode,
+// and narrow preference panes inherit naturally.
 
 .duc-cosmetics-page {
+  container-name: duc-cosmetics-page;
+  container-type: inline-size;
   width: 100%;
+  min-width: 0;
 }
 
 .duc-cosmetics-page__header {
@@ -35,6 +40,7 @@
 
 .duc-cosmetics-tab {
   flex: 0 0 auto;
+  min-height: 40px;
   padding: 0.55em 0.75em;
   border: 0;
   border-bottom: 2px solid transparent;
@@ -52,6 +58,10 @@
     outline: none;
   }
 
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--tertiary-low);
+  }
+
   &.active {
     border-bottom-color: var(--tertiary);
     color: var(--tertiary);
@@ -59,7 +69,13 @@
 }
 
 .duc-cosmetics-page__body {
+  min-width: 0;
   min-height: 220px;
+
+  &:focus-visible {
+    outline: 2px solid var(--tertiary-low);
+    outline-offset: 3px;
+  }
 }
 
 .duc-cosmetics-state {
@@ -81,6 +97,7 @@
 
 .duc-cosmetics-section-heading {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 1em;
@@ -101,7 +118,8 @@
 
 .duc-cosmetics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
   gap: 0.75em;
 }
 
@@ -264,7 +282,7 @@
   text-align: center;
 }
 
-@media (max-width: 600px) {
+@include container.until(sm, duc-cosmetics-page) {
   .duc-cosmetics-page__header {
     margin-bottom: 1em;
   }
@@ -275,6 +293,10 @@
     margin-left: -0.5em;
     padding-right: 0.5em;
     padding-left: 0.5em;
+  }
+
+  .duc-cosmetics-tab {
+    min-height: 44px;
   }
 
   .duc-cosmetics-section-heading {
@@ -309,5 +331,20 @@
     &--profile_effect {
       height: 72px;
     }
+  }
+}
+
+@include container.until(xs, duc-cosmetics-page) {
+  .duc-cosmetics-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .duc-cosmetics-section-heading {
+    flex-direction: column;
+  }
+
+  .duc-cosmetics-section-heading .btn {
+    width: 100%;
+    justify-content: center;
   }
 }

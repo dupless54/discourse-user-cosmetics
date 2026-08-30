@@ -1,4 +1,4 @@
-import { click, render } from "@ember/test-helpers";
+import { click, render, triggerKeyEvent } from "@ember/test-helpers";
 import { module, test } from "qunit";
 import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import pretender, { response } from "discourse/tests/helpers/create-pretender";
@@ -76,12 +76,42 @@ module("Component | UserCosmeticsPicker", function (hooks) {
     await render(<template><UserCosmeticsPicker /></template>);
 
     assert.dom(".duc-cosmetics-page").exists();
+    assert.dom(".duc-cosmetics-tabs").hasAttribute("role", "tablist");
     assert.dom(".duc-cosmetics-tab").exists({ count: 4 });
     assert.dom(".duc-cosmetics-tab.active").exists({ count: 1 });
+    assert
+      .dom(".duc-cosmetics-tab.active")
+      .hasAttribute("aria-selected", "true")
+      .hasAttribute("tabindex", "0")
+      .hasAttribute("aria-controls", "duc-cosmetics-panel");
+    assert
+      .dom("#duc-cosmetics-panel")
+      .hasAttribute("role", "tabpanel")
+      .hasAttribute("aria-labelledby", "duc-cosmetics-tab-avatar_frame");
     assert.dom(".duc-cosmetics-item").exists({ count: 2 });
     assert.dom(".duc-cosmetics-item.active").exists({ count: 1 });
     assert.dom(".duc-cosmetics-item.locked").exists({ count: 1 });
     assert.dom(".duc-cosmetics-item__lock .d-icon-lock").exists();
+  });
+
+  test("supports keyboard navigation across cosmetic tabs", async function (assert) {
+    await render(<template><UserCosmeticsPicker /></template>);
+
+    await triggerKeyEvent(
+      "#duc-cosmetics-tab-avatar_frame",
+      "keydown",
+      "ArrowRight"
+    );
+
+    assert.dom("#duc-cosmetics-tab-nameplate").hasClass("active").isFocused();
+    assert.dom("#duc-cosmetics-tab-nameplate").hasAttribute("tabindex", "0");
+    assert
+      .dom("#duc-cosmetics-panel")
+      .hasAttribute("aria-labelledby", "duc-cosmetics-tab-nameplate");
+
+    await triggerKeyEvent("#duc-cosmetics-tab-nameplate", "keydown", "End");
+
+    assert.dom("#duc-cosmetics-tab-profile_effect").hasClass("active").isFocused();
   });
 
   test("switches cosmetic categories without opening a custom modal", async function (assert) {

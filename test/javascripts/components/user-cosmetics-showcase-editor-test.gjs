@@ -54,9 +54,10 @@ module("Component | UserCosmeticsShowcaseEditor", function (hooks) {
     });
   });
 
-  test("renders only entitled cosmetics and preserves the saved order", async function (assert) {
+  test("renders only entitled cosmetics with accessible native controls", async function (assert) {
     await render(<template><UserCosmeticsShowcaseEditor /></template>);
 
+    assert.dom(".duc-showcase-editor").hasAttribute("aria-busy", "false");
     assert.dom(".duc-showcase-editor__selected-item").exists({ count: 2 });
     assert
       .dom(".duc-showcase-editor__selected-item:nth-child(1) > strong")
@@ -64,6 +65,15 @@ module("Component | UserCosmeticsShowcaseEditor", function (hooks) {
     assert
       .dom(".duc-showcase-editor__selected-item:nth-child(2) > strong")
       .hasText("Gold Frame");
+    assert
+      .dom('.duc-showcase-editor__item-actions button[aria-label="Move earlier"]')
+      .exists({ count: 2 });
+    assert
+      .dom('.duc-showcase-editor__item-actions button[aria-label="Move later"]')
+      .exists({ count: 2 });
+    assert
+      .dom('.duc-showcase-editor__item-actions button[aria-label="Remove from showcase"]')
+      .exists({ count: 2 });
     assert.dom(".duc-showcase-editor__available-item").doesNotExist();
     assert.dom(".duc-showcase-editor").doesNotIncludeText("Locked Frame");
   });

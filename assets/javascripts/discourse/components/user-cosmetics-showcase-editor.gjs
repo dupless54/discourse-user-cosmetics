@@ -3,11 +3,11 @@ import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import DButton from "discourse/ui-kit/d-button";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
-import { t } from "../lib/duc-i18n";
+import { i18n } from "discourse-i18n";
 
 export default class UserCosmeticsShowcaseEditor extends Component {
   @tracked items = [];
@@ -61,7 +61,7 @@ export default class UserCosmeticsShowcaseEditor extends Component {
   }
 
   get countLabel() {
-    return t("discourse_user_cosmetics.showcase.editor_count", {
+    return i18n("discourse_user_cosmetics.showcase.editor_count", {
       count: this.selectedIds.length,
       limit: this.limit,
     });
@@ -160,20 +160,23 @@ export default class UserCosmeticsShowcaseEditor extends Component {
   }
 
   <template>
-    <section class="duc-showcase-editor">
+    <section class="duc-showcase-editor" aria-busy={{if this.loading "true" "false"}}>
       <header class="duc-showcase-editor__header">
         <div>
-          <h3>{{t "discourse_user_cosmetics.showcase.editor_title"}}</h3>
-          <p>{{t "discourse_user_cosmetics.showcase.editor_subtitle"}}</p>
+          <h3>{{i18n "discourse_user_cosmetics.showcase.editor_title"}}</h3>
+          <p>{{i18n "discourse_user_cosmetics.showcase.editor_subtitle"}}</p>
         </div>
         <span class="duc-showcase-editor__count">{{this.countLabel}}</span>
       </header>
 
       {{#if this.loading}}
-        <div class="duc-showcase-editor__loading"><div class="spinner"></div></div>
+        <div class="duc-showcase-editor__loading" role="status">
+          <div class="spinner" aria-hidden="true"></div>
+          <span class="sr-only">{{i18n "loading"}}</span>
+        </div>
       {{else}}
         <div class="duc-showcase-editor__selected">
-          <h4>{{t "discourse_user_cosmetics.showcase.selected_title"}}</h4>
+          <h4>{{i18n "discourse_user_cosmetics.showcase.selected_title"}}</h4>
 
           {{#if this.selectedItems.length}}
             <div class="duc-showcase-editor__selected-grid">
@@ -188,46 +191,43 @@ export default class UserCosmeticsShowcaseEditor extends Component {
                   <strong title={{item.name}}>{{item.name}}</strong>
 
                   <div class="duc-showcase-editor__item-actions">
-                    <button
-                      type="button"
-                      class="btn btn-icon"
-                      title={{t "discourse_user_cosmetics.showcase.move_previous"}}
-                      disabled={{item.movePreviousDisabled}}
-                      {{on "click" (fn this.move item.id -1)}}
-                    >
-                      {{dIcon "chevron-left"}}
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-icon"
-                      title={{t "discourse_user_cosmetics.showcase.move_next"}}
-                      disabled={{item.moveNextDisabled}}
-                      {{on "click" (fn this.move item.id 1)}}
-                    >
-                      {{dIcon "chevron-right"}}
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-icon"
-                      title={{t "discourse_user_cosmetics.showcase.remove"}}
-                      {{on "click" (fn this.remove item.id)}}
-                    >
-                      {{dIcon "xmark"}}
-                    </button>
+                    <DButton
+                      @icon="chevron-left"
+                      @translatedTitle={{i18n "discourse_user_cosmetics.showcase.move_previous"}}
+                      @translatedAriaLabel={{i18n "discourse_user_cosmetics.showcase.move_previous"}}
+                      @disabled={{item.movePreviousDisabled}}
+                      @action={{fn this.move item.id -1}}
+                      class="btn-flat btn-small"
+                    />
+                    <DButton
+                      @icon="chevron-right"
+                      @translatedTitle={{i18n "discourse_user_cosmetics.showcase.move_next"}}
+                      @translatedAriaLabel={{i18n "discourse_user_cosmetics.showcase.move_next"}}
+                      @disabled={{item.moveNextDisabled}}
+                      @action={{fn this.move item.id 1}}
+                      class="btn-flat btn-small"
+                    />
+                    <DButton
+                      @icon="xmark"
+                      @translatedTitle={{i18n "discourse_user_cosmetics.showcase.remove"}}
+                      @translatedAriaLabel={{i18n "discourse_user_cosmetics.showcase.remove"}}
+                      @action={{fn this.remove item.id}}
+                      class="btn-flat btn-small"
+                    />
                   </div>
                 </article>
               {{/each}}
             </div>
           {{else}}
-            <p class="duc-showcase-editor__empty">{{t "discourse_user_cosmetics.showcase.selected_empty"}}</p>
+            <p class="duc-showcase-editor__empty">{{i18n "discourse_user_cosmetics.showcase.selected_empty"}}</p>
           {{/if}}
         </div>
 
         <div class="duc-showcase-editor__available">
           <div class="duc-showcase-editor__section-heading">
-            <h4>{{t "discourse_user_cosmetics.showcase.available_title"}}</h4>
+            <h4>{{i18n "discourse_user_cosmetics.showcase.available_title"}}</h4>
             {{#if this.atLimit}}
-              <span>{{t "discourse_user_cosmetics.showcase.limit_reached"}}</span>
+              <span>{{i18n "discourse_user_cosmetics.showcase.limit_reached"}}</span>
             {{/if}}
           </div>
 
@@ -254,7 +254,7 @@ export default class UserCosmeticsShowcaseEditor extends Component {
               {{/each}}
             </div>
           {{else}}
-            <p class="duc-showcase-editor__empty">{{t "discourse_user_cosmetics.showcase.available_empty"}}</p>
+            <p class="duc-showcase-editor__empty">{{i18n "discourse_user_cosmetics.showcase.available_empty"}}</p>
           {{/if}}
         </div>
 
@@ -262,11 +262,12 @@ export default class UserCosmeticsShowcaseEditor extends Component {
           <DButton
             @action={{this.save}}
             @disabled={{this.saveDisabled}}
-            @translatedLabel={{t "discourse_user_cosmetics.showcase.save"}}
+            @isLoading={{this.saving}}
+            @translatedLabel={{i18n "discourse_user_cosmetics.showcase.save"}}
             class="btn-primary"
           />
           {{#unless this.dirty}}
-            <span>{{t "discourse_user_cosmetics.showcase.saved"}}</span>
+            <span>{{i18n "discourse_user_cosmetics.showcase.saved"}}</span>
           {{/unless}}
         </div>
       {{/if}}
