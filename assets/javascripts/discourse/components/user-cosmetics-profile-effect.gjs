@@ -1,10 +1,11 @@
 import Component from "@glimmer/component";
 import { get } from "@ember/object";
-import { htmlSafe } from "@ember/template";
 import { modifier } from "ember-modifier";
 import { prefersReducedMotion } from "../lib/duc-motion";
 
 const CARD_SELECTOR = "#user-card, .user-card";
+const HOST_CLASS = "duc-profile-effect-host";
+const CARD_CLASS = "duc-profile-effect-card";
 
 const attachProfileEffect = modifier((element, [effect]) => {
   const card = element.closest(CARD_SELECTOR);
@@ -24,21 +25,23 @@ const attachProfileEffect = modifier((element, [effect]) => {
     return;
   }
 
-  if (getComputedStyle(parent).position === "static") {
+  const originalInlinePosition = parent.style.position;
+  const needsPositionContext = getComputedStyle(parent).position === "static";
+
+  if (needsPositionContext) {
     parent.style.position = "relative";
   }
-  parent.style.overflow = "visible";
-  parent.style.isolation = "isolate";
+
+  parent.classList.add(HOST_CLASS);
+  card.classList.add(CARD_CLASS);
 
   const backPortal = document.createElement("div");
-  backPortal.className = "duc-profile-effect-portal-back";
-  backPortal.style.position = "absolute";
-  backPortal.style.pointerEvents = "none";
+  backPortal.className =
+    "duc-profile-effect-portal duc-profile-effect-portal--back";
 
   const frontPortal = document.createElement("div");
-  frontPortal.className = "duc-profile-effect-portal-front";
-  frontPortal.style.position = "absolute";
-  frontPortal.style.pointerEvents = "none";
+  frontPortal.className =
+    "duc-profile-effect-portal duc-profile-effect-portal--front";
 
   parent.insertBefore(backPortal, card);
   parent.insertBefore(frontPortal, card.nextSibling);
@@ -53,8 +56,6 @@ const attachProfileEffect = modifier((element, [effect]) => {
       img.className = "duc-profile-effect-layer";
       img.dataset.anchor = layer.anchor;
       img.dataset.stackOrder = layer.stack_order;
-      img.style.position = "absolute";
-      img.style.display = "block";
 
       if (layer.anchor === "full") {
         img.style.top = "0";
@@ -106,22 +107,16 @@ const attachProfileEffect = modifier((element, [effect]) => {
     const sideOffsetTop = (effect.effect_side_offset_top || 0) * scale;
     const sideOffsetBottom = (effect.effect_side_offset_bottom || 0) * scale;
 
-    const pLeft = `${left - overflowH}px`;
-    const pTop = `${top - overflowTop}px`;
-    const pWidth = `${width + overflowH * 2}px`;
-    const pHeight = `${height + overflowTop + overflowBottom}px`;
-
-    let cardZ = parseInt(getComputedStyle(card).zIndex, 10);
-    if (!Number.isFinite(cardZ)) {
-      cardZ = 1000;
-      card.style.zIndex = cardZ;
-    }
+    const portalLeft = `${left - overflowH}px`;
+    const portalTop = `${top - overflowTop}px`;
+    const portalWidth = `${width + overflowH * 2}px`;
+    const portalHeight = `${height + overflowTop + overflowBottom}px`;
 
     const applyPortalStyles = (portal) => {
-      portal.style.left = pLeft;
-      portal.style.top = pTop;
-      portal.style.width = pWidth;
-      portal.style.height = pHeight;
+      portal.style.left = portalLeft;
+      portal.style.top = portalTop;
+      portal.style.width = portalWidth;
+      portal.style.height = portalHeight;
       portal.style.setProperty("--duc-side-offset-top", `${sideOffsetTop}px`);
       portal.style.setProperty(
         "--duc-side-offset-bottom",
@@ -130,10 +125,7 @@ const attachProfileEffect = modifier((element, [effect]) => {
     };
 
     applyPortalStyles(backPortal);
-    backPortal.style.zIndex = cardZ - 1;
-
     applyPortalStyles(frontPortal);
-    frontPortal.style.zIndex = cardZ + 1;
   }
 
   layout();
@@ -146,13 +138,14 @@ const attachProfileEffect = modifier((element, [effect]) => {
 
   return () => {
     resizeObserver?.disconnect();
-    if (parent.contains(backPortal)) {
-      backPortal.remove();
+    backPortal.remove();
+    frontPortal.remove();
+    parent.classList.remove(HOST_CLASS);
+    card.classList.remove(CARD_CLASS);
+
+    if (needsPositionContext) {
+      parent.style.position = originalInlinePosition;
     }
-    if (parent.contains(frontPortal)) {
-      frontPortal.remove();
-    }
-    images.length = 0;
   };
 });
 
@@ -169,20 +162,8 @@ export default class UserCosmeticsProfileEffect extends Component {
     return get(this.user, "cosmetics")?.profile_effect;
   }
 
-  get globalStyle() {
-    if (!this.effect) {
-      return htmlSafe("");
-    }
-    return htmlSafe(`
-      #user-card, .user-card {
-        overflow: visible !important;
-      }
-    `);
-  }
-
   <template>
     {{#if this.effect}}
-      <style>{{this.globalStyle}}</style>
       <div class="duc-profile-effect-anchor" {{attachProfileEffect this.effect}}></div>
     {{/if}}
   </template>
