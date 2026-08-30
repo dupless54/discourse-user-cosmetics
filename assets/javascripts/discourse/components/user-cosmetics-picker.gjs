@@ -12,10 +12,7 @@ import DButton from "discourse/ui-kit/d-button";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 import { enabledCosmeticKinds } from "../lib/duc-cosmetic-kinds";
-import {
-  refreshCosmeticsStylesheet,
-  syncCurrentUserAvatarFrame,
-} from "../lib/duc-current-user-presentation";
+import { refreshCosmeticsStylesheet } from "../lib/duc-current-user-presentation";
 
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
 const STYLESHEET_KINDS = ["avatar_frame", "nameplate"];
@@ -180,11 +177,10 @@ export default class UserCosmeticsPicker extends Component {
       return;
     }
 
+    // Mounted presentation components react to the current-user model. The
+    // picker owns data mutation only; each visual surface owns its own modifier
+    // lifecycle and cleanup.
     this.currentUser.set("cosmetics", cosmetics);
-    syncCurrentUserAvatarFrame(
-      cosmetics.avatar_frame,
-      this.siteSettings.discourse_user_cosmetics_frame_overhang_percent
-    );
 
     if (STYLESHEET_KINDS.includes(kind)) {
       refreshCosmeticsStylesheet();
@@ -237,7 +233,8 @@ export default class UserCosmeticsPicker extends Component {
     } else {
       const rtl = document.documentElement.dir === "rtl";
       const forward = event.key === "ArrowRight" ? !rtl : rtl;
-      targetIndex = (currentIndex + (forward ? 1 : -1) + kinds.length) % kinds.length;
+      targetIndex =
+        (currentIndex + (forward ? 1 : -1) + kinds.length) % kinds.length;
     }
 
     const targetKind = kinds[targetIndex];
@@ -346,12 +343,17 @@ export default class UserCosmeticsPicker extends Component {
             <span class="sr-only">{{i18n "loading"}}</span>
           </div>
         {{else if this.errorMessage}}
-          <div class="duc-cosmetics-state duc-cosmetics-state--error" role="alert">
+          <div
+            class="duc-cosmetics-state duc-cosmetics-state--error"
+            role="alert"
+          >
             <p>{{this.errorMessage}}</p>
             <DButton
               @icon="rotate"
               @action={{this.load}}
-              @translatedLabel={{i18n "discourse_user_cosmetics.picker.retry"}}
+              @translatedLabel={{i18n
+                "discourse_user_cosmetics.picker.retry"
+              }}
               class="btn-default"
             />
           </div>
@@ -365,7 +367,9 @@ export default class UserCosmeticsPicker extends Component {
             {{#if this.hasActiveSelection}}
               <DButton
                 @icon="xmark"
-                @translatedLabel={{i18n "discourse_user_cosmetics.picker.remove"}}
+                @translatedLabel={{i18n
+                  "discourse_user_cosmetics.picker.remove"
+                }}
                 @action={{this.unequip}}
                 class="btn-default btn-small"
               />
@@ -394,13 +398,19 @@ export default class UserCosmeticsPicker extends Component {
                     {{/if}}
 
                     {{#unless item.owned}}
-                      <span class="duc-cosmetics-item__lock" title={{item.lockedTooltip}}>
+                      <span
+                        class="duc-cosmetics-item__lock"
+                        title={{item.lockedTooltip}}
+                      >
                         {{dIcon "lock"}}
                       </span>
                     {{/unless}}
 
                     {{#if item.isActive}}
-                      <span class="duc-cosmetics-item__check" aria-hidden="true">
+                      <span
+                        class="duc-cosmetics-item__check"
+                        aria-hidden="true"
+                      >
                         {{dIcon "check"}}
                       </span>
                     {{/if}}
@@ -410,11 +420,16 @@ export default class UserCosmeticsPicker extends Component {
                     <div class="duc-cosmetics-item__name">{{item.name}}</div>
 
                     {{#if item.description}}
-                      <p class="duc-cosmetics-item__description">{{item.description}}</p>
+                      <p
+                        class="duc-cosmetics-item__description"
+                      >{{item.description}}</p>
                     {{/if}}
 
                     {{#if item.rarity_label}}
-                      <div class="duc-cosmetics-item__rarity" style={{item.rarityStyle}}>
+                      <div
+                        class="duc-cosmetics-item__rarity"
+                        style={{item.rarityStyle}}
+                      >
                         {{item.rarity_label}}
                       </div>
                     {{/if}}
@@ -426,10 +441,17 @@ export default class UserCosmeticsPicker extends Component {
                         @translatedLabel={{item.actionLabel}}
                         @disabled={{item.isActive}}
                         @action={{fn this.equip item}}
-                        class={{if item.isActive "btn-primary btn-small" "btn-default btn-small"}}
+                        class={{if
+                          item.isActive
+                          "btn-primary btn-small"
+                          "btn-default btn-small"
+                        }}
                       />
                     {{else}}
-                      <span class="duc-cosmetics-item__locked-label" title={{item.lockedTooltip}}>
+                      <span
+                        class="duc-cosmetics-item__locked-label"
+                        title={{item.lockedTooltip}}
+                      >
                         {{dIcon "lock"}}
                         {{i18n "discourse_user_cosmetics.picker.locked"}}
                       </span>
