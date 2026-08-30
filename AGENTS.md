@@ -48,8 +48,21 @@ Follow current Discourse plugin APIs/source, make the smallest maintainable chan
 
 Run targeted checks for changed behavior. Never claim an unrun test passed; report NOT RUN when tooling is unavailable. Stop for unresolved architecture, schema/migration, authorization/security, cross-plugin dependency, or product ambiguity.
 
+## CI-only merge gate
+Claude/Gemini/Codex reviewer or verifier approval is not required and must never block merge. Do not request or wait for AI approvals as a merge condition.
+
+For a normal scoped PR, the merge gate is CI only:
+- validate the exact changed paths still match the task;
+- use only the latest exact PR head SHA;
+- require the official `Discourse Plugin` CI workflow on that exact head to conclude GREEN;
+- if the repository exposes any additional required Discourse-owned CI/check context, it must also be GREEN;
+- a new commit invalidates all older CI evidence;
+- `NO_CI`, missing, skipped, pending, cancelled, neutral, stale-head, or failed checks are not GREEN.
+
+When the latest exact head is GREEN and no unresolved security/schema/product/architecture blocker remains, the agent is pre-authorized to merge without asking for another user confirmation. Prefer squash merge with `expected_head_sha` when supported. Never weaken tests or broaden scope just to obtain GREEN.
+
 ## Git and token discipline
-Preserve unrelated work and `.claude/settings.local.json`. No force-push/reset/clean/branch deletion/deploy/destructive DB actions. Commit/push/PR/merge only when explicitly authorized by the current task. Prefer symbol/path-targeted reads and diffs over broad repo scans or repeated summaries.
+Preserve unrelated work and `.claude/settings.local.json`. No force-push/reset/clean/branch deletion/deploy/destructive DB actions. Commit/push/PR updates needed to complete an authorized development task are allowed; destructive Git/production actions still require explicit authorization. Prefer symbol/path-targeted reads and diffs over broad repo scans or repeated summaries.
 
 Reusable task procedures live under `.agents/skills/`; read only the matching `SKILL.md`, including `task-packet` for non-trivial work.
 
