@@ -15,8 +15,10 @@ For multi-session work, use `docs/ai/work/<feature>/{state.md,progress.md,implem
 ## Fast task path
 For non-trivial work, use `.agents/skills/task-packet/SKILL.md` before broad reads. Use `docs/ai/REPO_MAP.md` to locate code, `COMMANDS.md` only for validation, and `DECISIONS.md` only for architecture/dependency choices. Skip the formal packet for trivial one-file edits.
 
-## Current Discourse platform baseline
-Treat current Discourse core/skeleton source plus official Meta developer guides as upstream authority. If a guide and current source disagree, verify the live core/skeleton API before coding and follow current source.
+## Live Discourse developer source gate
+Canonical live upstream index: https://meta.discourse.org/t/developer-guides-index/308036?tl=en
+
+For Discourse-version-sensitive implementation, refactor, review, or compatibility decisions, start at that live index and open only the task-relevant official topic(s). Plugin work prioritizes **Code & Internals + Plugins**; theme work prioritizes **Code & Internals + Themes & Components / Theme Developer Tutorial**. Verify version-sensitive APIs/deprecations against current `discourse/discourse` core or the current official skeleton when needed. Current official docs/core beat remembered examples or copied snippets unless this repository deliberately targets an older validated release via `.discourse-compatibility` / d-compat. Do not preload the full index.
 
 - Prefer supported extension surfaces in this order when practical: existing public/core component or API -> plugin outlet / transformer / JS Plugin API -> `modifyClass` only as a last resort. Do not introduce template overrides unless no supported extension point can satisfy the requirement.
 - Prefer FormKit for new non-trivial forms and DModal/component-based modal APIs for dialogs. Do not introduce deprecated controller-based modal patterns.
