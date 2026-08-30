@@ -2,16 +2,23 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
+import { service } from "@ember/service";
 import { on } from "@ember/modifier";
-import DButton from "discourse/components/d-button";
-import { ajax } from "discourse/lib/ajax";
-import { popupAjaxError } from "discourse/lib/ajax-error";
+import DButton from "discourse/ui-kit/d-button";
 import { t } from "../../lib/duc-i18n";
 import UserCosmeticsAdminForm from "./user-cosmetics-admin-form";
+import UserCosmeticsDeleteItemModal from "./modal/user-cosmetics-delete-item";
 
-const KINDS = ["avatar_frame", "nameplate", "card_decoration", "profile_effect"];
+const KINDS = [
+  "avatar_frame",
+  "nameplate",
+  "card_decoration",
+  "profile_effect",
+];
 
 export default class UserCosmeticsAdminPage extends Component {
+  @service modal;
+
   kinds = KINDS;
 
   @tracked items = (this.args.model?.items ?? []).map((item) =>
@@ -40,7 +47,9 @@ export default class UserCosmeticsAdminPage extends Component {
     if (item.gradient_from && item.gradient_to) {
       return `background-image: linear-gradient(135deg, ${item.gradient_from}, ${item.gradient_to});`;
     }
-    const layerImage = (item.layers ?? []).find((layer) => layer.image_url)?.image_url;
+    const layerImage = (item.layers ?? []).find(
+      (layer) => layer.image_url
+    )?.image_url;
     if (layerImage) {
       return `background-image: url("${layerImage}");`;
     }
@@ -133,26 +142,21 @@ export default class UserCosmeticsAdminPage extends Component {
   }
 
   @action
-  async deleteItem(item) {
-    if (
-      !window.confirm(
-        t("discourse_user_cosmetics.admin.delete_confirm", { name: item.name })
-      )
-    ) {
-      return;
+  afterDelete(item) {
+    this.items = this.items.filter((existing) => existing.id !== item.id);
+    if (this.editingItem?.id === item.id) {
+      this.editingItem = null;
     }
+  }
 
-    try {
-      await ajax(`/admin/plugins/user-cosmetics/items/${item.id}.json`, {
-        type: "DELETE",
-      });
-      this.items = this.items.filter((existing) => existing.id !== item.id);
-      if (this.editingItem?.id === item.id) {
-        this.editingItem = null;
-      }
-    } catch (error) {
-      popupAjaxError(error);
-    }
+  @action
+  deleteItem(item) {
+    return this.modal.show(UserCosmeticsDeleteItemModal, {
+      model: {
+        item,
+        onDeleted: this.afterDelete,
+      },
+    });
   }
 
   <template>
@@ -160,7 +164,9 @@ export default class UserCosmeticsAdminPage extends Component {
       <div class="duc-admin-header">
         <div class="duc-admin-heading">
           <h2>{{t "discourse_user_cosmetics.admin.title"}}</h2>
-          <p class="duc-admin-intro">{{t "discourse_user_cosmetics.admin.intro"}}</p>
+          <p class="duc-admin-intro">{{t
+              "discourse_user_cosmetics.admin.intro"
+            }}</p>
         </div>
 
         <DButton
@@ -184,7 +190,10 @@ export default class UserCosmeticsAdminPage extends Component {
                   {{on "click" (fn this.setKind tab.kind)}}
                 >
                   <span class="duc-admin-kind-label">{{tab.label}}</span>
-                  <span class="duc-admin-kind-count" aria-hidden="true">{{tab.count}}</span>
+                  <span
+                    class="duc-admin-kind-count"
+                    aria-hidden="true"
+                  >{{tab.count}}</span>
                 </button>
               </li>
             {{/each}}
@@ -207,7 +216,9 @@ export default class UserCosmeticsAdminPage extends Component {
           <table class="duc-admin-table">
             <thead>
               <tr>
-                <th>{{t "discourse_user_cosmetics.admin.table.preview"}}</th>
+                <th>{{t
+                    "discourse_user_cosmetics.admin.table.preview"
+                  }}</th>
                 <th>{{t "discourse_user_cosmetics.admin.table.name"}}</th>
                 <th>{{t "discourse_user_cosmetics.admin.table.group"}}</th>
                 <th>{{t "discourse_user_cosmetics.admin.table.owners"}}</th>
@@ -219,34 +230,57 @@ export default class UserCosmeticsAdminPage extends Component {
               {{#each this.visibleItems as |item|}}
                 <tr>
                   <td
-                    data-label={{t "discourse_user_cosmetics.admin.table.preview"}}
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.preview"
+                    }}
                     class="duc-admin-preview-cell"
                   >
-                    <div class="duc-admin-preview-swatch" style={{item.previewStyle}}></div>
+                    <div
+                      class="duc-admin-preview-swatch"
+                      style={{item.previewStyle}}
+                    ></div>
                   </td>
                   <td
-                    data-label={{t "discourse_user_cosmetics.admin.table.name"}}
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.name"
+                    }}
                     class="duc-admin-name-cell"
                   >
                     <div class="duc-admin-name-copy">
                       <div class="duc-admin-name-line">
                         <span class="duc-admin-item-name">{{item.name}}</span>
                         {{#if item.is_default}}
-                          <span class="duc-admin-default-badge">{{t "discourse_user_cosmetics.admin.default_badge"}}</span>
+                          <span class="duc-admin-default-badge">{{t
+                              "discourse_user_cosmetics.admin.default_badge"
+                            }}</span>
                         {{/if}}
                       </div>
                       {{#if item.description}}
-                        <span class="duc-admin-item-description">{{item.description}}</span>
+                        <span
+                          class="duc-admin-item-description"
+                        >{{item.description}}</span>
                       {{/if}}
                     </div>
                   </td>
-                  <td data-label={{t "discourse_user_cosmetics.admin.table.group"}}>
+                  <td
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.group"
+                    }}
+                  >
                     {{item.groupsLabel}}
                   </td>
-                  <td data-label={{t "discourse_user_cosmetics.admin.table.owners"}}>
+                  <td
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.owners"
+                    }}
+                  >
                     {{item.owner_count}}
                   </td>
-                  <td data-label={{t "discourse_user_cosmetics.admin.table.enabled"}}>
+                  <td
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.enabled"
+                    }}
+                  >
                     <span
                       class={{if
                         item.enabled
@@ -262,21 +296,27 @@ export default class UserCosmeticsAdminPage extends Component {
                     </span>
                   </td>
                   <td
-                    data-label={{t "discourse_user_cosmetics.admin.table.actions"}}
+                    data-label={{t
+                      "discourse_user_cosmetics.admin.table.actions"
+                    }}
                     class="duc-admin-row-actions"
                   >
                     <div class="duc-admin-row-action-buttons">
                       <DButton
                         @icon="pencil"
-                        @translatedLabel={{t "discourse_user_cosmetics.admin.edit_item"}}
+                        @translatedLabel={{t
+                          "discourse_user_cosmetics.admin.edit_item"
+                        }}
                         @action={{fn this.startEdit item}}
-                        class="btn-small"
+                        class="btn-small duc-admin-edit-item"
                       />
                       <DButton
                         @icon="trash-can"
-                        @translatedLabel={{t "discourse_user_cosmetics.admin.delete"}}
+                        @translatedLabel={{t
+                          "discourse_user_cosmetics.admin.delete"
+                        }}
                         @action={{fn this.deleteItem item}}
-                        class="btn-small btn-danger"
+                        class="btn-small btn-danger duc-admin-delete-item"
                       />
                     </div>
                   </td>
@@ -286,7 +326,9 @@ export default class UserCosmeticsAdminPage extends Component {
           </table>
         </div>
       {{else}}
-        <p class="duc-admin-empty">{{t "discourse_user_cosmetics.admin.no_items"}}</p>
+        <p class="duc-admin-empty">{{t
+            "discourse_user_cosmetics.admin.no_items"
+          }}</p>
       {{/if}}
     </div>
   </template>
