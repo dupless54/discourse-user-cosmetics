@@ -51,6 +51,7 @@ export default class UserCosmeticsAdminPage extends Component {
     return this.kinds.map((kind) => ({
       kind,
       label: t(`discourse_user_cosmetics.kinds.${kind}`),
+      count: this.items.filter((item) => item.kind === kind).length,
       active: kind === this.activeKind,
     }));
   }
@@ -182,7 +183,8 @@ export default class UserCosmeticsAdminPage extends Component {
                   class={{if tab.active "active"}}
                   {{on "click" (fn this.setKind tab.kind)}}
                 >
-                  {{tab.label}}
+                  <span class="duc-admin-kind-label">{{tab.label}}</span>
+                  <span class="duc-admin-kind-count" aria-hidden="true">{{tab.count}}</span>
                 </button>
               </li>
             {{/each}}
@@ -226,10 +228,17 @@ export default class UserCosmeticsAdminPage extends Component {
                     data-label={{t "discourse_user_cosmetics.admin.table.name"}}
                     class="duc-admin-name-cell"
                   >
-                    <span class="duc-admin-item-name">{{item.name}}</span>
-                    {{#if item.is_default}}
-                      <span class="duc-admin-default-badge">{{t "discourse_user_cosmetics.admin.default_badge"}}</span>
-                    {{/if}}
+                    <div class="duc-admin-name-copy">
+                      <div class="duc-admin-name-line">
+                        <span class="duc-admin-item-name">{{item.name}}</span>
+                        {{#if item.is_default}}
+                          <span class="duc-admin-default-badge">{{t "discourse_user_cosmetics.admin.default_badge"}}</span>
+                        {{/if}}
+                      </div>
+                      {{#if item.description}}
+                        <span class="duc-admin-item-description">{{item.description}}</span>
+                      {{/if}}
+                    </div>
                   </td>
                   <td data-label={{t "discourse_user_cosmetics.admin.table.group"}}>
                     {{item.groupsLabel}}
@@ -238,24 +247,38 @@ export default class UserCosmeticsAdminPage extends Component {
                     {{item.owner_count}}
                   </td>
                   <td data-label={{t "discourse_user_cosmetics.admin.table.enabled"}}>
-                    {{if item.enabled "✓" "—"}}
+                    <span
+                      class={{if
+                        item.enabled
+                        "duc-admin-status-badge duc-admin-status-badge--enabled"
+                        "duc-admin-status-badge duc-admin-status-badge--disabled"
+                      }}
+                    >
+                      {{if
+                        item.enabled
+                        (t "discourse_user_cosmetics.admin.status.enabled")
+                        (t "discourse_user_cosmetics.admin.status.disabled")
+                      }}
+                    </span>
                   </td>
                   <td
                     data-label={{t "discourse_user_cosmetics.admin.table.actions"}}
                     class="duc-admin-row-actions"
                   >
-                    <DButton
-                      @icon="pencil"
-                      @translatedLabel={{t "discourse_user_cosmetics.admin.edit_item"}}
-                      @action={{fn this.startEdit item}}
-                      class="btn-small"
-                    />
-                    <DButton
-                      @icon="trash-can"
-                      @translatedLabel={{t "discourse_user_cosmetics.admin.delete"}}
-                      @action={{fn this.deleteItem item}}
-                      class="btn-small btn-danger"
-                    />
+                    <div class="duc-admin-row-action-buttons">
+                      <DButton
+                        @icon="pencil"
+                        @translatedLabel={{t "discourse_user_cosmetics.admin.edit_item"}}
+                        @action={{fn this.startEdit item}}
+                        class="btn-small"
+                      />
+                      <DButton
+                        @icon="trash-can"
+                        @translatedLabel={{t "discourse_user_cosmetics.admin.delete"}}
+                        @action={{fn this.deleteItem item}}
+                        class="btn-small btn-danger"
+                      />
+                    </div>
                   </td>
                 </tr>
               {{/each}}

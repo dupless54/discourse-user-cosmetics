@@ -1,10 +1,58 @@
-// Native Discourse admin navigation for the cosmetics catalog.
-// Loaded after the shared cosmetics stylesheet so the final release candidate
-// can keep its newer responsive table/header behavior while using core admin
-// navigation primitives.
+// Native Discourse admin navigation and responsive cosmetics management UI.
+// This stylesheet loads after the shared cosmetics stylesheet, so admin-only
+// refinements can stay isolated from public profile/card presentation styles.
+
+.duc-admin-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  padding-bottom: 2rem;
+}
+
+.duc-admin-header {
+  box-sizing: border-box;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--primary-low);
+  border-radius: 12px;
+  background: var(--secondary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.duc-admin-heading {
+  flex: 1 1 420px;
+  min-width: 0;
+
+  h2 {
+    margin-bottom: 0.3rem;
+    font-size: var(--font-up-2);
+    line-height: 1.2;
+  }
+}
+
+.duc-admin-intro {
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.duc-admin-new-item {
+  flex: 0 0 auto;
+  min-height: 40px;
+}
 
 .duc-admin-controls {
-  margin: 1em 0 1.25em;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  padding: 0.35rem;
+  overflow-x: auto;
+  border: 1px solid var(--primary-low);
+  border-radius: 10px;
+  background: var(--secondary);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 
   nav {
     min-width: 0;
@@ -12,18 +60,613 @@
 }
 
 .duc-admin-kind-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 0;
   margin: 0;
+
+  > li {
+    min-width: 0;
+
+    > button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 38px;
+      max-width: 100%;
+      border-radius: 7px;
+      white-space: nowrap;
+    }
+  }
 }
 
-@media (max-width: 700px) {
+.duc-admin-kind-label {
+  min-width: 0;
+}
+
+.duc-admin-kind-count {
+  display: inline-grid;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  padding-inline: 0.35rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--primary-low);
+  color: var(--primary-high);
+  font-size: var(--font-down-2);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.duc-admin-kind-nav > li > button.active .duc-admin-kind-count {
+  background: color-mix(in srgb, var(--tertiary) 18%, var(--secondary));
+  color: var(--tertiary);
+}
+
+.duc-admin-table-wrap {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--primary-low);
+  border-radius: 12px;
+  background: var(--secondary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.duc-admin-table {
+  table-layout: fixed;
+
+  th,
+  td {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 0.85rem 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  th {
+    background: var(--primary-very-low);
+    color: var(--primary-high);
+  }
+
+  th:nth-child(1) {
+    width: 72px;
+  }
+
+  th:nth-child(2) {
+    width: 28%;
+  }
+
+  th:nth-child(4) {
+    width: 90px;
+  }
+
+  th:nth-child(5) {
+    width: 112px;
+  }
+
+  th:nth-child(6) {
+    width: 190px;
+    text-align: right;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.duc-admin-preview-swatch {
+  width: 44px;
+  height: 44px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.duc-admin-name-copy,
+.duc-admin-name-line {
+  min-width: 0;
+}
+
+.duc-admin-name-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.duc-admin-name-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.duc-admin-default-badge {
+  margin-left: 0;
+}
+
+.duc-admin-item-description {
+  display: -webkit-box;
+  max-width: 44ch;
+  overflow: hidden;
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.duc-admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: var(--font-down-1);
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.duc-admin-status-badge--enabled {
+  background: color-mix(in srgb, var(--success) 16%, var(--secondary));
+  color: var(--success);
+}
+
+.duc-admin-status-badge--disabled {
+  background: var(--primary-low);
+  color: var(--primary-medium);
+}
+
+.duc-admin-row-actions {
+  text-align: right;
+  white-space: normal;
+}
+
+.duc-admin-row-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  min-width: 0;
+
+  .btn {
+    min-width: 0;
+    margin: 0;
+  }
+}
+
+.duc-admin-empty {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--secondary);
+  text-align: center;
+}
+
+// Form refinements: keep the existing behavior, but make every control
+// shrinkable and easy to scan on desktop, tablet, and phone widths.
+.duc-admin-form {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--secondary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.duc-admin-form-preview {
+  width: 84px;
+  height: 84px;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.duc-admin-field,
+.duc-admin-field > label,
+.duc-admin-field-row > label,
+.duc-layer-slot,
+.duc-admin-group-list,
+.duc-admin-owners,
+.duc-admin-owners-add {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.duc-admin-field {
+  margin-bottom: 1rem;
+
+  > span {
+    margin-bottom: 0.4rem;
+    color: var(--primary-high);
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+.duc-admin-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--primary-low);
+  border-radius: 9px;
+  background: var(--primary-very-low);
+
+  > label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  input[type="color"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding: 0.2rem;
+  }
+}
+
+.duc-admin-image-controls {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.duc-admin-url-input,
+.duc-layer-slot .duc-admin-url-input,
+.duc-admin-owners-add input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.duc-effect-layers {
+  padding: 0.95rem;
+  border: 1px solid var(--primary-low);
+  border-radius: 10px;
+  background: var(--primary-very-low);
+}
+
+.duc-layer-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.duc-layer-slot {
+  overflow: hidden;
+  border-radius: 9px;
+}
+
+.duc-layer-slot-preview {
+  height: 88px;
+}
+
+.duc-admin-group-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.45rem 0.75rem;
+  width: 100%;
+  max-height: 220px;
+  padding: 0.65rem;
+}
+
+.duc-admin-checkbox {
+  min-width: 0;
+
+  > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.duc-admin-owners-list {
+  min-width: 0;
+}
+
+.duc-admin-owner-chip {
+  max-width: 100%;
+
+  button {
+    flex: 0 0 auto;
+  }
+}
+
+.duc-admin-owners-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  max-width: 420px;
+
+  input {
+    max-width: none;
+  }
+}
+
+.duc-admin-form-actions {
+  min-width: 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--primary-low);
+}
+
+@media (min-width: 901px) {
+  .duc-admin-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: 1.25rem -1.25rem -1.25rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--secondary);
+  }
+}
+
+// Switch to card rows before typical tablet widths become cramped. This keeps
+// the management UI readable without forcing horizontal page scrolling.
+@media (max-width: 900px) {
+  .duc-admin-page {
+    max-width: none;
+  }
+
+  .duc-admin-header {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .duc-admin-heading {
+    flex: 1 1 320px;
+  }
+
+  .duc-admin-new-item {
+    margin-left: auto;
+  }
+
   .duc-admin-controls {
     overflow-x: auto;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
   }
 
   .duc-admin-kind-nav {
     flex-wrap: nowrap;
-    min-width: max-content;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .duc-admin-table-wrap {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .duc-admin-table,
+  .duc-admin-table tbody,
+  .duc-admin-table tr,
+  .duc-admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .duc-admin-table thead {
+    display: none;
+  }
+
+  .duc-admin-table tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .duc-admin-table tbody tr {
+    position: relative;
+    box-sizing: border-box;
+    padding: 0.9rem;
+    overflow: hidden;
+    border: 1px solid var(--primary-low);
+    border-radius: 11px;
+    background: var(--secondary);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--primary) 6%, transparent);
+  }
+
+  .duc-admin-table tbody tr:hover {
+    background: var(--secondary);
+  }
+
+  .duc-admin-table td {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(120px, 36%) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.5rem 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .duc-admin-table td::before {
+    content: attr(data-label);
+    min-width: 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .duc-admin-table td > * {
+    min-width: 0;
+    justify-self: end;
+  }
+
+  .duc-admin-table .duc-admin-preview-cell {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    width: 48px;
+    padding: 0;
+  }
+
+  .duc-admin-table .duc-admin-preview-cell::before,
+  .duc-admin-table .duc-admin-name-cell::before {
+    display: none;
+  }
+
+  .duc-admin-table .duc-admin-name-cell {
+    display: block;
+    min-height: 52px;
+    padding-left: 62px;
+    text-align: right;
+  }
+
+  .duc-admin-name-copy {
+    align-items: flex-end;
+  }
+
+  .duc-admin-name-line {
+    justify-content: flex-end;
+  }
+
+  .duc-admin-item-description {
+    max-width: 56ch;
+  }
+
+  .duc-admin-row-action-buttons {
+    width: 100%;
+  }
+
+  .duc-admin-form {
+    padding: 1rem;
+  }
+
+  .duc-admin-field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .duc-layer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .duc-admin-header {
+    align-items: stretch;
+  }
+
+  .duc-admin-heading {
+    flex-basis: 100%;
+  }
+
+  .duc-admin-new-item {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .duc-admin-controls {
+    margin-inline: 0;
+  }
+
+  .duc-admin-kind-nav > li > button {
+    min-height: 36px;
+    padding-inline: 0.7rem;
+  }
+
+  .duc-admin-table td {
+    grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+  }
+
+  .duc-admin-row-action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .duc-admin-form {
+    padding: 0.85rem;
+  }
+
+  .duc-admin-form-preview {
+    width: 72px;
+    height: 72px;
+  }
+
+  .duc-admin-field-row,
+  .duc-layer-grid,
+  .duc-admin-group-list,
+  .duc-admin-owners-add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .duc-admin-image-controls {
+    align-items: stretch;
+
+    .btn,
+    .duc-upload-btn {
+      max-width: 100%;
+    }
+  }
+
+  .duc-admin-form-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+
+    .btn {
+      width: 100%;
+      min-width: 0;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 460px) {
+  .duc-admin-table td {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+    text-align: left;
+  }
+
+  .duc-admin-table td::before,
+  .duc-admin-table td > * {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .duc-admin-table .duc-admin-name-cell {
+    padding-left: 62px;
+    text-align: left;
+  }
+
+  .duc-admin-name-copy {
+    align-items: flex-start;
+  }
+
+  .duc-admin-name-line {
+    justify-content: flex-start;
+  }
+
+  .duc-admin-row-action-buttons {
+    width: 100%;
+  }
+
+  .duc-admin-form-actions {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

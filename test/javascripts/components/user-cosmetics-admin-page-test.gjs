@@ -49,12 +49,21 @@ module("Component | UserCosmeticsAdminPage", function (hooks) {
     assert.dom(".duc-admin-new-item").exists();
     assert.dom(".admin-controls .nav.nav-pills").exists();
     assert.dom(".duc-admin-kind-nav > li > button").exists({ count: 4 });
-    assert.dom(".duc-admin-kind-nav > li > button.active").hasText("Avatar Frames");
+    assert.dom(".duc-admin-kind-nav > li > button.active").exists({ count: 1 });
+    assert
+      .dom(".duc-admin-kind-nav > li:first-child .duc-admin-kind-label")
+      .hasText("Avatar Frames");
+    assert.dom(".duc-admin-kind-count").exists({ count: 4 });
+    assert
+      .dom(".duc-admin-kind-nav > li:first-child .duc-admin-kind-count")
+      .hasText("1");
     assert.dom(".duc-admin-table tbody tr").exists({ count: 1 });
     assert.dom(".duc-admin-table tbody tr").includesText("Gold Frame");
+    assert.dom(".duc-admin-item-description").hasText("Featured frame");
+    assert.dom(".duc-admin-status-badge--enabled").hasText("Enabled");
     assert.dom(".duc-admin-name-cell[data-label]").exists();
     assert.dom(".duc-admin-row-actions[data-label]").exists();
-    assert.dom(".duc-admin-row-actions .btn").exists({ count: 2 });
+    assert.dom(".duc-admin-row-action-buttons .btn").exists({ count: 2 });
   });
 
   test("switches categories inline and opens the native admin form", async function (assert) {
