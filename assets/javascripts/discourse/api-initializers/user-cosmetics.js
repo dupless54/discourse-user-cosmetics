@@ -20,7 +20,6 @@ import {
 import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
 export default apiInitializer("1.8.0", (api) => {
-  const siteSettings = api.container.lookup("service:site-settings");
   const appEvents = api.container.lookup("service:app-events");
   const messageBus = api.container.lookup("service:message-bus");
 
@@ -40,7 +39,6 @@ export default apiInitializer("1.8.0", (api) => {
   // outlet below, so no global style injection is needed here.
   installCosmeticsResumeSync({
     currentUser,
-    siteSettings,
     appEvents,
   });
 
