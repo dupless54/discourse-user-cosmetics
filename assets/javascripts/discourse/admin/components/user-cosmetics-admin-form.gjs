@@ -7,7 +7,7 @@ import Form from "discourse/components/form";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/ui-kit/d-button";
-import { t } from "../../lib/duc-i18n";
+import { i18n as t } from "discourse-i18n";
 import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
 
 const LAYER_SLOTS = [
