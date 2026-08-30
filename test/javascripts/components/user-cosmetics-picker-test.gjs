@@ -3,11 +3,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import pretender, { response } from "discourse/tests/helpers/create-pretender";
 import UserCosmeticsPicker from "discourse/plugins/discourse-user-cosmetics/discourse/components/user-cosmetics-picker";
-import {
-  CURRENT_USER_STYLE_ID,
-  FRAMES_CSS_LINK_ID,
-  syncCurrentUserAvatarFrame,
-} from "discourse/plugins/discourse-user-cosmetics/discourse/lib/duc-current-user-presentation";
+import { FRAMES_CSS_LINK_ID } from "discourse/plugins/discourse-user-cosmetics/discourse/lib/duc-current-user-presentation";
 
 const emptyKinds = {
   nameplate: [],
@@ -66,10 +62,6 @@ module("Component | UserCosmeticsPicker", function (hooks) {
     pretender.put("/user-cosmetics/select.json", () =>
       response(this.selectResponse)
     );
-  });
-
-  hooks.afterEach(function () {
-    document.getElementById(CURRENT_USER_STYLE_ID)?.remove();
   });
 
   test("renders native cosmetic tabs and ownership state", async function (assert) {
@@ -139,22 +131,20 @@ module("Component | UserCosmeticsPicker", function (hooks) {
     assert.dom(".duc-cosmetics-item").exists({ count: 2 });
   });
 
-  test("applies returned cosmetics immediately after unequip", async function (assert) {
-    const frame = {
-      id: 1,
-      slug: "gold-frame",
-      name: "Gold Frame",
-      image_url: "/images/gold-frame.png",
-    };
+  test("updates reactive current-user cosmetics and shared CSS after unequip", async function (assert) {
     const cosmetics = {
-      avatar_frame: frame,
+      avatar_frame: {
+        id: 1,
+        slug: "gold-frame",
+        name: "Gold Frame",
+        image_url: "/images/gold-frame.png",
+      },
       nameplate: null,
       card_decoration: null,
       profile_effect: null,
     };
 
     this.currentUser.set("cosmetics", cosmetics);
-    this.siteSettings.discourse_user_cosmetics_frame_overhang_percent = 23;
     this.selectResponse = {
       success: "OK",
       cosmetics: {
@@ -167,8 +157,6 @@ module("Component | UserCosmeticsPicker", function (hooks) {
 
     await render(<template><UserCosmeticsPicker /></template>);
 
-    syncCurrentUserAvatarFrame(frame, 23);
-
     let link = document.getElementById(FRAMES_CSS_LINK_ID);
     const createdLink = !link;
     if (!link) {
@@ -179,27 +167,20 @@ module("Component | UserCosmeticsPicker", function (hooks) {
       document.head.appendChild(link);
     }
     const originalHref = link.href;
-    const styleTag = document.getElementById(CURRENT_USER_STYLE_ID);
-
-    assert.true(Boolean(styleTag), "current-user frame style is installed");
-    assert.true(
-      styleTag.textContent.includes("inset: -23%"),
-      "current site overhang is used"
-    );
 
     await click(".duc-cosmetics-section-heading .btn");
 
-    assert.strictEqual(this.currentUser.cosmetics.avatar_frame, null);
     assert.strictEqual(
-      document.getElementById(CURRENT_USER_STYLE_ID),
+      this.currentUser.cosmetics.avatar_frame,
       null,
-      "current-user frame style is removed"
+      "the reactive current-user model receives the server response"
     );
     assert.notStrictEqual(
       link.href,
       originalHref,
       "the shared frames/nameplates stylesheet is refreshed"
     );
+    assert.dom("style#discourse-user-cosmetics-current-user-style").doesNotExist();
 
     if (createdLink) {
       link.remove();

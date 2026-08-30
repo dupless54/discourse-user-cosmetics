@@ -2,12 +2,12 @@ import { apiInitializer } from "discourse/lib/api";
 import UserCosmeticsNameplate from "../components/user-cosmetics-nameplate";
 import UserCosmeticsCardDecoration from "../components/user-cosmetics-card-decoration";
 import UserCosmeticsCardMessage from "../components/user-cosmetics-card-message";
+import UserCosmeticsHeaderFrame from "../components/user-cosmetics-header-frame";
 import UserCosmeticsLiveSync from "../components/user-cosmetics-live-sync";
 import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
 import {
   FRAMES_CSS_LINK_ID,
   refreshCosmeticsStylesheet,
-  syncCurrentUserAvatarFrame,
 } from "../lib/duc-current-user-presentation";
 import {
   COSMETICS_CHANGE_CHANNEL,
@@ -20,11 +20,10 @@ import {
 import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
 export default apiInitializer("1.8.0", (api) => {
-  const siteSettings = api.container.lookup("service:site-settings");
   const appEvents = api.container.lookup("service:app-events");
   const messageBus = api.container.lookup("service:message-bus");
 
-  // 1. CSS Dosyasını Ekleme
+  // Server-generated post/nameplate presentation remains a shared stylesheet.
   if (!document.getElementById(FRAMES_CSS_LINK_ID)) {
     const link = document.createElement("link");
     link.id = FRAMES_CSS_LINK_ID;
@@ -33,24 +32,17 @@ export default apiInitializer("1.8.0", (api) => {
     document.head.appendChild(link);
   }
 
-  // 2. Geçerli Kullanıcı (Current User) avatar çerçevesini senkronize et.
   const currentUser = api.getCurrentUser();
-  syncCurrentUserAvatarFrame(
-    currentUser?.cosmetics?.avatar_frame,
-    siteSettings.discourse_user_cosmetics_frame_overhang_percent
-  );
 
-  // Normal sayfa açılışında server truth ile bir kez uzlaş. Aynı lifecycle
-  // senkronu mobil/PWA resume ve bfcache dönüşlerinde de tekrar çalışır; böylece
-  // ilk yüklemede eski browser/CDN CSS'i veya preload edilmiş kozmetik verisi
-  // görünür kalmaz.
+  // Reconcile browser/PWA resume state with server truth. Header frame rendering
+  // itself is reactive through the current-user model and the supported header
+  // outlet below, so no global style injection is needed here.
   installCosmeticsResumeSync({
     currentUser,
-    siteSettings,
     appEvents,
   });
 
-  // 3. Başka bir sekmede/tarayıcıda yapılan seçimleri açık sayfalara taşı.
+  // Carry selections made in another tab/browser into already-open surfaces.
   messageBus.subscribe(COSMETICS_CHANGE_CHANNEL, (data) => {
     if (data?.user_id === undefined || !data?.kind) {
       return;
@@ -72,15 +64,11 @@ export default apiInitializer("1.8.0", (api) => {
       }
 
       currentUser.set("cosmetics", cosmetics);
-      syncCurrentUserAvatarFrame(
-        cosmetics?.avatar_frame,
-        siteSettings.discourse_user_cosmetics_frame_overhang_percent
-      );
     });
   });
 
-  // 4. Outlet Bileşenlerini (Bileşenleri) Yükleme
   if (typeof api.renderInOutlet === "function") {
+    api.renderInOutlet("user-dropdown-button__after", UserCosmeticsHeaderFrame);
     api.renderInOutlet("user-card-metadata", UserCosmeticsLiveSync);
     api.renderInOutlet("user-profile-primary", UserCosmeticsLiveSync);
     api.renderInOutlet("user-card-post-names", UserCosmeticsNameplate);
