@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "devDependencies": {
+    "@glint/ember-tsc": "1.8.11",
+    "discourse": "npm:@discourse/types@2026.3.0-d02b2966",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "lint:types": "ember-tsc -b"
+  },
+  "engines": {
+    "node": ">= 22",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm",
+    "pnpm": "^10"
+  },
+  "packageManager": "pnpm@10.28.0"
+}
