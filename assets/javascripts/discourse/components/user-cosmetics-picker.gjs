@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
+import { schedule } from "@ember/runloop";
 import { service } from "@ember/service";
 import { trustHTML } from "@ember/template";
 import { ajax } from "discourse/lib/ajax";
@@ -241,7 +242,7 @@ export default class UserCosmeticsPicker extends Component {
 
     const targetKind = kinds[targetIndex];
     this.activeKind = targetKind;
-    this.focusTab(targetKind);
+    schedule("afterRender", () => this.focusTab(targetKind));
   }
 
   @action
