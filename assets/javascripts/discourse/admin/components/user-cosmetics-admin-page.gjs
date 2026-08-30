@@ -5,7 +5,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { on } from "@ember/modifier";
 import DButton from "discourse/ui-kit/d-button";
-import { t } from "../../lib/duc-i18n";
+import { i18n } from "discourse-i18n";
 import UserCosmeticsAdminForm from "./user-cosmetics-admin-form";
 import UserCosmeticsDeleteItemModal from "./modal/user-cosmetics-delete-item";
 
@@ -36,7 +36,7 @@ export default class UserCosmeticsAdminPage extends Component {
       groupsLabel:
         item.group_names && item.group_names.length
           ? item.group_names.join(", ")
-          : t("discourse_user_cosmetics.admin.everyone"),
+          : i18n("discourse_user_cosmetics.admin.everyone"),
     };
   }
 
@@ -59,7 +59,7 @@ export default class UserCosmeticsAdminPage extends Component {
   get tabs() {
     return this.kinds.map((kind) => ({
       kind,
-      label: t(`discourse_user_cosmetics.kinds.${kind}`),
+      label: i18n(`discourse_user_cosmetics.kinds.${kind}`),
       count: this.items.filter((item) => item.kind === kind).length,
       active: kind === this.activeKind,
     }));
@@ -163,22 +163,22 @@ export default class UserCosmeticsAdminPage extends Component {
     <div class="duc-admin-page">
       <div class="duc-admin-header">
         <div class="duc-admin-heading">
-          <h2>{{t "discourse_user_cosmetics.admin.title"}}</h2>
-          <p class="duc-admin-intro">{{t
+          <h2>{{i18n "discourse_user_cosmetics.admin.title"}}</h2>
+          <p class="duc-admin-intro">{{i18n
               "discourse_user_cosmetics.admin.intro"
             }}</p>
         </div>
 
         <DButton
           @icon="plus"
-          @translatedLabel={{t "discourse_user_cosmetics.admin.new_item"}}
+          @translatedLabel={{i18n "discourse_user_cosmetics.admin.new_item"}}
           @action={{this.startNew}}
           class="btn-primary duc-admin-new-item"
         />
       </div>
 
       <section class="admin-controls duc-admin-controls">
-        <nav aria-label={{t "discourse_user_cosmetics.admin.title"}}>
+        <nav aria-label={{i18n "discourse_user_cosmetics.admin.title"}}>
           <ul class="nav nav-pills duc-admin-kind-nav" role="tablist">
             {{#each this.tabs as |tab|}}
               <li>
@@ -216,21 +216,21 @@ export default class UserCosmeticsAdminPage extends Component {
           <table class="duc-admin-table">
             <thead>
               <tr>
-                <th>{{t
+                <th>{{i18n
                     "discourse_user_cosmetics.admin.table.preview"
                   }}</th>
-                <th>{{t "discourse_user_cosmetics.admin.table.name"}}</th>
-                <th>{{t "discourse_user_cosmetics.admin.table.group"}}</th>
-                <th>{{t "discourse_user_cosmetics.admin.table.owners"}}</th>
-                <th>{{t "discourse_user_cosmetics.admin.table.enabled"}}</th>
-                <th>{{t "discourse_user_cosmetics.admin.table.actions"}}</th>
+                <th>{{i18n "discourse_user_cosmetics.admin.table.name"}}</th>
+                <th>{{i18n "discourse_user_cosmetics.admin.table.group"}}</th>
+                <th>{{i18n "discourse_user_cosmetics.admin.table.owners"}}</th>
+                <th>{{i18n "discourse_user_cosmetics.admin.table.enabled"}}</th>
+                <th>{{i18n "discourse_user_cosmetics.admin.table.actions"}}</th>
               </tr>
             </thead>
             <tbody>
               {{#each this.visibleItems as |item|}}
                 <tr>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.preview"
                     }}
                     class="duc-admin-preview-cell"
@@ -241,7 +241,7 @@ export default class UserCosmeticsAdminPage extends Component {
                     ></div>
                   </td>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.name"
                     }}
                     class="duc-admin-name-cell"
@@ -250,7 +250,7 @@ export default class UserCosmeticsAdminPage extends Component {
                       <div class="duc-admin-name-line">
                         <span class="duc-admin-item-name">{{item.name}}</span>
                         {{#if item.is_default}}
-                          <span class="duc-admin-default-badge">{{t
+                          <span class="duc-admin-default-badge">{{i18n
                               "discourse_user_cosmetics.admin.default_badge"
                             }}</span>
                         {{/if}}
@@ -263,21 +263,21 @@ export default class UserCosmeticsAdminPage extends Component {
                     </div>
                   </td>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.group"
                     }}
                   >
                     {{item.groupsLabel}}
                   </td>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.owners"
                     }}
                   >
                     {{item.owner_count}}
                   </td>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.enabled"
                     }}
                   >
@@ -290,13 +290,13 @@ export default class UserCosmeticsAdminPage extends Component {
                     >
                       {{if
                         item.enabled
-                        (t "discourse_user_cosmetics.admin.status.enabled")
-                        (t "discourse_user_cosmetics.admin.status.disabled")
+                        (i18n "discourse_user_cosmetics.admin.status.enabled")
+                        (i18n "discourse_user_cosmetics.admin.status.disabled")
                       }}
                     </span>
                   </td>
                   <td
-                    data-label={{t
+                    data-label={{i18n
                       "discourse_user_cosmetics.admin.table.actions"
                     }}
                     class="duc-admin-row-actions"
@@ -304,7 +304,7 @@ export default class UserCosmeticsAdminPage extends Component {
                     <div class="duc-admin-row-action-buttons">
                       <DButton
                         @icon="pencil"
-                        @translatedLabel={{t
+                        @translatedLabel={{i18n
                           "discourse_user_cosmetics.admin.edit_item"
                         }}
                         @action={{fn this.startEdit item}}
@@ -312,7 +312,7 @@ export default class UserCosmeticsAdminPage extends Component {
                       />
                       <DButton
                         @icon="trash-can"
-                        @translatedLabel={{t
+                        @translatedLabel={{i18n
                           "discourse_user_cosmetics.admin.delete"
                         }}
                         @action={{fn this.deleteItem item}}
@@ -326,7 +326,7 @@ export default class UserCosmeticsAdminPage extends Component {
           </table>
         </div>
       {{else}}
-        <p class="duc-admin-empty">{{t
+        <p class="duc-admin-empty">{{i18n
             "discourse_user_cosmetics.admin.no_items"
           }}</p>
       {{/if}}
