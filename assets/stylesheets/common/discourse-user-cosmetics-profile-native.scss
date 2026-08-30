@@ -1,9 +1,27 @@
-// Scoped presentation rules for user-card/profile cosmetics.
+// Scoped presentation rules for user-card/profile/header cosmetics.
 // Components add these classes only while their cosmetic is mounted, so no
-// global user-card/profile override remains after teardown.
+// global user-card/profile/header override remains after teardown.
 
+.duc-current-user-frame-anchor,
 .duc-nameplate-anchor {
   display: none;
+}
+
+.duc-current-user-frame {
+  position: relative;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: var(--duc-current-user-frame-inset, -14%);
+    z-index: 2;
+    background-image: var(--duc-current-user-frame-image);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+  }
 }
 
 .duc-nameplate-target {
