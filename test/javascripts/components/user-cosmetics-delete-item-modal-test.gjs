@@ -21,11 +21,13 @@ module("Component | UserCosmeticsDeleteItemModal", function (hooks) {
         <UserCosmeticsDeleteItemModal
           @model={{this.model}}
           @closeModal={{this.closeModal}}
+          @inline={{true}}
         />
       </template>
     );
 
-    assert.dom(".d-modal.duc-delete-item-modal").exists();
+    assert.dom(".d-modal").exists();
+    assert.dom(".duc-delete-item-modal").exists();
     assert
       .dom(".duc-delete-item-modal__message")
       .includesText("Gold Frame")
