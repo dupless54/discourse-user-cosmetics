@@ -1,4 +1,4 @@
-import { click, render } from "@ember/test-helpers";
+import { click, fillIn, render } from "@ember/test-helpers";
 import { module, test } from "qunit";
 import { setupRenderingTest } from "discourse/tests/helpers/component-test";
 import UserCosmeticsAdminPage from "discourse/plugins/discourse-user-cosmetics/discourse/admin/components/user-cosmetics-admin-page";
@@ -64,9 +64,11 @@ module("Component | UserCosmeticsAdminPage", function (hooks) {
     assert.dom(".duc-admin-name-cell[data-label]").exists();
     assert.dom(".duc-admin-row-actions[data-label]").exists();
     assert.dom(".duc-admin-row-action-buttons .btn").exists({ count: 2 });
+    assert.dom(".duc-admin-edit-item").exists();
+    assert.dom(".duc-admin-delete-item").exists();
   });
 
-  test("switches categories inline and opens the native admin form", async function (assert) {
+  test("switches categories inline and opens the FormKit admin form", async function (assert) {
     await render(
       <template><UserCosmeticsAdminPage @model={{this.model}} /></template>
     );
@@ -80,7 +82,16 @@ module("Component | UserCosmeticsAdminPage", function (hooks) {
 
     await click(".duc-admin-new-item");
 
-    assert.dom(".duc-admin-form").exists();
+    assert.dom("form.form-kit.duc-admin-form").exists();
+    assert.dom('[data-duc-admin-field="name"]').exists();
+    assert.dom('[data-duc-admin-field="description"]').exists();
+    assert.dom('[data-duc-admin-field="enabled"]').exists();
+    assert.dom('[data-duc-admin-field="is-default"]').exists();
     assert.dom(".duc-admin-page").exists("admin form remains embedded in the page");
+
+    await fillIn('[data-duc-admin-field="name"]', "New Profile Effect");
+    assert
+      .dom('[data-duc-admin-field="name"]')
+      .hasValue("New Profile Effect", "FormKit keeps the draft field editable");
   });
 });

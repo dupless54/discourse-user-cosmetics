@@ -1,0 +1,8 @@
+- Fresh branch created from main `987e1eb816aa9653bb5112ea1afc968971859032`.
+- Core cosmetic metadata fields migrated to Discourse FormKit while upload/layer/group/owner flows remain specialized and server-authoritative.
+- Browser `window.confirm` deletion replaced with a dedicated DModal component.
+- Touched DButton imports moved to current `discourse/ui-kit/d-button` path.
+- Admin responsive layout now uses official `lib/viewport` lg/sm helpers for primary layout transitions; the 460px rule remains only as a documented content-fit micro breakpoint.
+- Added focused QUnit coverage for FormKit controls and the DModal confirmation surface.
+- Type-check bootstrap intentionally deferred because this repository currently has no package.json/tsconfig; keep that as an isolated CI/tooling PR.
+- Next: open PR, validate exact changed paths, then fix only issues reported by exact-head Official Discourse Plugin CI.

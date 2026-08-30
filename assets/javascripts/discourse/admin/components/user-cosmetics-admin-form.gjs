@@ -1,16 +1,15 @@
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
+import { cached, tracked } from "@glimmer/tracking";
+import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
+import Form from "discourse/components/form";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import DButton from "discourse/components/d-button";
+import DButton from "discourse/ui-kit/d-button";
 import { t } from "../../lib/duc-i18n";
 import UserCosmeticsLayerUpload from "./user-cosmetics-layer-upload";
 
-// Yeni "Sol", "Sağ" (left/right) ve "Tam" (full) katmanlarımızı sisteme dahil ettik.
-// Sistem bu listeyi okuyup otomatik olarak 10 kutu çizecek.
 const LAYER_SLOTS = [
   { anchor: "full", stackOrder: "front", labelKey: "layer_full_front" },
   { anchor: "full", stackOrder: "back", labelKey: "layer_full_back" },
@@ -25,36 +24,32 @@ const LAYER_SLOTS = [
 ];
 
 export default class UserCosmeticsAdminForm extends Component {
-  @tracked name = this.args.item.name ?? "";
-  @tracked description = this.args.item.description ?? "";
   @tracked imageUploadId = this.args.item.image_upload_id ?? null;
-  @tracked rawImageUrl = this.args.item.raw_image_url || this.args.item.image_url || "";
+  @tracked rawImageUrl =
+    this.args.item.raw_image_url || this.args.item.image_url || "";
   @tracked gradientFrom = this.args.item.gradient_from ?? "";
   @tracked gradientTo = this.args.item.gradient_to ?? "";
   @tracked glowColor = this.args.item.glow_color ?? "";
-  @tracked rarityLabel = this.args.item.rarity_label ?? "";
   @tracked rarityColor = this.args.item.rarity_color ?? "";
-  @tracked sortOrder = this.args.item.sort_order ?? 0;
-  @tracked enabled = this.args.item.enabled ?? true;
-  @tracked isDefault = this.args.item.is_default ?? false;
   @tracked groupIds = [...(this.args.item.group_ids ?? [])];
 
   @tracked effectOverflowTop = this.args.item.effect_overflow_top ?? 300;
   @tracked effectOverflowBottom = this.args.item.effect_overflow_bottom ?? 140;
-  @tracked effectOverflowHorizontal = this.args.item.effect_overflow_horizontal ?? 60;
-
-  // YENİ EKLENEN YAN ÇUBUK KESİNTİ DEĞERLERİ
+  @tracked effectOverflowHorizontal =
+    this.args.item.effect_overflow_horizontal ?? 60;
   @tracked effectSideOffsetTop = this.args.item.effect_side_offset_top ?? 0;
-  @tracked effectSideOffsetBottom = this.args.item.effect_side_offset_bottom ?? 0;
+  @tracked effectSideOffsetBottom =
+    this.args.item.effect_side_offset_bottom ?? 0;
 
   currentLayers = new Map(
-    (this.args.item.layers ?? []).map((l) => [`${l.anchor}:${l.stack_order}`, { ...l }])
+    (this.args.item.layers ?? []).map((layer) => [
+      `${layer.anchor}:${layer.stack_order}`,
+      { ...layer },
+    ])
   );
 
   @tracked uploading = false;
-  @tracked saving = false;
   @tracked errorMessage = null;
-
   @tracked owners = [];
   @tracked grantUsername = "";
 
@@ -63,16 +58,30 @@ export default class UserCosmeticsAdminForm extends Component {
     this.loadOwners();
   }
 
+  @cached
+  get formData() {
+    return {
+      name: this.args.item.name ?? "",
+      description: this.args.item.description ?? "",
+      rarityLabel: this.args.item.rarity_label ?? "",
+      sortOrder: this.args.item.sort_order ?? 0,
+      enabled: this.args.item.enabled ?? true,
+      isDefault: this.args.item.is_default ?? false,
+    };
+  }
+
   async loadOwners() {
     if (this.args.isNew || !this.args.item.id) {
       return;
     }
+
     try {
-      const res = await ajax(
+      const response = await ajax(
         `/admin/plugins/user-cosmetics/items/${this.args.item.id}/owners.json`
       );
-      this.owners = res.owners ?? [];
-    } catch (e) {
+      this.owners = response.owners ?? [];
+    } catch {
+      // Owner loading is supplementary. The edit form remains usable if it fails.
     }
   }
 
@@ -87,10 +96,10 @@ export default class UserCosmeticsAdminForm extends Component {
   }
 
   get groupChoices() {
-    return (this.args.groups ?? []).map((g) => ({
-      id: g.id,
-      name: g.name,
-      checked: this.groupIds.includes(g.id),
+    return (this.args.groups ?? []).map((group) => ({
+      id: group.id,
+      name: group.name,
+      checked: this.groupIds.includes(group.id),
     }));
   }
 
@@ -102,7 +111,8 @@ export default class UserCosmeticsAdminForm extends Component {
     return LAYER_SLOTS.map((slot) => ({
       ...slot,
       label: t(`discourse_user_cosmetics.admin.fields.${slot.labelKey}`),
-      initialLayer: this.currentLayers.get(`${slot.anchor}:${slot.stackOrder}`) ?? null,
+      initialLayer:
+        this.currentLayers.get(`${slot.anchor}:${slot.stackOrder}`) ?? null,
     }));
   }
 
@@ -117,85 +127,54 @@ export default class UserCosmeticsAdminForm extends Component {
   }
 
   @action
-  updateEffectOverflowTop(e) {
-    this.effectOverflowTop = Number(e.target.value) || 0;
+  updateEffectOverflowTop(event) {
+    this.effectOverflowTop = Number(event.target.value) || 0;
   }
 
   @action
-  updateEffectOverflowBottom(e) {
-    this.effectOverflowBottom = Number(e.target.value) || 0;
+  updateEffectOverflowBottom(event) {
+    this.effectOverflowBottom = Number(event.target.value) || 0;
   }
 
   @action
-  updateEffectOverflowHorizontal(e) {
-    this.effectOverflowHorizontal = Number(e.target.value) || 0;
-  }
-
-  // YENİ EKLENEN AKSİYONLAR
-  @action
-  updateEffectSideOffsetTop(e) {
-    this.effectSideOffsetTop = Number(e.target.value) || 0;
+  updateEffectOverflowHorizontal(event) {
+    this.effectOverflowHorizontal = Number(event.target.value) || 0;
   }
 
   @action
-  updateEffectSideOffsetBottom(e) {
-    this.effectSideOffsetBottom = Number(e.target.value) || 0;
+  updateEffectSideOffsetTop(event) {
+    this.effectSideOffsetTop = Number(event.target.value) || 0;
   }
 
   @action
-  updateName(e) {
-    this.name = e.target.value;
+  updateEffectSideOffsetBottom(event) {
+    this.effectSideOffsetBottom = Number(event.target.value) || 0;
   }
 
   @action
-  updateDescription(e) {
-    this.description = e.target.value;
-  }
-
-  @action
-  updateRawImageUrl(e) {
-    this.rawImageUrl = e.target.value;
+  updateRawImageUrl(event) {
+    this.rawImageUrl = event.target.value;
     this.imageUploadId = null;
   }
 
   @action
-  updateGradientFrom(e) {
-    this.gradientFrom = e.target.value;
+  updateGradientFrom(event) {
+    this.gradientFrom = event.target.value;
   }
 
   @action
-  updateGradientTo(e) {
-    this.gradientTo = e.target.value;
+  updateGradientTo(event) {
+    this.gradientTo = event.target.value;
   }
 
   @action
-  updateGlowColor(e) {
-    this.glowColor = e.target.value;
+  updateGlowColor(event) {
+    this.glowColor = event.target.value;
   }
 
   @action
-  updateRarityLabel(e) {
-    this.rarityLabel = e.target.value;
-  }
-
-  @action
-  updateRarityColor(e) {
-    this.rarityColor = e.target.value;
-  }
-
-  @action
-  updateSortOrder(e) {
-    this.sortOrder = Number(e.target.value) || 0;
-  }
-
-  @action
-  toggleEnabled() {
-    this.enabled = !this.enabled;
-  }
-
-  @action
-  toggleIsDefault() {
-    this.isDefault = !this.isDefault;
+  updateRarityColor(event) {
+    this.rarityColor = event.target.value;
   }
 
   @action
@@ -217,6 +196,7 @@ export default class UserCosmeticsAdminForm extends Component {
 
     this.uploading = true;
     this.errorMessage = null;
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -232,9 +212,9 @@ export default class UserCosmeticsAdminForm extends Component {
 
       this.imageUploadId = result.id;
       this.rawImageUrl = result.url;
-    } catch (e) {
+    } catch (error) {
       this.errorMessage = t("discourse_user_cosmetics.admin.upload_error");
-      popupAjaxError(e);
+      popupAjaxError(error);
     } finally {
       this.uploading = false;
     }
@@ -247,8 +227,8 @@ export default class UserCosmeticsAdminForm extends Component {
   }
 
   @action
-  updateGrantUsername(e) {
-    this.grantUsername = e.target.value;
+  updateGrantUsername(event) {
+    this.grantUsername = event.target.value;
   }
 
   @action
@@ -257,15 +237,16 @@ export default class UserCosmeticsAdminForm extends Component {
     if (!username || !this.args.item.id) {
       return;
     }
+
     try {
-      const res = await ajax(
+      const response = await ajax(
         `/admin/plugins/user-cosmetics/items/${this.args.item.id}/grant.json`,
         { type: "POST", data: { username } }
       );
-      this.owners = res.owners ?? this.owners;
+      this.owners = response.owners ?? this.owners;
       this.grantUsername = "";
-    } catch (e) {
-      popupAjaxError(e);
+    } catch (error) {
+      popupAjaxError(error);
     }
   }
 
@@ -274,37 +255,46 @@ export default class UserCosmeticsAdminForm extends Component {
     if (!this.args.item.id) {
       return;
     }
+
     try {
-      const res = await ajax(
+      const response = await ajax(
         `/admin/plugins/user-cosmetics/items/${this.args.item.id}/revoke.json`,
         { type: "DELETE", data: { username } }
       );
-      this.owners = res.owners ?? this.owners.filter((u) => u !== username);
-    } catch (e) {
-      popupAjaxError(e);
+      this.owners =
+        response.owners ?? this.owners.filter((user) => user !== username);
+    } catch (error) {
+      popupAjaxError(error);
     }
   }
 
   @action
-  async save() {
-    this.saving = true;
+  async save({
+    name,
+    description,
+    rarityLabel,
+    sortOrder,
+    enabled,
+    isDefault,
+  }) {
     this.errorMessage = null;
+
     try {
       const payload = {
         item: {
           kind: this.args.item.kind,
-          name: this.name,
-          description: this.description,
+          name,
+          description,
           image_upload_id: this.imageUploadId,
           image_url: this.imageUploadId ? null : this.rawImageUrl || null,
           gradient_from: this.gradientFrom || null,
           gradient_to: this.gradientTo || null,
           glow_color: this.glowColor || null,
-          rarity_label: this.rarityLabel || null,
+          rarity_label: rarityLabel || null,
           rarity_color: this.rarityColor || null,
-          sort_order: this.sortOrder,
-          enabled: this.enabled,
-          is_default: this.isDefault,
+          sort_order: Number(sortOrder) || 0,
+          enabled,
+          is_default: isDefault,
           group_ids: this.groupIds,
         },
       };
@@ -314,7 +304,6 @@ export default class UserCosmeticsAdminForm extends Component {
         payload.item.effect_overflow_top = this.effectOverflowTop;
         payload.item.effect_overflow_bottom = this.effectOverflowBottom;
         payload.item.effect_overflow_horizontal = this.effectOverflowHorizontal;
-        // YENİ KESİNTİ DEĞERLERİNİ SUNUCUYA GÖNDERİYORUZ
         payload.item.effect_side_offset_top = this.effectSideOffsetTop;
         payload.item.effect_side_offset_bottom = this.effectSideOffsetBottom;
         payload.item.layers = Array.from(this.currentLayers.values());
@@ -332,12 +321,11 @@ export default class UserCosmeticsAdminForm extends Component {
           { type: "PUT", data: payload }
         );
       }
+
       this.args.onSaved?.(response);
-    } catch (e) {
+    } catch (error) {
       this.errorMessage = t("discourse_user_cosmetics.admin.save_error");
-      popupAjaxError(e);
-    } finally {
-      this.saving = false;
+      popupAjaxError(error);
     }
   }
 
@@ -347,28 +335,43 @@ export default class UserCosmeticsAdminForm extends Component {
   }
 
   <template>
-    <div class="duc-admin-form">
+    <Form
+      @data={{this.formData}}
+      @onSubmit={{this.save}}
+      class="duc-admin-form"
+      as |form|
+    >
       <div class="duc-admin-form-preview" style={{this.previewStyle}}></div>
 
-      <label class="duc-admin-field">
-        <span>{{t "discourse_user_cosmetics.admin.fields.name"}}</span>
-        <input
-          type="text"
-          value={{this.name}}
-          {{on "input" this.updateName}}
-          placeholder={{t "discourse_user_cosmetics.admin.fields.name_placeholder"}}
+      <form.Field
+        @name="name"
+        @title={{t "discourse_user_cosmetics.admin.fields.name"}}
+        @format="large"
+        @type="input"
+        as |field|
+      >
+        <field.Control
+          placeholder={{t
+            "discourse_user_cosmetics.admin.fields.name_placeholder"
+          }}
+          data-duc-admin-field="name"
         />
-      </label>
+      </form.Field>
 
-      <label class="duc-admin-field">
-        <span>{{t "discourse_user_cosmetics.admin.fields.description"}}</span>
-        <input
-          type="text"
-          value={{this.description}}
-          {{on "input" this.updateDescription}}
-          placeholder={{t "discourse_user_cosmetics.admin.fields.description_placeholder"}}
+      <form.Field
+        @name="description"
+        @title={{t "discourse_user_cosmetics.admin.fields.description"}}
+        @format="large"
+        @type="input"
+        as |field|
+      >
+        <field.Control
+          placeholder={{t
+            "discourse_user_cosmetics.admin.fields.description_placeholder"
+          }}
+          data-duc-admin-field="description"
         />
-      </label>
+      </form.Field>
 
       {{#unless this.isProfileEffect}}
         <div class="duc-admin-field">
@@ -391,7 +394,9 @@ export default class UserCosmeticsAdminForm extends Component {
             {{#if this.rawImageUrl}}
               <DButton
                 @icon="xmark"
-                @translatedLabel={{t "discourse_user_cosmetics.admin.fields.remove_image"}}
+                @translatedLabel={{t
+                  "discourse_user_cosmetics.admin.fields.remove_image"
+                }}
                 @action={{this.clearImage}}
                 class="btn-small"
               />
@@ -401,23 +406,43 @@ export default class UserCosmeticsAdminForm extends Component {
             type="text"
             value={{this.rawImageUrl}}
             {{on "input" this.updateRawImageUrl}}
-            placeholder={{t "discourse_user_cosmetics.admin.fields.or_paste_url"}}
+            placeholder={{t
+              "discourse_user_cosmetics.admin.fields.or_paste_url"
+            }}
             class="duc-admin-url-input"
           />
         </div>
 
         <div class="duc-admin-field duc-admin-field-row">
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.gradient_from"}}</span>
-            <input type="color" value={{this.gradientFrom}} {{on "input" this.updateGradientFrom}} />
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.gradient_from"
+              }}</span>
+            <input
+              type="color"
+              value={{this.gradientFrom}}
+              {{on "input" this.updateGradientFrom}}
+            />
           </label>
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.gradient_to"}}</span>
-            <input type="color" value={{this.gradientTo}} {{on "input" this.updateGradientTo}} />
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.gradient_to"
+              }}</span>
+            <input
+              type="color"
+              value={{this.gradientTo}}
+              {{on "input" this.updateGradientTo}}
+            />
           </label>
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.glow_color"}}</span>
-            <input type="color" value={{this.glowColor}} {{on "input" this.updateGlowColor}} />
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.glow_color"
+              }}</span>
+            <input
+              type="color"
+              value={{this.glowColor}}
+              {{on "input" this.updateGlowColor}}
+            />
           </label>
         </div>
       {{/unless}}
@@ -425,7 +450,9 @@ export default class UserCosmeticsAdminForm extends Component {
       {{#if this.isProfileEffect}}
         <div class="duc-admin-field duc-effect-layers">
           <span>{{t "discourse_user_cosmetics.admin.fields.layers"}}</span>
-          <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.layers_help"}}</p>
+          <p class="duc-admin-help">{{t
+              "discourse_user_cosmetics.admin.fields.layers_help"
+            }}</p>
           <div class="duc-layer-grid">
             {{#each this.layerSlots as |slot|}}
               <UserCosmeticsLayerUpload
@@ -441,7 +468,9 @@ export default class UserCosmeticsAdminForm extends Component {
 
         <div class="duc-admin-field duc-admin-field-row">
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_top"}}</span>
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.overflow_top"
+              }}</span>
             <input
               type="number"
               min="0"
@@ -450,7 +479,9 @@ export default class UserCosmeticsAdminForm extends Component {
             />
           </label>
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_bottom"}}</span>
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.overflow_bottom"
+              }}</span>
             <input
               type="number"
               min="0"
@@ -459,7 +490,9 @@ export default class UserCosmeticsAdminForm extends Component {
             />
           </label>
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.overflow_horizontal"}}</span>
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.overflow_horizontal"
+              }}</span>
             <input
               type="number"
               min="0"
@@ -468,12 +501,15 @@ export default class UserCosmeticsAdminForm extends Component {
             />
           </label>
         </div>
-        <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.overflow_help"}}</p>
+        <p class="duc-admin-help">{{t
+            "discourse_user_cosmetics.admin.fields.overflow_help"
+          }}</p>
 
-        <!-- YENİ EKLENEN: YAN KESİNTİ HTML KUTUCUKLARI -->
         <div class="duc-admin-field duc-admin-field-row">
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.side_offset_top"}}</span>
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.side_offset_top"
+              }}</span>
             <input
               type="number"
               min="0"
@@ -482,7 +518,9 @@ export default class UserCosmeticsAdminForm extends Component {
             />
           </label>
           <label>
-            <span>{{t "discourse_user_cosmetics.admin.fields.side_offset_bottom"}}</span>
+            <span>{{t
+                "discourse_user_cosmetics.admin.fields.side_offset_bottom"
+              }}</span>
             <input
               type="number"
               min="0"
@@ -491,47 +529,91 @@ export default class UserCosmeticsAdminForm extends Component {
             />
           </label>
         </div>
-        <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.side_offset_help"}}</p>
+        <p class="duc-admin-help">{{t
+            "discourse_user_cosmetics.admin.fields.side_offset_help"
+          }}</p>
       {{/if}}
 
-      <div class="duc-admin-field duc-admin-field-row">
+      <div class="duc-admin-field-row duc-admin-formkit-row">
+        <form.Field
+          @name="rarityLabel"
+          @title={{t "discourse_user_cosmetics.admin.fields.rarity_label"}}
+          @format="full"
+          @type="input"
+          class="duc-admin-formkit-field"
+          as |field|
+        >
+          <field.Control
+            placeholder={{t
+              "discourse_user_cosmetics.admin.fields.rarity_label_placeholder"
+            }}
+            data-duc-admin-field="rarity-label"
+          />
+        </form.Field>
+
         <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.rarity_label"}}</span>
+          <span>{{t
+              "discourse_user_cosmetics.admin.fields.rarity_color"
+            }}</span>
           <input
-            type="text"
-            value={{this.rarityLabel}}
-            {{on "input" this.updateRarityLabel}}
-            placeholder={{t "discourse_user_cosmetics.admin.fields.rarity_label_placeholder"}}
+            type="color"
+            value={{this.rarityColor}}
+            {{on "input" this.updateRarityColor}}
           />
         </label>
-        <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.rarity_color"}}</span>
-          <input type="color" value={{this.rarityColor}} {{on "input" this.updateRarityColor}} />
-        </label>
-        <label>
-          <span>{{t "discourse_user_cosmetics.admin.fields.sort_order"}}</span>
-          <input type="number" value={{this.sortOrder}} {{on "input" this.updateSortOrder}} />
-        </label>
+
+        <form.Field
+          @name="sortOrder"
+          @title={{t "discourse_user_cosmetics.admin.fields.sort_order"}}
+          @format="full"
+          @type="input-number"
+          class="duc-admin-formkit-field"
+          as |field|
+        >
+          <field.Control data-duc-admin-field="sort-order" />
+        </form.Field>
       </div>
 
-      <label class="duc-admin-field duc-admin-checkbox">
-        <input type="checkbox" checked={{this.enabled}} {{on "change" this.toggleEnabled}} />
-        <span>{{t "discourse_user_cosmetics.admin.fields.enabled"}}</span>
-      </label>
+      <div class="duc-admin-form-options">
+        <form.CheckboxGroup as |checkboxGroup|>
+          <checkboxGroup.Field
+            @name="enabled"
+            @title={{t "discourse_user_cosmetics.admin.fields.enabled"}}
+            @format="full"
+            @type="checkbox"
+            class="duc-admin-checkbox"
+            as |field|
+          >
+            <field.Control data-duc-admin-field="enabled" />
+          </checkboxGroup.Field>
 
-      <label class="duc-admin-field duc-admin-checkbox">
-        <input type="checkbox" checked={{this.isDefault}} {{on "change" this.toggleIsDefault}} />
-        <span>{{t "discourse_user_cosmetics.admin.fields.is_default"}}</span>
-      </label>
+          <checkboxGroup.Field
+            @name="isDefault"
+            @title={{t "discourse_user_cosmetics.admin.fields.is_default"}}
+            @format="full"
+            @type="checkbox"
+            class="duc-admin-checkbox"
+            as |field|
+          >
+            <field.Control data-duc-admin-field="is-default" />
+          </checkboxGroup.Field>
+        </form.CheckboxGroup>
+      </div>
 
       <div class="duc-admin-field">
         <span>{{t "discourse_user_cosmetics.admin.fields.groups"}}</span>
-        <p class="duc-admin-help">{{t "discourse_user_cosmetics.admin.fields.groups_help"}}</p>
+        <p class="duc-admin-help">{{t
+            "discourse_user_cosmetics.admin.fields.groups_help"
+          }}</p>
         <div class="duc-admin-group-list">
-          {{#each this.groupChoices as |g|}}
+          {{#each this.groupChoices as |group|}}
             <label class="duc-admin-checkbox">
-              <input type="checkbox" checked={{g.checked}} {{on "change" (fn this.toggleGroup g.id)}} />
-              <span>{{g.name}}</span>
+              <input
+                type="checkbox"
+                checked={{group.checked}}
+                {{on "change" (fn this.toggleGroup group.id)}}
+              />
+              <span>{{group.name}}</span>
             </label>
           {{/each}}
         </div>
@@ -551,7 +633,9 @@ export default class UserCosmeticsAdminForm extends Component {
                 >×</button>
               </span>
             {{else}}
-              <span class="duc-admin-owners-none">{{t "discourse_user_cosmetics.admin.owners.none"}}</span>
+              <span class="duc-admin-owners-none">{{t
+                  "discourse_user_cosmetics.admin.owners.none"
+                }}</span>
             {{/each}}
           </div>
           <div class="duc-admin-owners-add">
@@ -559,10 +643,14 @@ export default class UserCosmeticsAdminForm extends Component {
               type="text"
               value={{this.grantUsername}}
               {{on "input" this.updateGrantUsername}}
-              placeholder={{t "discourse_user_cosmetics.admin.owners.add_placeholder"}}
+              placeholder={{t
+                "discourse_user_cosmetics.admin.owners.add_placeholder"
+              }}
             />
             <DButton
-              @translatedLabel={{t "discourse_user_cosmetics.admin.owners.add"}}
+              @translatedLabel={{t
+                "discourse_user_cosmetics.admin.owners.add"
+              }}
               @action={{this.grantToUser}}
               class="btn-small"
             />
@@ -574,19 +662,14 @@ export default class UserCosmeticsAdminForm extends Component {
         <p class="duc-admin-form-error">{{this.errorMessage}}</p>
       {{/if}}
 
-      <div class="duc-admin-form-actions">
-        <DButton
-          @translatedLabel={{t "discourse_user_cosmetics.admin.save"}}
-          @action={{this.save}}
-          @isLoading={{this.saving}}
-          class="btn-primary"
-        />
+      <form.Actions class="duc-admin-form-actions">
+        <form.Submit @label="discourse_user_cosmetics.admin.save" />
         <DButton
           @translatedLabel={{t "discourse_user_cosmetics.admin.cancel"}}
           @action={{this.cancel}}
           class="btn-default"
         />
-      </div>
-    </div>
+      </form.Actions>
+    </Form>
   </template>
 }

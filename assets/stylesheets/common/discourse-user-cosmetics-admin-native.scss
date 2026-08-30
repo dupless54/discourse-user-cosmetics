@@ -1,3 +1,5 @@
+@use "lib/viewport";
+
 // Native Discourse admin navigation and responsive cosmetics management UI.
 // This stylesheet loads after the shared cosmetics stylesheet, so admin-only
 // refinements can stay isolated from public profile/card presentation styles.
@@ -246,8 +248,8 @@
   text-align: center;
 }
 
-// Form refinements: keep the existing behavior, but make every control
-// shrinkable and easy to scan on desktop, tablet, and phone widths.
+// Form refinements: FormKit owns standard metadata fields while specialized
+// upload, layer, entitlement and owner controls keep their existing behavior.
 .duc-admin-form {
   box-sizing: border-box;
   width: 100%;
@@ -268,6 +270,8 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
+.duc-admin-formkit-field,
+.duc-admin-form-options,
 .duc-admin-field,
 .duc-admin-field > label,
 .duc-admin-field-row > label,
@@ -277,6 +281,14 @@
 .duc-admin-owners-add {
   box-sizing: border-box;
   min-width: 0;
+}
+
+.duc-admin-formkit-field {
+  margin: 0;
+}
+
+.duc-admin-form-options {
+  margin-bottom: 1rem;
 }
 
 .duc-admin-field {
@@ -318,6 +330,11 @@
     height: 40px;
     padding: 0.2rem;
   }
+}
+
+.duc-admin-formkit-row {
+  align-items: start;
+  margin-bottom: 1rem;
 }
 
 .duc-admin-image-controls {
@@ -403,7 +420,7 @@
   border-top: 1px solid var(--primary-low);
 }
 
-@media (min-width: 901px) {
+@include viewport.from(lg) {
   .duc-admin-form-actions {
     position: sticky;
     bottom: 0;
@@ -414,9 +431,9 @@
   }
 }
 
-// Switch to card rows before typical tablet widths become cramped. This keeps
-// the management UI readable without forcing horizontal page scrolling.
-@media (max-width: 900px) {
+// Switch to card rows at Discourse's official lg breakpoint so tablets and
+// narrow desktop panes never need horizontal page scrolling.
+@include viewport.until(lg) {
   .duc-admin-page {
     max-width: none;
   }
@@ -481,7 +498,7 @@
     box-shadow: 0 1px 2px color-mix(in srgb, var(--primary) 6%, transparent);
   }
 
-  .duc-admin-table tbody tr:hover {
+  html.discourse-no-touch .duc-admin-table tbody tr:hover {
     background: var(--secondary);
   }
 
@@ -560,7 +577,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@include viewport.until(sm) {
   .duc-admin-header {
     align-items: stretch;
   }
@@ -636,6 +653,8 @@
   }
 }
 
+// Content-fit micro breakpoint: below this width the card metadata itself no
+// longer fits two readable columns, independently of Discourse's main layout.
 @media (max-width: 460px) {
   .duc-admin-table td {
     grid-template-columns: minmax(0, 1fr);
