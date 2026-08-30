@@ -45,6 +45,7 @@ export default class UserCosmeticsDeleteItemModal extends Component {
   <template>
     <DModal
       @closeModal={{@closeModal}}
+      @inline={{@inline}}
       @title={{t "discourse_user_cosmetics.admin.delete"}}
       class="duc-delete-item-modal"
     >
