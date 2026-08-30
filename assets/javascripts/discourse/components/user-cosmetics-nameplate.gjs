@@ -52,25 +52,14 @@ const attachNameplate = modifier((element, [nameplate]) => {
   }
 
   const node = target.element;
-  const original = {
-    backgroundImage: node.style.backgroundImage,
-    backgroundPosition: node.style.backgroundPosition,
-    backgroundRepeat: node.style.backgroundRepeat,
-    backgroundSize: node.style.backgroundSize,
-  };
+  const originalBackgroundImage = node.style.backgroundImage;
 
   node.classList.add(TARGET_CLASS, target.variant);
   node.style.backgroundImage = backgroundImage;
-  node.style.backgroundPosition = "center";
-  node.style.backgroundRepeat = "no-repeat";
-  node.style.backgroundSize = "cover";
 
   return () => {
     node.classList.remove(TARGET_CLASS, target.variant);
-    node.style.backgroundImage = original.backgroundImage;
-    node.style.backgroundPosition = original.backgroundPosition;
-    node.style.backgroundRepeat = original.backgroundRepeat;
-    node.style.backgroundSize = original.backgroundSize;
+    node.style.backgroundImage = originalBackgroundImage;
   };
 });
 
