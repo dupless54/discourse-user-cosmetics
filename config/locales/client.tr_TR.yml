@@ -63,6 +63,9 @@ tr_TR:
           actions: "İşlemler"
         everyone: "Herkes"
         default_badge: "Varsayılan"
+        status:
+          enabled: "Etkin"
+          disabled: "Devre dışı"
         fields:
           name: "Ad"
           name_placeholder: "örn. Altın Halka"

@@ -63,6 +63,9 @@ en:
           actions: "Actions"
         everyone: "Everyone"
         default_badge: "Default"
+        status:
+          enabled: "Enabled"
+          disabled: "Disabled"
         fields:
           name: "Name"
           name_placeholder: "e.g. Gold Ring"
