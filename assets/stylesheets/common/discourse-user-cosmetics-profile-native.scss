@@ -1,0 +1,36 @@
+// Scoped presentation rules for user-card/profile cosmetic effects.
+// The component adds these classes only while an effect is mounted, so no
+// global user-card style override remains after teardown.
+
+.duc-profile-effect-host {
+  overflow: visible;
+  isolation: isolate;
+}
+
+.duc-profile-effect-card {
+  position: relative;
+  z-index: 1;
+  overflow: visible !important;
+}
+
+.duc-profile-effect-portal {
+  position: absolute;
+  pointer-events: none;
+
+  &--back {
+    z-index: 0;
+  }
+
+  &--front {
+    z-index: 2;
+  }
+
+  .duc-profile-effect-layer {
+    position: absolute;
+    display: block;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    animation: duc-fade-in 0.2s ease-out;
+  }
+}

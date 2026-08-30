@@ -10,6 +10,7 @@
 enabled_site_setting :discourse_user_cosmetics_enabled
 
 register_asset "stylesheets/common/discourse-user-cosmetics.scss"
+register_asset "stylesheets/common/discourse-user-cosmetics-profile-native.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-preferences.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-showcase.scss"
 register_asset "stylesheets/common/discourse-user-cosmetics-accessibility.scss"
