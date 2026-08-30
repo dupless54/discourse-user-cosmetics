@@ -1,17 +1,20 @@
 # Discourse-native modernization progress
 
-## Completed before active PR
+## Completed
 - [x] Current Discourse type-check CI bootstrap merged.
 - [x] Admin forms moved to FormKit/DModal/ui-kit and current responsive helpers.
+- [x] Preferences picker/showcase editor moved to current ui-kit and direct `discourse-i18n`.
+- [x] Preferences cosmetic tabs use keyboard-correct tab semantics and named container breakpoints.
+- [x] Preferences/showcase QUnit coverage and exact-head CI are GREEN and merged.
 
-## Active Preferences phase
-- [x] Move picker/showcase touched controls to `discourse/ui-kit/d-button`.
-- [x] Use direct `discourse-i18n` in touched components.
-- [x] Add keyboard-correct tab semantics for cosmetic kinds.
-- [x] Replace hardcoded 600/900px layout breakpoints with named Discourse container breakpoints.
-- [x] Preserve theme variables, focus visibility, touch-size controls and overflow-safe grids.
-- [x] Extend focused QUnit coverage.
+## Active profile/user-card phase
+- [x] Keep current supported Plugin API/outlet integration; no invasive core overrides added.
+- [x] Move profile showcase and user-card message copy to direct `discourse-i18n`.
+- [x] Replace profile-effect global `<style>` injection with effect-lifetime scoped host/card classes.
+- [x] Fix profile-effect portal class mismatch with BEM-style back/front modifiers.
+- [x] Restore temporary positioning changes during modifier teardown.
+- [x] Extend reduced-motion and active-effect cleanup QUnit coverage.
 - [ ] Official exact-head Discourse Plugin CI GREEN.
 - [ ] Merge.
 
-Next after merge: profile/user-card/post presentation surfaces and their extension hooks.
+Next after merge: scope nameplate presentation without global style injection, then audit remaining post/user-card presentation and legacy client helpers.
