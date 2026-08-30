@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { service } from "@ember/service";
-import { t } from "../lib/duc-i18n";
+import { i18n } from "discourse-i18n";
 
 const MessageIcon = <template>
   <svg
@@ -41,7 +41,7 @@ export default class UserCosmeticsCardMessage extends Component {
   }
 
   get label() {
-    return t("discourse_user_cosmetics.user_card.message", {
+    return i18n("discourse_user_cosmetics.user_card.message", {
       username: this.username,
     });
   }
