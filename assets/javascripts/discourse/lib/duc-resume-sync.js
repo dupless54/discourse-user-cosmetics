@@ -1,8 +1,5 @@
 import { set } from "@ember/object";
-import {
-  refreshCosmeticsStylesheet,
-  syncCurrentUserAvatarFrame,
-} from "./duc-current-user-presentation";
+import { refreshCosmeticsStylesheet } from "./duc-current-user-presentation";
 import {
   COSMETICS_CHANGE_EVENT,
   cosmeticsUsername,
@@ -22,7 +19,6 @@ function setCosmetics(user, cosmetics) {
 
 export async function reconcileCurrentUserCosmetics({
   currentUser,
-  siteSettings,
   appEvents,
   refreshStylesheet = true,
 }) {
@@ -41,11 +37,10 @@ export async function reconcileCurrentUserCosmetics({
     return undefined;
   }
 
+  // All mounted cosmetic components, including the header frame, react to the
+  // current-user model. Updating server truth here is enough; presentation
+  // cleanup belongs to each component/modifier lifecycle.
   setCosmetics(currentUser, cosmetics);
-  syncCurrentUserAvatarFrame(
-    cosmetics?.avatar_frame,
-    siteSettings.discourse_user_cosmetics_frame_overhang_percent
-  );
 
   if (currentUser.id !== undefined && currentUser.id !== null) {
     appEvents.trigger(COSMETICS_CHANGE_EVENT, {
@@ -60,7 +55,6 @@ export async function reconcileCurrentUserCosmetics({
 
 export function installCosmeticsResumeSync({
   currentUser,
-  siteSettings,
   appEvents,
   documentObject = document,
   windowObject = window,
@@ -79,7 +73,6 @@ export function installCosmeticsResumeSync({
     lastSyncAt = now;
     pendingSync = reconcileCurrentUserCosmetics({
       currentUser,
-      siteSettings,
       appEvents,
     }).finally(() => {
       pendingSync = null;
