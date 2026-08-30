@@ -6,7 +6,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/ui-kit/d-button";
 import DModal from "discourse/ui-kit/d-modal";
 import DModalCancel from "discourse/ui-kit/d-modal-cancel";
-import { t } from "../../../lib/duc-i18n";
+import { i18n } from "discourse-i18n";
 
 export default class UserCosmeticsDeleteItemModal extends Component {
   @tracked deleting = false;
@@ -16,7 +16,7 @@ export default class UserCosmeticsDeleteItemModal extends Component {
   }
 
   get message() {
-    return t("discourse_user_cosmetics.admin.delete_confirm", {
+    return i18n("discourse_user_cosmetics.admin.delete_confirm", {
       name: this.item.name,
     });
   }
@@ -46,7 +46,7 @@ export default class UserCosmeticsDeleteItemModal extends Component {
     <DModal
       @closeModal={{@closeModal}}
       @inline={{@inline}}
-      @title={{t "discourse_user_cosmetics.admin.delete"}}
+      @title={{i18n "discourse_user_cosmetics.admin.delete"}}
       class="duc-delete-item-modal"
     >
       <:body>
@@ -55,7 +55,7 @@ export default class UserCosmeticsDeleteItemModal extends Component {
       <:footer>
         <DButton
           @icon="trash-can"
-          @translatedLabel={{t "discourse_user_cosmetics.admin.delete"}}
+          @translatedLabel={{i18n "discourse_user_cosmetics.admin.delete"}}
           @action={{this.deleteItem}}
           @isLoading={{this.deleting}}
           class="btn-danger duc-delete-item-modal__confirm"
