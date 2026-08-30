@@ -5,19 +5,20 @@ import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { service } from "@ember/service";
 import { trustHTML } from "@ember/template";
-import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import DButton from "discourse/ui-kit/d-button";
 import dIcon from "discourse/ui-kit/helpers/d-icon";
+import { i18n } from "discourse-i18n";
 import { enabledCosmeticKinds } from "../lib/duc-cosmetic-kinds";
 import {
   refreshCosmeticsStylesheet,
   syncCurrentUserAvatarFrame,
 } from "../lib/duc-current-user-presentation";
-import { t } from "../lib/duc-i18n";
 
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
 const STYLESHEET_KINDS = ["avatar_frame", "nameplate"];
+const TAB_PANEL_ID = "duc-cosmetics-panel";
 
 function safeHexColor(value) {
   return typeof value === "string" && HEX_COLOR_REGEX.test(value) ? value : null;
@@ -49,6 +50,10 @@ export default class UserCosmeticsPicker extends Component {
     return enabledCosmeticKinds(this.siteSettings);
   }
 
+  get activeTabId() {
+    return this.activeKind ? `duc-cosmetics-tab-${this.activeKind}` : null;
+  }
+
   @action
   async load() {
     this.loading = true;
@@ -76,7 +81,7 @@ export default class UserCosmeticsPicker extends Component {
       this.items = decorated;
       this.active = response.active ?? {};
     } catch (e) {
-      this.errorMessage = t("discourse_user_cosmetics.picker.save_error");
+      this.errorMessage = i18n("discourse_user_cosmetics.picker.save_error");
     } finally {
       this.loading = false;
     }
@@ -93,10 +98,10 @@ export default class UserCosmeticsPicker extends Component {
       previewStyle: this.previewStyleFor(item),
       rarityStyle: safeColorStyle("color", item.rarity_color),
       lockedTooltip: groupNamesLabel
-        ? t("discourse_user_cosmetics.picker.locked_group_tooltip", {
+        ? i18n("discourse_user_cosmetics.picker.locked_group_tooltip", {
             groups: groupNamesLabel,
           })
-        : t("discourse_user_cosmetics.picker.locked_tooltip"),
+        : i18n("discourse_user_cosmetics.picker.locked_tooltip"),
     };
   }
 
@@ -114,11 +119,17 @@ export default class UserCosmeticsPicker extends Component {
   }
 
   get tabs() {
-    return this.kinds.map((kind) => ({
-      kind,
-      label: t(`discourse_user_cosmetics.kinds.${kind}`),
-      active: kind === this.activeKind,
-    }));
+    return this.kinds.map((kind) => {
+      const active = kind === this.activeKind;
+
+      return {
+        kind,
+        label: i18n(`discourse_user_cosmetics.kinds.${kind}`),
+        active,
+        id: `duc-cosmetics-tab-${kind}`,
+        tabIndex: active ? "0" : "-1",
+      };
+    });
   }
 
   get currentActiveId() {
@@ -140,8 +151,8 @@ export default class UserCosmeticsPicker extends Component {
         ...item,
         isActive,
         actionLabel: isActive
-          ? t("discourse_user_cosmetics.picker.equipped")
-          : t("discourse_user_cosmetics.picker.equip"),
+          ? i18n("discourse_user_cosmetics.picker.equipped")
+          : i18n("discourse_user_cosmetics.picker.equip"),
       };
     });
   }
@@ -152,12 +163,12 @@ export default class UserCosmeticsPicker extends Component {
 
   get currentKindLabel() {
     return this.activeKind
-      ? t(`discourse_user_cosmetics.kinds.${this.activeKind}`)
+      ? i18n(`discourse_user_cosmetics.kinds.${this.activeKind}`)
       : "";
   }
 
   get currentItemCountLabel() {
-    return t("discourse_user_cosmetics.picker.item_count", {
+    return i18n("discourse_user_cosmetics.picker.item_count", {
       count: this.currentItems.length,
     });
   }
@@ -179,6 +190,16 @@ export default class UserCosmeticsPicker extends Component {
     }
   }
 
+  focusTab(kind) {
+    const tab = document.getElementById(`duc-cosmetics-tab-${kind}`);
+    tab?.focus();
+    tab?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }
+
   @action
   setKind(kind, event) {
     if (!this.kinds.includes(kind)) {
@@ -191,6 +212,36 @@ export default class UserCosmeticsPicker extends Component {
       block: "nearest",
       inline: "nearest",
     });
+  }
+
+  @action
+  handleTabKeyDown(kind, event) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+      return;
+    }
+
+    const kinds = this.kinds;
+    const currentIndex = kinds.indexOf(kind);
+    if (currentIndex < 0 || !kinds.length) {
+      return;
+    }
+
+    event.preventDefault();
+
+    let targetIndex = currentIndex;
+    if (event.key === "Home") {
+      targetIndex = 0;
+    } else if (event.key === "End") {
+      targetIndex = kinds.length - 1;
+    } else {
+      const rtl = document.documentElement.dir === "rtl";
+      const forward = event.key === "ArrowRight" ? !rtl : rtl;
+      targetIndex = (currentIndex + (forward ? 1 : -1) + kinds.length) % kinds.length;
+    }
+
+    const targetKind = kinds[targetIndex];
+    this.activeKind = targetKind;
+    this.focusTab(targetKind);
   }
 
   @action
@@ -251,23 +302,28 @@ export default class UserCosmeticsPicker extends Component {
   <template>
     <section class="duc-cosmetics-page">
       <header class="duc-cosmetics-page__header">
-        <h2>{{t "discourse_user_cosmetics.preferences.title"}}</h2>
-        <p>{{t "discourse_user_cosmetics.picker.subtitle"}}</p>
+        <h2>{{i18n "discourse_user_cosmetics.preferences.title"}}</h2>
+        <p>{{i18n "discourse_user_cosmetics.picker.subtitle"}}</p>
       </header>
 
       {{#if this.activeKind}}
         <div
           class="duc-cosmetics-tabs"
           role="tablist"
-          aria-label={{t "discourse_user_cosmetics.preferences.title"}}
+          aria-orientation="horizontal"
+          aria-label={{i18n "discourse_user_cosmetics.preferences.title"}}
         >
           {{#each this.tabs as |tab|}}
             <button
+              id={{tab.id}}
               type="button"
               role="tab"
+              tabindex={{tab.tabIndex}}
               aria-selected={{if tab.active "true" "false"}}
+              aria-controls={{TAB_PANEL_ID}}
               class="duc-cosmetics-tab {{if tab.active 'active'}}"
               {{on "click" (fn this.setKind tab.kind)}}
+              {{on "keydown" (fn this.handleTabKeyDown tab.kind)}}
             >
               {{tab.label}}
             </button>
@@ -275,16 +331,26 @@ export default class UserCosmeticsPicker extends Component {
         </div>
       {{/if}}
 
-      <div class="duc-cosmetics-page__body">
+      <div
+        id={{TAB_PANEL_ID}}
+        class="duc-cosmetics-page__body"
+        role={{if this.activeKind "tabpanel"}}
+        aria-labelledby={{this.activeTabId}}
+        aria-busy={{if this.loading "true" "false"}}
+        tabindex={{if this.activeKind "0"}}
+      >
         {{#if this.loading}}
-          <div class="duc-cosmetics-state"><div class="spinner"></div></div>
+          <div class="duc-cosmetics-state" role="status">
+            <div class="spinner" aria-hidden="true"></div>
+            <span class="sr-only">{{i18n "loading"}}</span>
+          </div>
         {{else if this.errorMessage}}
-          <div class="duc-cosmetics-state duc-cosmetics-state--error">
+          <div class="duc-cosmetics-state duc-cosmetics-state--error" role="alert">
             <p>{{this.errorMessage}}</p>
             <DButton
               @icon="rotate"
               @action={{this.load}}
-              @translatedLabel={{t "discourse_user_cosmetics.picker.retry"}}
+              @translatedLabel={{i18n "discourse_user_cosmetics.picker.retry"}}
               class="btn-default"
             />
           </div>
@@ -298,7 +364,7 @@ export default class UserCosmeticsPicker extends Component {
             {{#if this.hasActiveSelection}}
               <DButton
                 @icon="xmark"
-                @translatedLabel={{t "discourse_user_cosmetics.picker.remove"}}
+                @translatedLabel={{i18n "discourse_user_cosmetics.picker.remove"}}
                 @action={{this.unequip}}
                 class="btn-default btn-small"
               />
@@ -364,7 +430,7 @@ export default class UserCosmeticsPicker extends Component {
                     {{else}}
                       <span class="duc-cosmetics-item__locked-label" title={{item.lockedTooltip}}>
                         {{dIcon "lock"}}
-                        {{t "discourse_user_cosmetics.picker.locked"}}
+                        {{i18n "discourse_user_cosmetics.picker.locked"}}
                       </span>
                     {{/if}}
                   </div>
@@ -373,12 +439,12 @@ export default class UserCosmeticsPicker extends Component {
             </div>
           {{else}}
             <p class="duc-cosmetics-empty">
-              {{t "discourse_user_cosmetics.picker.none_for_kind"}}
+              {{i18n "discourse_user_cosmetics.picker.none_for_kind"}}
             </p>
           {{/if}}
         {{else}}
           <p class="duc-cosmetics-empty">
-            {{t "discourse_user_cosmetics.picker.none_enabled"}}
+            {{i18n "discourse_user_cosmetics.picker.none_enabled"}}
           </p>
         {{/if}}
       </div>
