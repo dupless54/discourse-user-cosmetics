@@ -18,11 +18,20 @@ import {
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
+import { postAvatarFrameClassTransformer } from "../lib/duc-post-avatar-frame";
 import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
 export default apiInitializer("1.8.0", (api) => {
   const appEvents = api.container.lookup("service:app-events");
   const messageBus = api.container.lookup("service:message-bus");
+
+  // Current Discourse exposes `post-avatar-class` as a value transformer on the
+  // native PostAvatar component. Add a stable user-id class without expanding
+  // the post serializer payload; generated CSS maps only entitled selections.
+  api.registerValueTransformer(
+    "post-avatar-class",
+    postAvatarFrameClassTransformer
+  );
 
   // Server-generated post/nameplate presentation remains a shared stylesheet.
   if (!document.getElementById(FRAMES_CSS_LINK_ID)) {
