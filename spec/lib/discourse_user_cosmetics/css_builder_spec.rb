@@ -96,4 +96,29 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).not_to include("#user-card .user-card-avatar")
     expect(css).not_to include(".user-profile-avatar:has")
   end
+
+  it "keys post and mention nameplates to native transformer classes without username DOM selectors" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "nameplate",
+        name: "Native nameplate",
+        image_url: "https://example.com/native-nameplate.webp",
+      )
+    user = Fabricate(:user)
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "nameplate",
+      item_id: item.id,
+    )
+
+    css = described_class.build_frames_css
+
+    expect(css).to include(".duc-nameplate-post-user-#{user.id}")
+    expect(css).to include(".duc-nameplate-post-user-#{user.id} > a")
+    expect(css).to include("a.mention.duc-nameplate-mention-user-#{user.id}")
+    expect(css).not_to include(%([data-user-card="#{user.username_lower}" i]))
+    expect(css).not_to include(%(href^="/u/#{user.username_lower}"))
+    expect(css).not_to include(":has(")
+  end
 end

@@ -93,20 +93,6 @@ module ::DiscourseUserCosmetics
       bump_stylesheet_version!
     end
 
-    def self.invalidate_username_change!(user_id:)
-      return if user_id.blank?
-
-      selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
-      return unless selection
-
-      # Post avatar frames are keyed by the stable numeric user id through the
-      # native `post-avatar-class` transformer. Only generated nameplate CSS is
-      # still username-backed, so an avatar-frame-only user rename must not
-      # churn the shared stylesheet cache identity.
-      nameplate_field = DiscourseUserCosmetics::UserSelection.field_for("nameplate")
-      bump_stylesheet_version! if selection.public_send(nameplate_field).present?
-    end
-
     def self.feature_gate_signature
       DiscourseUserCosmetics::Item::KINDS.map do |kind|
         DiscourseUserCosmetics::Item.kind_enabled?(kind) ? "1" : "0"
