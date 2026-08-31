@@ -48,7 +48,8 @@ module ::DiscourseUserCosmetics
           item = selection.nameplate_item
           next unless user && item
 
-          uname = escape_css_string(user.username_lower)
+          post_nameplate_class = "duc-nameplate-post-user-#{user.id}"
+          mention_nameplate_class = "duc-nameplate-mention-user-#{user.id}"
 
           bg_css = ""
           if item.resolved_image_url.present?
@@ -59,8 +60,11 @@ module ::DiscourseUserCosmetics
             next
           end
 
-          # Metinleri saran <a> etiketleri (:not(:has(img.avatar)) ile resimleri dışarıda bırakıyoruz)
-          css << %([data-user-card="#{uname}" i]:not(:has(img.avatar)), a.mention[href^="/u/#{uname}" i] {\n)
+          # Current Discourse exposes `poster-name-class` for post author names
+          # and `mentions-class` for cooked mentions. The client adds stable
+          # numeric user-id classes, avoiding broad username selectors and
+          # DOM-shape probing such as `:has(img.avatar)`.
+          css << %(.#{post_nameplate_class}, a.mention.#{mention_nameplate_class} {\n)
           css << "  position: relative !important;\n"
           css << "  isolation: isolate; /* Efektin postun arkasına düşmesini %100 engeller */\n"
           css << "  padding: 2px 6px;\n"
@@ -69,8 +73,7 @@ module ::DiscourseUserCosmetics
           css << "  text-shadow: 0px 1px 2px #000000, 0px 0px 4px #000000, 0px 0px 8px #000000 !important;\n"
           css << "}\n"
 
-          # ::before sözde elementi ile isim plakasını (GIF/APNG) tam arkaya yerleştiriyoruz
-          css << %([data-user-card="#{uname}" i]:not(:has(img.avatar))::before, a.mention[href^="/u/#{uname}" i]::before {\n)
+          css << %(.#{post_nameplate_class}::before, a.mention.#{mention_nameplate_class}::before {\n)
           css << "  content: \"\";\n"
           css << "  position: absolute;\n"
           css << "  inset: 0;\n"
