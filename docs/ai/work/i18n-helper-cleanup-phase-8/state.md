@@ -5,10 +5,18 @@
 - Base commit: `45f09e721421602eb78262f4c2c9b2ce387fcc55`
 
 ## Source baseline
-Previous modernization phases moved every active client/admin caller to the current `discourse-i18n` entry point. Repository code search for `duc-i18n` returns no active caller, and the compatibility file itself states it should be removed once the final caller is migrated.
+Current Discourse client/admin code imports `i18n` directly from `discourse-i18n`. The transitional plugin helper exists only to preserve the historical local `t(...)` call shape while callers are migrated.
+
+## CI correction
+The first exact-head official CI run exposed one remaining active caller that repository code search had missed:
+
+`assets/javascripts/discourse/admin/components/user-cosmetics-layer-upload.gjs`
+
+QUnit compilation failed because that component still imported `../../lib/duc-i18n` after the helper was deleted. The component now imports `i18n` directly as `t` from `discourse-i18n`, preserving all existing call sites and behavior. A follow-up repository search for `duc-i18n` returns no active caller.
 
 ## Phase scope
-- Delete the unused `assets/javascripts/discourse/lib/duc-i18n.js` compatibility wrapper.
+- Migrate the final layer-upload caller to direct `discourse-i18n`.
+- Delete `assets/javascripts/discourse/lib/duc-i18n.js`.
 - Update modernization progress documentation.
 
 ## Invariants
