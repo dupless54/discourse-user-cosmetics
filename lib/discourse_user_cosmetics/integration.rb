@@ -7,6 +7,14 @@ module ::DiscourseUserCosmetics
   # selections, and saved loadouts. Companion plugins may contribute
   # entitlement decisions in batches without patching Item#usable_by?.
   class Integration
+    extend IntegrationContract
+    extend ShowcaseIntegration
+
+    # Preserve the existing public constants while their implementation lives
+    # in Zeitwerk-compatible extension modules.
+    CONTRACT_VERSION = IntegrationContract::CONTRACT_VERSION
+    CONTRACT_CAPABILITY_METHODS = IntegrationContract::CONTRACT_CAPABILITY_METHODS
+
     class InvalidEntitlementProviderResult < StandardError; end
 
     class << self

@@ -2,6 +2,13 @@
 
 RSpec.describe DiscourseUserCosmetics::Integration do
   describe "public contract manifest" do
+    it "preserves the public contract constants" do
+      expect(described_class::CONTRACT_VERSION).to eq(1)
+      expect(described_class::CONTRACT_CAPABILITY_METHODS[:showcase]).to eq(
+        %i[showcase_for update_showcase!],
+      )
+    end
+
     it "exposes a stable version and the capabilities loaded on this plugin stack" do
       expect(described_class.contract_version).to eq(1)
       expect(described_class.contract_manifest).to eq(
