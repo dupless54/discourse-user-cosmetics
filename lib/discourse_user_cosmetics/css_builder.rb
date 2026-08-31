@@ -13,17 +13,6 @@ module ::DiscourseUserCosmetics
         inset_value = "-#{overhang}%"
 
         css << "/* --- Avatar Frames --- */\n"
-        css << ".duc-avatar-frame-target { position: relative !important; display: inline-block !important; }\n"
-        css << ".duc-avatar-frame-target::after {\n"
-        css << "  content: \"\";\n"
-        css << "  position: absolute;\n"
-        css << "  inset: #{inset_value};\n"
-        css << "  background-repeat: no-repeat;\n"
-        css << "  background-position: center;\n"
-        css << "  background-size: contain;\n"
-        css << "  pointer-events: none;\n"
-        css << "  z-index: 2;\n"
-        css << "}\n\n"
 
         stylesheet_selections(kind: "avatar_frame", item_association: :avatar_frame_item).find_each(
           batch_size: 500,
@@ -35,13 +24,14 @@ module ::DiscourseUserCosmetics
           image = item.resolved_image_url
           next if image.blank?
 
-          uname = escape_css_string(user.username_lower)
           image_css = escape_css_url(image)
+          post_avatar_class = "duc-avatar-frame-user-#{user.id}"
 
-          # Post avatars remain on the shared generated stylesheet until the
-          # post payload/performance path is migrated in its own audited phase.
-          css << %([data-user-card="#{uname}" i]:has(img.avatar) { position: relative !important; display: inline-block !important; }\n)
-          css << %([data-user-card="#{uname}" i]:has(img.avatar)::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
+          # Current Discourse exposes `post-avatar-class` as a value transformer.
+          # The client adds this stable numeric user-id class to `.topic-avatar`,
+          # so generated CSS no longer depends on username attributes or `:has()`.
+          css << %(.topic-avatar.#{post_avatar_class} .post-avatar { position: relative !important; display: inline-block !important; }\n)
+          css << %(.topic-avatar.#{post_avatar_class} .post-avatar::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
         end
       end
 

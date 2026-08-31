@@ -15,14 +15,18 @@
 - [x] Client/admin callers use the current `discourse-i18n` entry point directly.
 - [x] Current-user header avatar frame uses the supported `user-dropdown-button__after` outlet instead of a global style injection.
 - [x] Header-frame exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
+- [x] User-card avatar frames render through `user-card-avatar-flair` with scoped lifecycle CSS.
+- [x] Profile avatar frames render through `user-profile-avatar-img-wrapper` with scoped lifecycle CSS.
+- [x] Generated user-card/profile avatar selectors removed from `frames.css`.
+- [x] Profile/user-card avatar-frame exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
 
-## Active profile/user-card avatar-frame modernization
-- [x] Render user-card avatar frames through the core `user-card-avatar-flair` outlet.
-- [x] Render profile avatar frames through the core `user-profile-avatar-img-wrapper` outlet.
-- [x] Scope frame CSS custom properties/classes to mounted Discourse avatar hosts with teardown cleanup.
-- [x] Remove generated user-card/profile avatar selectors from `frames.css`; keep post presentation unchanged for now.
-- [x] Add focused QUnit and Ruby coverage for the new surface boundary.
+## Active post avatar-frame modernization
+- [x] Use the core `post-avatar-class` value transformer instead of changing the post serializer payload.
+- [x] Add a stable numeric `duc-avatar-frame-user-<id>` class to native `.topic-avatar` hosts.
+- [x] Key generated post-frame CSS to the transformer class instead of username attributes and `:has(img.avatar)`.
+- [x] Preserve entitlement filtering, stylesheet batching and live stylesheet refresh behavior.
+- [x] Add focused QUnit and Ruby coverage for transformer/CSS mapping.
 - [ ] Official exact-head Discourse Plugin CI GREEN.
 - [ ] Merge.
 
-Next after merge: audit the core `post-avatar` outlet and decide the post cosmetics payload/cache strategy before removing the remaining generated post-frame selectors. Then continue backend route/Zeitwerk/service-object modernization.
+Next after merge: remove the now-unused client i18n compatibility helper, then continue backend route/Zeitwerk/service-object modernization and the remaining generated nameplate selector audit.

@@ -99,12 +99,12 @@ module ::DiscourseUserCosmetics
       selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
       return unless selection
 
-      has_stylesheet_selection =
-        STYLESHEET_KINDS.any? do |kind|
-          selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind)).present?
-        end
-
-      bump_stylesheet_version! if has_stylesheet_selection
+      # Post avatar frames are keyed by the stable numeric user id through the
+      # native `post-avatar-class` transformer. Only generated nameplate CSS is
+      # still username-backed, so an avatar-frame-only user rename must not
+      # churn the shared stylesheet cache identity.
+      nameplate_field = DiscourseUserCosmetics::UserSelection.field_for("nameplate")
+      bump_stylesheet_version! if selection.public_send(nameplate_field).present?
     end
 
     def self.feature_gate_signature
