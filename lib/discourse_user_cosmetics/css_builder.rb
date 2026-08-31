@@ -73,6 +73,14 @@ module ::DiscourseUserCosmetics
           css << "  text-shadow: 0px 1px 2px #000000, 0px 0px 4px #000000, 0px 0px 8px #000000 !important;\n"
           css << "}\n"
 
+          # The post transformer class is applied to the native `.names > span`
+          # wrapper. Core colors its descendant user link explicitly, so mirror
+          # the legacy direct-link presentation without returning to username selectors.
+          css << %(.#{post_nameplate_class} > a {\n)
+          css << "  color: #ffffff !important;\n"
+          css << "  text-shadow: 0px 1px 2px #000000, 0px 0px 4px #000000, 0px 0px 8px #000000 !important;\n"
+          css << "}\n"
+
           css << %(.#{post_nameplate_class}::before, a.mention.#{mention_nameplate_class}::before {\n)
           css << "  content: \"\";\n"
           css << "  position: absolute;\n"
