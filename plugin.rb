@@ -20,15 +20,13 @@ module ::DiscourseUserCosmetics
   PLUGIN_NAME = "discourse-user-cosmetics"
 end
 
+require_relative "lib/discourse_user_cosmetics/engine"
+
 after_initialize do
-  # --- load our Ruby code -------------------------------------------------
+  # Library files are still loaded explicitly in this phase because the
+  # integration contract is split across files that reopen Integration.
+  # App models/controllers now load through the isolated Rails engine.
   require_relative "lib/discourse_user_cosmetics/asset_policy"
-  require_relative "app/models/discourse_user_cosmetics/item"
-  require_relative "app/models/discourse_user_cosmetics/item_group"
-  require_relative "app/models/discourse_user_cosmetics/user_item"
-  require_relative "app/models/discourse_user_cosmetics/user_selection"
-  require_relative "app/models/discourse_user_cosmetics/loadout"
-  require_relative "app/models/discourse_user_cosmetics/effect_layer"
   require_relative "lib/discourse_user_cosmetics/entitlement_resolver"
   require_relative "lib/discourse_user_cosmetics/presenter"
   require_relative "lib/discourse_user_cosmetics/selection_service"
@@ -40,40 +38,9 @@ after_initialize do
   require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
   require_relative "lib/discourse_user_cosmetics/css_builder"
   require_relative "lib/discourse_user_cosmetics/seeder"
-  require_relative "app/controllers/discourse_user_cosmetics/items_controller"
-  require_relative "app/controllers/discourse_user_cosmetics/showcase_controller"
-  require_relative "app/controllers/discourse_user_cosmetics/admin_items_controller"
-  require_relative "app/controllers/discourse_user_cosmetics/stylesheets_controller"
 
   # --- admin nav entry (Admin > Plugins > User Cosmetics) -----------------
   add_admin_route "discourse_user_cosmetics.title", "user-cosmetics"
-
-  # --- routes ---------------------------------------------------------------
-  Discourse::Application.routes.append do
-    get "/admin/plugins/user-cosmetics" => "admin/plugins#index", constraints: StaffConstraint.new
-
-    %w[u users].each do |root_path|
-      get "/#{root_path}/:username/preferences/cosmetics" => "users#preferences",
-          constraints: { username: RouteFormat.username }
-    end
-
-    get "/user-cosmetics/mine" => "discourse_user_cosmetics/items#mine", defaults: { format: :json }
-    put "/user-cosmetics/select" => "discourse_user_cosmetics/items#select", defaults: { format: :json }
-    put "/user-cosmetics/showcase" => "discourse_user_cosmetics/showcase#update", defaults: { format: :json }
-    get "/user-cosmetics/frames.css" => "discourse_user_cosmetics/stylesheets#frames"
-
-    scope "/admin/plugins/user-cosmetics", constraints: StaffConstraint.new do
-      defaults format: :json do
-        get "/items" => "discourse_user_cosmetics/admin_items#index"
-        post "/items" => "discourse_user_cosmetics/admin_items#create"
-        put "/items/:id" => "discourse_user_cosmetics/admin_items#update", constraints: { id: /\d+/ }
-        delete "/items/:id" => "discourse_user_cosmetics/admin_items#destroy", constraints: { id: /\d+/ }
-        post "/items/:id/grant" => "discourse_user_cosmetics/admin_items#grant", constraints: { id: /\d+/ }
-        delete "/items/:id/revoke" => "discourse_user_cosmetics/admin_items#revoke", constraints: { id: /\d+/ }
-        get "/items/:id/owners" => "discourse_user_cosmetics/admin_items#owners", constraints: { id: /\d+/ }
-      end
-    end
-  end
 
   on(:user_added_to_group) do |user, group, **_kwargs|
     DiscourseUserCosmetics::Presenter.invalidate_group_membership!(
