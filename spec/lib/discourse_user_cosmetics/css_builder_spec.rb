@@ -35,8 +35,8 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     large_queries = track_sql_queries { large_css = described_class.build_frames_css }
 
     expect(large_queries.size).to eq(small_queries.size)
-    expect(large_css).to include(users.first.username_lower)
-    expect(large_css).to include(additional_users.last.username_lower)
+    expect(large_css).to include("duc-avatar-frame-user-#{users.first.id}")
+    expect(large_css).to include("duc-avatar-frame-user-#{additional_users.last.id}")
   end
 
   it "preserves group and direct-grant entitlement filtering in the bulk query" do
@@ -66,17 +66,17 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
 
     css = described_class.build_frames_css
 
-    expect(css).to include(group_user.username_lower)
-    expect(css).to include(direct_user.username_lower)
-    expect(css).not_to include(stale_user.username_lower)
+    expect(css).to include("duc-avatar-frame-user-#{group_user.id}")
+    expect(css).to include("duc-avatar-frame-user-#{direct_user.id}")
+    expect(css).not_to include("duc-avatar-frame-user-#{stale_user.id}")
   end
 
-  it "keeps generated avatar-frame selectors limited to post surfaces" do
+  it "keys post avatar frames to the native transformer class without username selectors" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "avatar_frame",
-        name: "Native surface frame",
-        image_url: "https://example.com/native-surface-frame.webp",
+        name: "Native post frame",
+        image_url: "https://example.com/native-post-frame.webp",
       )
     user = Fabricate(:user)
 
@@ -88,7 +88,11 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
 
     css = described_class.build_frames_css
 
-    expect(css).to include(%([data-user-card="#{user.username_lower}" i]:has(img.avatar)))
+    expect(css).to include(
+      ".topic-avatar.duc-avatar-frame-user-#{user.id} .post-avatar::after",
+    )
+    expect(css).not_to include(%([data-user-card="#{user.username_lower}" i]:has(img.avatar)))
+    expect(css).not_to include(".duc-avatar-frame-target")
     expect(css).not_to include("#user-card .user-card-avatar")
     expect(css).not_to include(".user-profile-avatar:has")
   end
