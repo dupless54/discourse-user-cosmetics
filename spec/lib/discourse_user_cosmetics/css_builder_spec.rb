@@ -115,6 +115,7 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     css = described_class.build_frames_css
 
     expect(css).to include(".duc-nameplate-post-user-#{user.id}")
+    expect(css).to include(".duc-nameplate-post-user-#{user.id} > a")
     expect(css).to include("a.mention.duc-nameplate-mention-user-#{user.id}")
     expect(css).not_to include(%([data-user-card="#{user.username_lower}" i]))
     expect(css).not_to include(%(href^="/u/#{user.username_lower}"))
