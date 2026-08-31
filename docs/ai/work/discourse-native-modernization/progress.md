@@ -19,14 +19,15 @@
 - [x] Profile avatar frames render through `user-profile-avatar-img-wrapper` with scoped lifecycle CSS.
 - [x] Generated user-card/profile avatar selectors removed from `frames.css`.
 - [x] Profile/user-card avatar-frame exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
+- [x] Post avatar frames use the core `post-avatar-class` value transformer without expanding post serializer payloads.
+- [x] Generated post-frame CSS is keyed by stable numeric user-id classes instead of username/`:has(img.avatar)` selectors.
+- [x] Avatar-frame-only username changes no longer churn the shared stylesheet cache identity.
+- [x] Post avatar-frame exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
 
-## Active post avatar-frame modernization
-- [x] Use the core `post-avatar-class` value transformer instead of changing the post serializer payload.
-- [x] Add a stable numeric `duc-avatar-frame-user-<id>` class to native `.topic-avatar` hosts.
-- [x] Key generated post-frame CSS to the transformer class instead of username attributes and `:has(img.avatar)`.
-- [x] Preserve entitlement filtering, stylesheet batching and live stylesheet refresh behavior.
-- [x] Add focused QUnit and Ruby coverage for transformer/CSS mapping.
+## Active compatibility cleanup
+- [x] Confirm no active caller imports the transitional `duc-i18n` compatibility helper.
+- [x] Remove `assets/javascripts/discourse/lib/duc-i18n.js`.
 - [ ] Official exact-head Discourse Plugin CI GREEN.
 - [ ] Merge.
 
-Next after merge: remove the now-unused client i18n compatibility helper, then continue backend route/Zeitwerk/service-object modernization and the remaining generated nameplate selector audit.
+Next after merge: continue backend route/Zeitwerk/service-object modernization in small behavior-preserving phases, then separately audit the remaining generated nameplate selector path.

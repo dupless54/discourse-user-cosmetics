@@ -5,7 +5,7 @@ import { on } from "@ember/modifier";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/components/d-button";
-import { t } from "../../lib/duc-i18n";
+import { i18n as t } from "discourse-i18n";
 
 // One of the (at most) 4 slots a "profile_effect" item can have, matching
 // Discord's layer schema: { anchor: "top"|"bottom", order: "front"|"back" }.
