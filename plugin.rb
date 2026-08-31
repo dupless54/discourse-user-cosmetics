@@ -49,12 +49,6 @@ after_initialize do
     DiscourseUserCosmetics::UserReferenceCleanup.cleanup!(user_id: user&.id)
   end
 
-  on(:user_updated) do |user, changed_fields|
-    next if Array(changed_fields).map(&:to_s).exclude?("username")
-
-    DiscourseUserCosmetics::Presenter.invalidate_username_change!(user_id: user&.id)
-  end
-
   %i[user_card user current_user].each do |serializer_name|
     add_to_serializer(serializer_name, :cosmetics) { ::DiscourseUserCosmetics::Presenter.summary_for(object) }
   end
