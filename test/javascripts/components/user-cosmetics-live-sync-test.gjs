@@ -157,7 +157,7 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     assert.notStrictEqual(nameplateBackground(), "");
   });
 
-  test("reconciles stale cosmetics and shared CSS on a normal page bootstrap", async function (assert) {
+  test("reconciles stale cosmetics without re-requesting shared CSS on normal page bootstrap", async function (assert) {
     await render(
       <template>
         <section class="user-main">
@@ -198,10 +198,10 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
       this.cardUrls[0].includes("duc_refresh="),
       "bootstrap bypasses stale card caches"
     );
-    const refreshedLink = document.getElementById(FRAMES_CSS_LINK_ID);
-    assert.true(
-      new URL(refreshedLink.href).searchParams.has("duc_refresh"),
-      "bootstrap cache-busts the shared cosmetics stylesheet"
+    const stylesheetLink = document.getElementById(FRAMES_CSS_LINK_ID);
+    assert.false(
+      new URL(stylesheetLink.href).searchParams.has("duc_refresh"),
+      "bootstrap keeps the already requested shared stylesheet URL"
     );
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
     assert.notStrictEqual(nameplateBackground(), initialBackground);
@@ -273,6 +273,14 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     );
 
     const initialBackground = nameplateBackground();
+
+    document.getElementById(FRAMES_CSS_LINK_ID)?.remove();
+    const link = document.createElement("link");
+    link.id = FRAMES_CSS_LINK_ID;
+    link.rel = "stylesheet";
+    link.href = "/user-cosmetics/frames.css";
+    document.head.appendChild(link);
+
     const documentObject = new EventTarget();
     documentObject.visibilityState = "visible";
     const windowObject = new EventTarget();
@@ -296,6 +304,12 @@ module("Component | UserCosmeticsLiveSync", function (hooks) {
     assert.true(
       this.cardUrls[0].includes("duc_refresh="),
       "resume bypasses a stale mobile card cache"
+    );
+    assert.true(
+      new URL(document.getElementById(FRAMES_CSS_LINK_ID).href).searchParams.has(
+        "duc_refresh"
+      ),
+      "resume still cache-busts the shared cosmetics stylesheet"
     );
     assert.strictEqual(this.user.cosmetics.nameplate.id, 2);
     assert.notStrictEqual(nameplateBackground(), initialBackground);
