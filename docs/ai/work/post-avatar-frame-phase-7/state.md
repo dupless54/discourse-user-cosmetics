@@ -26,12 +26,20 @@ This avoids:
 - expanding topic-stream JSON payloads
 - username-derived selectors
 - `:has(img.avatar)` dependency for avatar frames
+- stylesheet cache churn when an avatar-frame-only user changes username
 
 ## Phase scope
 - Register the native `post-avatar-class` transformer.
 - Generate post avatar-frame CSS against the numeric transformer class.
 - Remove the old username/`:has(img.avatar)` avatar-frame selectors and unused generic avatar-frame target rules.
+- Narrow username-change stylesheet invalidation to the remaining username-backed nameplate presentation.
 - Preserve nameplate selectors unchanged in this phase.
+
+## CI correction
+The first exact-head run exposed three request specs that still asserted usernames for avatar-frame CSS. Production output was already correctly keyed by `duc-avatar-frame-user-<id>`; the stale expectations were updated. Coverage now distinguishes:
+- avatar-frame feature/group invalidation by stable numeric class,
+- nameplate username-change invalidation,
+- no stylesheet ETag churn for avatar-frame-only username changes.
 
 ## Invariants
 - No entitlement, selection, serializer payload, route/API/schema, upload, grant/revoke, Store integration, or authorization behavior changes.
