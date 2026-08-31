@@ -23,6 +23,22 @@ end
 require_relative "lib/discourse_user_cosmetics/engine"
 
 after_initialize do
+  # Library files are still loaded explicitly in this phase because the
+  # integration contract is split across files that reopen Integration.
+  # App models/controllers now load through the isolated Rails engine.
+  require_relative "lib/discourse_user_cosmetics/asset_policy"
+  require_relative "lib/discourse_user_cosmetics/entitlement_resolver"
+  require_relative "lib/discourse_user_cosmetics/presenter"
+  require_relative "lib/discourse_user_cosmetics/selection_service"
+  require_relative "lib/discourse_user_cosmetics/loadout_service"
+  require_relative "lib/discourse_user_cosmetics/showcase_service"
+  require_relative "lib/discourse_user_cosmetics/integration"
+  require_relative "lib/discourse_user_cosmetics/integration_contract"
+  require_relative "lib/discourse_user_cosmetics/showcase_integration"
+  require_relative "lib/discourse_user_cosmetics/user_reference_cleanup"
+  require_relative "lib/discourse_user_cosmetics/css_builder"
+  require_relative "lib/discourse_user_cosmetics/seeder"
+
   # --- admin nav entry (Admin > Plugins > User Cosmetics) -----------------
   add_admin_route "discourse_user_cosmetics.title", "user-cosmetics"
 
