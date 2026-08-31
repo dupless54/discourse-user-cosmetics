@@ -12,7 +12,14 @@ module ::DiscourseUserCosmetics
     # authenticated responses are never stored by browser/shared caches.
     def frames
       presenter = DiscourseUserCosmetics::Presenter
-      state = [presenter.cache_version, presenter.stylesheet_version, presenter.feature_gate_signature].join("/")
+      css_builder = DiscourseUserCosmetics::CssBuilder
+      state =
+        [
+          presenter.cache_version,
+          presenter.stylesheet_version,
+          css_builder.stylesheet_schema_version,
+          presenter.feature_gate_signature,
+        ].join("/")
 
       response.headers["Content-Type"] = "text/css; charset=utf-8"
 
