@@ -73,6 +73,29 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     expect(response.body).not_to include("duc-avatar-frame-user-#{user.id}")
   end
 
+  it "rebuilds generated CSS when the stylesheet schema changes" do
+    schema_token = SecureRandom.hex(8)
+    css_builder = DiscourseUserCosmetics::CssBuilder
+
+    allow(css_builder).to receive(:stylesheet_schema_version).and_return("#{schema_token}-a")
+    allow(css_builder).to receive(:build_frames_css).and_return("/* schema-a */")
+
+    get "/user-cosmetics/frames.css"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to eq("/* schema-a */")
+    first_etag = response.headers.fetch("ETag")
+
+    allow(css_builder).to receive(:stylesheet_schema_version).and_return("#{schema_token}-b")
+    allow(css_builder).to receive(:build_frames_css).and_return("/* schema-b */")
+
+    get "/user-cosmetics/frames.css", headers: { "HTTP_IF_NONE_MATCH" => first_etag }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.headers.fetch("ETag")).not_to eq(first_etag)
+    expect(response.body).to eq("/* schema-b */")
+  end
+
   it "rebuilds ambient nameplate CSS after the selected user's username changes" do
     item =
       DiscourseUserCosmetics::Item.create!(
