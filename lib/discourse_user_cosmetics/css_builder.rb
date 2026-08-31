@@ -2,6 +2,15 @@
 
 module ::DiscourseUserCosmetics
   class CssBuilder
+    # Increment whenever the generated selector/output shape changes. The value
+    # participates in frames.css cache/ETag identity so a plugin deploy cannot
+    # keep serving pre-change ambient avatar/nameplate CSS from server caches.
+    STYLESHEET_SCHEMA_VERSION = 1
+
+    def self.stylesheet_schema_version
+      STYLESHEET_SCHEMA_VERSION
+    end
+
     def self.build_frames_css
       css = +"/* discourse-user-cosmetics: generated styles */\n\n"
 
