@@ -3,7 +3,7 @@
 RSpec.describe DiscourseUserCosmetics::CatalogItemSerializer do
   subject(:serialized) { described_class.new(item, root: false, owned: owned).as_json }
 
-  fab!(:upload) { Fabricate(:upload) }
+  fab!(:upload)
   fab!(:item) do
     DiscourseUserCosmetics::Item.create!(
       kind: "avatar_frame",
