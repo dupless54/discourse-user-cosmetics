@@ -27,15 +27,18 @@
 - [x] Obsolete `assets/javascripts/discourse/lib/duc-i18n.js` removed after exact-head CI GREEN and merged.
 - [x] Plugin routes moved to an isolated Rails engine while preserving public/admin route contracts.
 - [x] App models/controllers now load through the engine; Phase 9 exact-head Typecheck/QUnit/RSpec/route/boot/Zeitwerk CI GREEN and merged.
+- [x] Split integration extensions normalized to Zeitwerk-compatible modules while preserving the public `Integration` contract/constants.
+- [x] Plugin `lib/` now autoloads through the isolated engine; manual library requires removed.
+- [x] Phase 10 exact-head Typecheck/QUnit/RSpec/lint/boot/Zeitwerk CI GREEN and merged.
 
-## Active full library Zeitwerk phase
-- [x] Convert `integration_contract.rb` to the matching `DiscourseUserCosmetics::IntegrationContract` module.
-- [x] Convert `showcase_integration.rb` to the matching `DiscourseUserCosmetics::ShowcaseIntegration` module.
-- [x] Compose both modules onto the public `DiscourseUserCosmetics::Integration` class without changing method semantics.
-- [x] Preserve `Integration::CONTRACT_VERSION` and `Integration::CONTRACT_CAPABILITY_METHODS` for compatibility.
-- [x] Add `lib/` to the engine autoload path and remove manual library requires from `plugin.rb`.
-- [x] Add focused RSpec coverage for the preserved public integration constants.
-- [ ] Official exact-head Discourse Plugin CI GREEN, including Zeitwerk eager-load/reload, plugin boot, integration RSpec, and existing frontend/backend suites.
+## Active native nameplate transformer phase
+- [x] Verify current Discourse `poster-name-class` and `mentions-class` value transformers in core.
+- [x] Add stable numeric user-id class transformers for post author names and cooked mentions.
+- [x] Replace generated username/data-user-card/`:has()` nameplate selectors with transformer-backed classes.
+- [x] Preserve existing entitled-selection filtering and image/gradient presentation semantics.
+- [x] Add focused QUnit unit coverage for both class transformers.
+- [x] Add RSpec coverage proving generated nameplate CSS no longer depends on username DOM selectors.
+- [ ] Official exact-head Discourse Plugin CI GREEN, including Typecheck, lint, QUnit, RSpec, build, annotations, and boot/Zeitwerk checks.
 - [ ] Merge.
 
-Next after merge: continue thin-controller/service-object modernization in bounded phases or complete the remaining generated nameplate selector audit, keeping public integration contracts and server-authoritative ownership/selection behavior unchanged.
+Next after merge: continue thin-controller/service-object modernization in bounded phases, keeping public integration contracts and server-authoritative ownership/selection behavior unchanged.
