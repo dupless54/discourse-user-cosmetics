@@ -35,9 +35,10 @@
 - [x] Verify current Discourse `poster-name-class` and `mentions-class` value transformers in core.
 - [x] Add stable numeric user-id class transformers for post author names and cooked mentions.
 - [x] Replace generated username/data-user-card/`:has()` nameplate selectors with transformer-backed classes.
+- [x] Remove obsolete username-change stylesheet invalidation now that both generated CSS kinds use stable numeric identities.
 - [x] Preserve existing entitled-selection filtering and image/gradient presentation semantics.
 - [x] Add focused QUnit unit coverage for both class transformers.
-- [x] Add RSpec coverage proving generated nameplate CSS no longer depends on username DOM selectors.
+- [x] Add RSpec coverage proving generated nameplate CSS no longer depends on username DOM selectors or rename-driven cache churn.
 - [ ] Official exact-head Discourse Plugin CI GREEN, including Typecheck, lint, QUnit, RSpec, build, annotations, and boot/Zeitwerk checks.
 - [ ] Merge.
 
