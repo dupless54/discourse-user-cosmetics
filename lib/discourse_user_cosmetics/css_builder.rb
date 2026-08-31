@@ -24,14 +24,23 @@ module ::DiscourseUserCosmetics
           image = item.resolved_image_url
           next if image.blank?
 
+          uname = escape_css_string(user.username_lower)
           image_css = escape_css_url(image)
           post_avatar_class = "duc-avatar-frame-user-#{user.id}"
+          ambient_avatar_selector =
+            %([data-user-card="#{uname}" i]:has(img.avatar):not(.main-avatar))
 
           # Current Discourse exposes `post-avatar-class` as a value transformer.
-          # The client adds this stable numeric user-id class to `.topic-avatar`,
-          # so generated CSS no longer depends on username attributes or `:has()`.
+          # Keep the stable numeric post selector as the authoritative post path.
           css << %(.topic-avatar.#{post_avatar_class} .post-avatar { position: relative !important; display: inline-block !important; }\n)
           css << %(.topic-avatar.#{post_avatar_class} .post-avatar::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
+
+          # Topic-list posters and other ambient DUserLink avatar surfaces do
+          # not expose the post-avatar transformer. Restore the compatibility
+          # selector there while excluding `.main-avatar`, which is the native
+          # post DUserAvatar link, so post frames never render twice.
+          css << %(#{ambient_avatar_selector} { position: relative !important; display: inline-block !important; }\n)
+          css << %(#{ambient_avatar_selector}::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
         end
       end
 
@@ -48,8 +57,11 @@ module ::DiscourseUserCosmetics
           item = selection.nameplate_item
           next unless user && item
 
+          uname = escape_css_string(user.username_lower)
           post_nameplate_class = "duc-nameplate-post-user-#{user.id}"
           mention_nameplate_class = "duc-nameplate-mention-user-#{user.id}"
+          ambient_nameplate_selector =
+            %([data-user-card="#{uname}" i]:not(:has(img.avatar)):not(.mention):not(.#{post_nameplate_class} *))
 
           bg_css = ""
           if item.resolved_image_url.present?
@@ -60,11 +72,12 @@ module ::DiscourseUserCosmetics
             next
           end
 
-          # Current Discourse exposes `poster-name-class` for post author names
-          # and `mentions-class` for cooked mentions. The client adds stable
-          # numeric user-id classes, avoiding broad username selectors and
-          # DOM-shape probing such as `:has(img.avatar)`.
-          css << %(.#{post_nameplate_class}, a.mention.#{mention_nameplate_class} {\n)
+          # Native post and cooked-mention transformers remain authoritative.
+          # The username-keyed compatibility selector restores ambient DUserLink
+          # names on discovery/sidebar/custom surfaces which have no equivalent
+          # user-id transformer. It excludes post-name descendants and mentions
+          # so those native paths never receive duplicate pseudo-elements.
+          css << %(.#{post_nameplate_class}, a.mention.#{mention_nameplate_class}, #{ambient_nameplate_selector} {\n)
           css << "  position: relative !important;\n"
           css << "  isolation: isolate; /* Efektin postun arkasına düşmesini %100 engeller */\n"
           css << "  padding: 2px 6px;\n"
@@ -75,13 +88,14 @@ module ::DiscourseUserCosmetics
 
           # The post transformer class is applied to the native `.names > span`
           # wrapper. Core colors its descendant user link explicitly, so mirror
-          # the legacy direct-link presentation without returning to username selectors.
+          # the legacy direct-link presentation without returning to a post
+          # username selector.
           css << %(.#{post_nameplate_class} > a {\n)
           css << "  color: #ffffff !important;\n"
           css << "  text-shadow: 0px 1px 2px #000000, 0px 0px 4px #000000, 0px 0px 8px #000000 !important;\n"
           css << "}\n"
 
-          css << %(.#{post_nameplate_class}::before, a.mention.#{mention_nameplate_class}::before {\n)
+          css << %(.#{post_nameplate_class}::before, a.mention.#{mention_nameplate_class}::before, #{ambient_nameplate_selector}::before {\n)
           css << "  content: \"\";\n"
           css << "  position: absolute;\n"
           css << "  inset: 0;\n"
