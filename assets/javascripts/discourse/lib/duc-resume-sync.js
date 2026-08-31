@@ -64,7 +64,7 @@ export function installCosmeticsResumeSync({
   let lastSyncAt = 0;
   let pendingSync = null;
 
-  const refresh = () => {
+  const refresh = ({ refreshStylesheet = true } = {}) => {
     const now = Date.now();
     if (pendingSync || now - lastSyncAt < MIN_RESUME_SYNC_INTERVAL_MS) {
       return pendingSync;
@@ -74,6 +74,7 @@ export function installCosmeticsResumeSync({
     pendingSync = reconcileCurrentUserCosmetics({
       currentUser,
       appEvents,
+      refreshStylesheet,
     }).finally(() => {
       pendingSync = null;
     });
@@ -101,12 +102,13 @@ export function installCosmeticsResumeSync({
   documentObject.addEventListener("visibilitychange", onVisibilityChange);
   windowObject.addEventListener("pageshow", onPageShow);
 
-  // A full reload/new browser session can start from stale browser/CDN CSS and
-  // stale preloaded user presentation data without ever producing a MessageBus
-  // event. Reconcile once during normal bootstrap so server truth wins before a
-  // tab visibility change is required to repair the page.
+  // A normal bootstrap has just inserted /user-cosmetics/frames.css, whose
+  // controller already performs conditional revalidation. Reconcile the user
+  // payload once, but do not immediately mutate the link href and force a
+  // second stylesheet request. Real browser/PWA resumes still cache-bust both
+  // presentation sources through the normal refresh path above.
   if (syncOnInstall) {
-    refresh();
+    refresh({ refreshStylesheet: false });
   }
 
   return () => {
