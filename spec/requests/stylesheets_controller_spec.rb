@@ -73,7 +73,7 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     expect(response.body).not_to include("duc-avatar-frame-user-#{user.id}")
   end
 
-  it "does not invalidate numeric nameplate CSS when only the username changes" do
+  it "rebuilds ambient nameplate CSS after the selected user's username changes" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "nameplate",
@@ -90,9 +90,11 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     get "/user-cosmetics/frames.css"
 
     expect(response).to have_http_status(:ok)
+    old_username = user.username_lower
     first_etag = response.headers.fetch("ETag")
     expect(response.body).to include("duc-nameplate-post-user-#{user.id}")
     expect(response.body).to include("duc-nameplate-mention-user-#{user.id}")
+    expect(response.body).to include(%([data-user-card="#{old_username}" i]))
 
     new_username = "renamed#{user.id}"
     user.update_columns(username: new_username, username_lower: new_username.downcase)
@@ -100,15 +102,18 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
 
     get "/user-cosmetics/frames.css", headers: { "HTTP_IF_NONE_MATCH" => first_etag }
 
-    expect(response).to have_http_status(:not_modified)
-    expect(response.headers.fetch("ETag")).to eq(first_etag)
+    expect(response).to have_http_status(:ok)
+    expect(response.headers.fetch("ETag")).not_to eq(first_etag)
+    expect(response.body).to include("duc-nameplate-post-user-#{user.id}")
+    expect(response.body).to include(%([data-user-card="#{new_username.downcase}" i]))
+    expect(response.body).not_to include(%([data-user-card="#{old_username}" i]))
   end
 
-  it "does not invalidate numeric avatar-frame CSS when only the username changes" do
+  it "rebuilds ambient avatar-frame CSS after the selected user's username changes" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "avatar_frame",
-        name: "Stable frame",
+        name: "Rename frame",
         image_url: "https://example.com/stable-frame.webp",
       )
     DiscourseUserCosmetics::SelectionService.select!(
@@ -120,8 +125,10 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
     get "/user-cosmetics/frames.css"
 
     expect(response).to have_http_status(:ok)
+    old_username = user.username_lower
     first_etag = response.headers.fetch("ETag")
     expect(response.body).to include("duc-avatar-frame-user-#{user.id}")
+    expect(response.body).to include(%([data-user-card="#{old_username}" i]))
 
     new_username = "stable#{user.id}"
     user.update_columns(username: new_username, username_lower: new_username.downcase)
@@ -129,11 +136,14 @@ RSpec.describe DiscourseUserCosmetics::StylesheetsController, type: :request do
 
     get "/user-cosmetics/frames.css", headers: { "HTTP_IF_NONE_MATCH" => first_etag }
 
-    expect(response).to have_http_status(:not_modified)
-    expect(response.headers.fetch("ETag")).to eq(first_etag)
+    expect(response).to have_http_status(:ok)
+    expect(response.headers.fetch("ETag")).not_to eq(first_etag)
+    expect(response.body).to include("duc-avatar-frame-user-#{user.id}")
+    expect(response.body).to include(%([data-user-card="#{new_username.downcase}" i]))
+    expect(response.body).not_to include(%([data-user-card="#{old_username}" i]))
   end
 
-  it "does not invalidate numeric CSS for unrelated user updates" do
+  it "does not invalidate cosmetic CSS for unrelated user updates" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "nameplate",
