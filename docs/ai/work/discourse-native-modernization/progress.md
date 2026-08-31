@@ -12,14 +12,17 @@
 - [x] Nameplate presentation is scoped to the mounted Discourse user-card/profile surface.
 - [x] Nameplate global `<style>` injection removed with focused teardown/live-sync QUnit coverage.
 - [x] Nameplate exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
+- [x] Client/admin callers use the current `discourse-i18n` entry point directly.
+- [x] Current-user header avatar frame uses the supported `user-dropdown-button__after` outlet instead of a global style injection.
+- [x] Header-frame exact-head Typecheck/QUnit/RSpec/lint CI GREEN and merged.
 
-## Active client i18n cleanup
-- [x] Preferences navigation imports `i18n` directly from `discourse-i18n`.
-- [x] Admin delete modal imports `i18n` directly from `discourse-i18n`.
-- [x] Admin list page imports `i18n` directly from `discourse-i18n`.
-- [x] Remove the obsolete `globalThis.I18n` compatibility fallback; the temporary alias delegates to current `discourse-i18n`.
-- [ ] Move the remaining large admin form from the transitional alias to a direct `discourse-i18n` import.
+## Active profile/user-card avatar-frame modernization
+- [x] Render user-card avatar frames through the core `user-card-avatar-flair` outlet.
+- [x] Render profile avatar frames through the core `user-profile-avatar-img-wrapper` outlet.
+- [x] Scope frame CSS custom properties/classes to mounted Discourse avatar hosts with teardown cleanup.
+- [x] Remove generated user-card/profile avatar selectors from `frames.css`; keep post presentation unchanged for now.
+- [x] Add focused QUnit and Ruby coverage for the new surface boundary.
 - [ ] Official exact-head Discourse Plugin CI GREEN.
 - [ ] Merge.
 
-Next after merge: finish the last direct-i18n caller, audit remaining post/avatar-frame presentation, then continue backend route/Zeitwerk/service-object modernization.
+Next after merge: audit the core `post-avatar` outlet and decide the post cosmetics payload/cache strategy before removing the remaining generated post-frame selectors. Then continue backend route/Zeitwerk/service-object modernization.

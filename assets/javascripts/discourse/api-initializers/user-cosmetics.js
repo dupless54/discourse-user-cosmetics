@@ -5,6 +5,7 @@ import UserCosmeticsCardMessage from "../components/user-cosmetics-card-message"
 import UserCosmeticsHeaderFrame from "../components/user-cosmetics-header-frame";
 import UserCosmeticsLiveSync from "../components/user-cosmetics-live-sync";
 import UserCosmeticsProfileEffect from "../components/user-cosmetics-profile-effect";
+import UserCosmeticsSurfaceAvatarFrame from "../components/user-cosmetics-surface-avatar-frame";
 import {
   FRAMES_CSS_LINK_ID,
   refreshCosmeticsStylesheet,
@@ -69,6 +70,14 @@ export default apiInitializer("1.8.0", (api) => {
 
   if (typeof api.renderInOutlet === "function") {
     api.renderInOutlet("user-dropdown-button__after", UserCosmeticsHeaderFrame);
+    api.renderInOutlet(
+      "user-card-avatar-flair",
+      UserCosmeticsSurfaceAvatarFrame
+    );
+    api.renderInOutlet(
+      "user-profile-avatar-img-wrapper",
+      UserCosmeticsSurfaceAvatarFrame
+    );
     api.renderInOutlet("user-card-metadata", UserCosmeticsLiveSync);
     api.renderInOutlet("user-profile-primary", UserCosmeticsLiveSync);
     api.renderInOutlet("user-card-post-names", UserCosmeticsNameplate);

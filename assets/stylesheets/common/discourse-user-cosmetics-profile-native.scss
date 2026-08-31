@@ -3,6 +3,7 @@
 // global user-card/profile/header override remains after teardown.
 
 .duc-current-user-frame-anchor,
+.duc-surface-avatar-frame-anchor,
 .duc-nameplate-anchor {
   display: none;
 }
@@ -17,6 +18,23 @@
     inset: var(--duc-current-user-frame-inset, -14%);
     z-index: 2;
     background-image: var(--duc-current-user-frame-image);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+  }
+}
+
+.duc-surface-avatar-frame {
+  position: relative;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: var(--duc-surface-avatar-frame-inset, -14%);
+    z-index: 2;
+    background-image: var(--duc-surface-avatar-frame-image);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;

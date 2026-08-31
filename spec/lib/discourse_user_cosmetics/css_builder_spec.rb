@@ -70,4 +70,26 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).to include(direct_user.username_lower)
     expect(css).not_to include(stale_user.username_lower)
   end
+
+  it "keeps generated avatar-frame selectors limited to post surfaces" do
+    item =
+      DiscourseUserCosmetics::Item.create!(
+        kind: "avatar_frame",
+        name: "Native surface frame",
+        image_url: "https://example.com/native-surface-frame.webp",
+      )
+    user = Fabricate(:user)
+
+    DiscourseUserCosmetics::SelectionService.select!(
+      user: user,
+      kind: "avatar_frame",
+      item_id: item.id,
+    )
+
+    css = described_class.build_frames_css
+
+    expect(css).to include(%([data-user-card="#{user.username_lower}" i]:has(img.avatar)))
+    expect(css).not_to include("#user-card .user-card-avatar")
+    expect(css).not_to include(".user-profile-avatar:has")
+  end
 end

@@ -38,17 +38,10 @@ module ::DiscourseUserCosmetics
           uname = escape_css_string(user.username_lower)
           image_css = escape_css_url(image)
 
-          # Konular ve Mesajlar
+          # Post avatars remain on the shared generated stylesheet until the
+          # post payload/performance path is migrated in its own audited phase.
           css << %([data-user-card="#{uname}" i]:has(img.avatar) { position: relative !important; display: inline-block !important; }\n)
           css << %([data-user-card="#{uname}" i]:has(img.avatar)::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
-
-          # Kart (Açılır Pencere)
-          css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i] { position: relative !important; display: inline-block !important; }\n)
-          css << %(#user-card .user-card-avatar a[href^="/u/#{uname}" i]::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
-
-          # Profil Sayfası
-          css << %(.user-profile-avatar:has(img.avatar[src*="/#{uname}/" i]), .user-profile-avatar:has(img.avatar[title="#{uname}" i]) { position: relative !important; display: inline-block !important; }\n)
-          css << %(.user-profile-avatar:has(img.avatar[src*="/#{uname}/" i])::after, .user-profile-avatar:has(img.avatar[title="#{uname}" i])::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n\n)
         end
       end
 
