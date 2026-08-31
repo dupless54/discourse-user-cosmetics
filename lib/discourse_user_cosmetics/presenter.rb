@@ -93,6 +93,25 @@ module ::DiscourseUserCosmetics
       bump_stylesheet_version!
     end
 
+    # Native post selectors are numeric, but discovery/sidebar/other ambient
+    # DUserLink compatibility selectors are keyed by username because those
+    # surfaces do not expose an equivalent stable user-id transformer. A rename
+    # therefore needs to rotate only the shared stylesheet identity when the
+    # user has a CSS-backed selection.
+    def self.invalidate_username_change!(user_id:)
+      return if user_id.blank?
+
+      selection = DiscourseUserCosmetics::UserSelection.find_by(user_id: user_id)
+      return unless selection
+
+      has_stylesheet_selection =
+        STYLESHEET_KINDS.any? do |kind|
+          selection.public_send(DiscourseUserCosmetics::UserSelection.field_for(kind)).present?
+        end
+
+      bump_stylesheet_version! if has_stylesheet_selection
+    end
+
     def self.feature_gate_signature
       DiscourseUserCosmetics::Item::KINDS.map do |kind|
         DiscourseUserCosmetics::Item.kind_enabled?(kind) ? "1" : "0"

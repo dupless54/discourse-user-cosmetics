@@ -99,7 +99,10 @@ export default apiInitializer("1.8.0", (api) => {
       "user-card-avatar-flair",
       UserCosmeticsSurfaceAvatarFrame
     );
-    api.renderInOutlet(
+    // `user-profile-avatar-img-wrapper` is a wrapper outlet whose default block
+    // is the core profile avatar. Rendering *in* it replaces that avatar, so
+    // append the cosmetic anchor after the wrapped content instead.
+    api.renderAfterWrapperOutlet(
       "user-profile-avatar-img-wrapper",
       UserCosmeticsSurfaceAvatarFrame
     );

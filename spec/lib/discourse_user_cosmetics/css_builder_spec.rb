@@ -71,11 +71,11 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).not_to include("duc-avatar-frame-user-#{stale_user.id}")
   end
 
-  it "keys post avatar frames to the native transformer class without username selectors" do
+  it "keeps the native post frame and restores ambient DUserLink avatar frames" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "avatar_frame",
-        name: "Native post frame",
+        name: "Native and ambient frame",
         image_url: "https://example.com/native-post-frame.webp",
       )
     user = Fabricate(:user)
@@ -91,17 +91,19 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).to include(
       ".topic-avatar.duc-avatar-frame-user-#{user.id} .post-avatar::after",
     )
-    expect(css).not_to include(%([data-user-card="#{user.username_lower}" i]:has(img.avatar)))
+    expect(css).to include(
+      %([data-user-card="#{user.username_lower}" i]:has(img.avatar):not(.main-avatar)::after),
+    )
     expect(css).not_to include(".duc-avatar-frame-target")
     expect(css).not_to include("#user-card .user-card-avatar")
     expect(css).not_to include(".user-profile-avatar:has")
   end
 
-  it "keys post and mention nameplates to native transformer classes without username DOM selectors" do
+  it "keeps native post and mention nameplates and restores ambient DUserLink names" do
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "nameplate",
-        name: "Native nameplate",
+        name: "Native and ambient nameplate",
         image_url: "https://example.com/native-nameplate.webp",
       )
     user = Fabricate(:user)
@@ -117,8 +119,9 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).to include(".duc-nameplate-post-user-#{user.id}")
     expect(css).to include(".duc-nameplate-post-user-#{user.id} > a")
     expect(css).to include("a.mention.duc-nameplate-mention-user-#{user.id}")
-    expect(css).not_to include(%([data-user-card="#{user.username_lower}" i]))
+    expect(css).to include(
+      %([data-user-card="#{user.username_lower}" i]:not(:has(img.avatar)):not(.mention):not(.duc-nameplate-post-user-#{user.id} *)),
+    )
     expect(css).not_to include(%(href^="/u/#{user.username_lower}"))
-    expect(css).not_to include(":has(")
   end
 end
