@@ -71,7 +71,8 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     expect(css).not_to include("duc-avatar-frame-user-#{stale_user.id}")
   end
 
-  it "keeps the native post frame and restores ambient DUserLink avatar frames" do
+  it "keeps the native post frame and centers ambient DUserLink avatar frames on avatar geometry" do
+    SiteSetting.discourse_user_cosmetics_frame_overhang_percent = 14
     item =
       DiscourseUserCosmetics::Item.create!(
         kind: "avatar_frame",
@@ -87,13 +88,20 @@ RSpec.describe DiscourseUserCosmetics::CssBuilder do
     )
 
     css = described_class.build_frames_css
+    ambient_selector =
+      %([data-user-card="#{user.username_lower}" i]:has(img.avatar):not(.main-avatar))
 
     expect(css).to include(
       ".topic-avatar.duc-avatar-frame-user-#{user.id} .post-avatar::after",
     )
-    expect(css).to include(
-      %([data-user-card="#{user.username_lower}" i]:has(img.avatar):not(.main-avatar)::after),
-    )
+    expect(css).to include("inset: -14%;")
+    expect(css).to include("#{ambient_selector}::after")
+    expect(css).to include("top: 0;")
+    expect(css).to include("left: 0;")
+    expect(css).to include("width: 100%;")
+    expect(css).to include("aspect-ratio: 1;")
+    expect(css).to include("transform: scale(1.28);")
+    expect(css).to include("transform-origin: center;")
     expect(css).not_to include(".duc-avatar-frame-target")
     expect(css).not_to include("#user-card .user-card-avatar")
     expect(css).not_to include(".user-profile-avatar:has")

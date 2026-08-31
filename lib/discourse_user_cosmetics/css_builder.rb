@@ -5,7 +5,7 @@ module ::DiscourseUserCosmetics
     # Increment whenever the generated selector/output shape changes. The value
     # participates in frames.css cache/ETag identity so a plugin deploy cannot
     # keep serving pre-change ambient avatar/nameplate CSS from server caches.
-    STYLESHEET_SCHEMA_VERSION = 1
+    STYLESHEET_SCHEMA_VERSION = 2
 
     def self.stylesheet_schema_version
       STYLESHEET_SCHEMA_VERSION
@@ -20,6 +20,7 @@ module ::DiscourseUserCosmetics
       if SiteSetting.discourse_user_cosmetics_avatar_frames_enabled
         overhang = SiteSetting.discourse_user_cosmetics_frame_overhang_percent.to_i.clamp(0, 60)
         inset_value = "-#{overhang}%"
+        ambient_scale = (100 + (overhang * 2)) / 100.0
 
         css << "/* --- Avatar Frames --- */\n"
 
@@ -45,11 +46,13 @@ module ::DiscourseUserCosmetics
           css << %(.topic-avatar.#{post_avatar_class} .post-avatar::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
 
           # Topic-list posters and other ambient DUserLink avatar surfaces do
-          # not expose the post-avatar transformer. Restore the compatibility
-          # selector there while excluding `.main-avatar`, which is the native
-          # post DUserAvatar link, so post frames never render twice.
+          # not expose the post-avatar transformer. Their inline link box can be
+          # a few pixels taller than the square avatar because of baseline/line
+          # box metrics. Build the decoration from the link width as a square and
+          # scale it around that square's center so the frame stays locked to the
+          # avatar instead of the surrounding line box.
           css << %(#{ambient_avatar_selector} { position: relative !important; display: inline-block !important; }\n)
-          css << %(#{ambient_avatar_selector}::after {\n  content: \"\";\n  position: absolute;\n  inset: #{inset_value};\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
+          css << %(#{ambient_avatar_selector}::after {\n  content: \"\";\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  aspect-ratio: 1;\n  transform: scale(#{ambient_scale});\n  transform-origin: center;\n  background-image: url(\"#{image_css}\");\n  background-repeat: no-repeat;\n  background-position: center;\n  background-size: contain;\n  pointer-events: none;\n  z-index: 2;\n}\n)
         end
       end
 
