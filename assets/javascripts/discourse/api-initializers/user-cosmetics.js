@@ -18,6 +18,10 @@ import {
   fetchLatestCosmetics,
   matchesCosmeticsChange,
 } from "../lib/duc-live-cosmetics";
+import {
+  mentionNameplateClassTransformer,
+  postNameplateClassTransformer,
+} from "../lib/duc-nameplate-class";
 import { postAvatarFrameClassTransformer } from "../lib/duc-post-avatar-frame";
 import { installCosmeticsResumeSync } from "../lib/duc-resume-sync";
 
@@ -31,6 +35,18 @@ export default apiInitializer("1.8.0", (api) => {
   api.registerValueTransformer(
     "post-avatar-class",
     postAvatarFrameClassTransformer
+  );
+
+  // Current post metadata and cooked-mention rendering both expose supported
+  // class transformers. Stable numeric user-id classes let generated nameplate
+  // CSS avoid broad username/data-user-card selectors and :has() DOM probing.
+  api.registerValueTransformer(
+    "poster-name-class",
+    postNameplateClassTransformer
+  );
+  api.registerValueTransformer(
+    "mentions-class",
+    mentionNameplateClassTransformer
   );
 
   // Server-generated post/nameplate presentation remains a shared stylesheet.
