@@ -30,16 +30,19 @@
 - [x] Split integration extensions normalized to Zeitwerk-compatible modules while preserving the public `Integration` contract/constants.
 - [x] Plugin `lib/` now autoloads through the isolated engine; manual library requires removed.
 - [x] Phase 10 exact-head Typecheck/QUnit/RSpec/lint/boot/Zeitwerk CI GREEN and merged.
+- [x] Post and cooked-mention nameplates now use supported `poster-name-class` / `mentions-class` transformers with stable numeric user-id selectors.
+- [x] Username/data-user-card/`:has()` generated nameplate selectors and rename-driven stylesheet invalidation removed.
+- [x] Phase 11 exact-head Typecheck/QUnit/RSpec/lint/boot/Zeitwerk CI GREEN and merged.
 
-## Active native nameplate transformer phase
-- [x] Verify current Discourse `poster-name-class` and `mentions-class` value transformers in core.
-- [x] Add stable numeric user-id class transformers for post author names and cooked mentions.
-- [x] Replace generated username/data-user-card/`:has()` nameplate selectors with transformer-backed classes.
-- [x] Remove obsolete username-change stylesheet invalidation now that both generated CSS kinds use stable numeric identities.
-- [x] Preserve existing entitled-selection filtering and image/gradient presentation semantics.
-- [x] Add focused QUnit unit coverage for both class transformers.
-- [x] Add RSpec coverage proving generated nameplate CSS no longer depends on username DOM selectors or rename-driven cache churn.
-- [ ] Official exact-head Discourse Plugin CI GREEN, including Typecheck, lint, QUnit, RSpec, build, annotations, and boot/Zeitwerk checks.
+## Active explicit catalog serializer phase
+- [x] Verify current Discourse guidance for preventing accidental ActiveRecord serialization and current `ApplicationSerializer` option patterns.
+- [x] Add `DiscourseUserCosmetics::CatalogItemSerializer < ApplicationSerializer` with an explicit user-facing field allowlist.
+- [x] Pass the precomputed entitlement decision through serializer options instead of embedding authorization logic in serialization.
+- [x] Preserve profile-effect representative-image behavior using the already preloaded effect layers.
+- [x] Remove the controller's inline catalog-item serialization helper.
+- [x] Add focused serializer specs for field boundaries, entitlement output, and profile-effect preview image behavior.
+- [ ] Existing request contract/query-count specs GREEN.
+- [ ] Official exact-head Discourse Plugin CI GREEN, including Typecheck, lint, RSpec, QUnit/build, annotations, and boot/Zeitwerk checks.
 - [ ] Merge.
 
-Next after merge: continue thin-controller/service-object modernization in bounded phases, keeping public integration contracts and server-authoritative ownership/selection behavior unchanged.
+Next after merge: assess whether the read-only `mine` aggregation benefits from a bounded query/service extraction; keep the existing `SelectionService` mutation path and public JSON contract unchanged.

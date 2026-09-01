@@ -30,7 +30,11 @@ module ::DiscourseUserCosmetics
           memo[kind] =
             if enabled_kinds.include?(kind)
               Array(items_by_kind[kind]).map do |item|
-                serialize_for_user(item, owned: usable_item_ids.key?(item.id))
+                DiscourseUserCosmetics::CatalogItemSerializer.new(
+                  item,
+                  root: false,
+                  owned: usable_item_ids.key?(item.id),
+                ).as_json
               end
             else
               []
@@ -79,28 +83,6 @@ module ::DiscourseUserCosmetics
       return nil unless item&.kind == kind && usable_item_ids.key?(item.id)
 
       item.id
-    end
-
-    def serialize_for_user(item, owned:)
-      base = {
-        id: item.id,
-        kind: item.kind,
-        name: item.name,
-        description: item.description,
-        image_url: item.resolved_image_url,
-        gradient_from: item.gradient_from,
-        gradient_to: item.gradient_to,
-        glow_color: item.glow_color,
-        rarity_label: item.rarity_label,
-        rarity_color: item.rarity_color,
-        owned: owned,
-      }
-
-      # Profile effects use positioned layers rather than one canonical image;
-      # expose a representative image for the picker preview.
-      base[:image_url] = DiscourseUserCosmetics::Presenter.effect_fields(item)[:image_url] if item.kind == "profile_effect"
-
-      base
     end
   end
 end
